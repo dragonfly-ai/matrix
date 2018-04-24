@@ -1,6 +1,7 @@
 package Jama
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSGlobal
 
 /** Singular Value Decomposition.
   * <P>
@@ -22,7 +23,7 @@ import scala.scalajs.js
   * @param Arg Rectangular matrix
   */
 // Derived from LINPACK code.
-@js.native
+@js.native @JSGlobal
 class SingularValueDecomposition(val Arg: Matrix) extends js.Object {
 
   /** Return the left singular vectors
