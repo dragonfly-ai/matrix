@@ -1,7 +1,8 @@
 package Jama
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
+import scala.scalajs.js.annotation.JSImport.Namespace
+import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
 
 /** Cholesky Decomposition.
   * <P>
@@ -17,7 +18,8 @@ import scala.scalajs.js.annotation.JSGlobal
   *
   * @param  Arg Square, symmetric matrix.
   */
-@js.native @JSGlobal
+@JSImport("jama", "CholeskyDecomposition")
+@js.native
 class CholeskyDecomposition(val Arg: Matrix) extends js.Object { // Initialize.
 
   /** Is the matrix symmetric and positive definite?

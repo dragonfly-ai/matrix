@@ -1,7 +1,8 @@
 package Jama
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
+import scala.scalajs.js.annotation.JSImport.Namespace
+import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
 
 /** LU Decomposition.
   * <P>
@@ -22,7 +23,8 @@ import scala.scalajs.js.annotation.JSGlobal
   * @param  A Rectangular matrix
   */
 
-@js.native @JSGlobal
+@JSImport("jama", "LUDecomposition")
+@js.native
 class LUDecomposition(val A: Matrix) extends js.Object {  // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
   /** Is the matrix nonsingular?
@@ -47,13 +49,13 @@ class LUDecomposition(val A: Matrix) extends js.Object {  // Use a "left-looking
     *
     * @return piv
     */
-  def getPivot: Array[Int] = js.native
+  def getPivot: js.Array[Int] = js.native
 
   /** Return pivot permutation vector as a one-dimensional double array
     *
     * @return (double) piv
     */
-  def getDoublePivot: Array[Double] = js.native
+  def getDoublePivot: js.Array[Double] = js.native
 
   /** Determinant
     *

@@ -1,7 +1,8 @@
 package Jama
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
+import scala.scalajs.js.annotation.JSImport.Namespace
+import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSGlobal, JSImport}
 
 
 /**
@@ -47,14 +48,15 @@ import scala.scalajs.js.annotation.JSGlobal
   * @author The MathWorks, Inc. and the National Institute of Standards and Technology.
   * @version 5 August 1998
   */
-@js.native @JSGlobal
+@JSImport("jama", "Matrix")
+@js.native
 object Matrix extends js.Object { // with Cloneable {
   /** Construct a matrix from a copy of a 2-D array.
     *
     * @param A Two-dimensional array of doubles.
     * @exception IllegalArgumentException All rows must have the same length
     */
-    def constructWithCopy(A: Array[Array[Double]]): Matrix = js.native
+  def constructWithCopy(A: js.Array[js.Array[Double]]): Matrix = js.native
 
   /** Generate matrix with random elements
     *
@@ -73,7 +75,8 @@ object Matrix extends js.Object { // with Cloneable {
   def identity(m: Int, n: Int): Matrix = js.native
 }
 
-@js.native @JSGlobal
+@JSImport("jama", "Matrix")
+@js.native
 class Matrix extends js.Object {
 
   /** Construct an m-by-n matrix of zeros.
@@ -97,7 +100,7 @@ class Matrix extends js.Object {
     * @exception IllegalArgumentException All rows must have the same length
     * @see #constructWithCopy
     */
-  def this(A: Array[Array[Double]]) = this()
+  def this(A: js.Array[js.Array[Double]]) = this()
 
   /** Construct a matrix quickly without checking arguments.
     *
@@ -105,7 +108,7 @@ class Matrix extends js.Object {
     * @param m Number of rows.
     * @param n Number of colums.
     */
-  def this(A: Array[Array[Double]], m: Int, n: Int)  = this()
+  def this(A: js.Array[js.Array[Double]], m: Int, n: Int)  = this()
 
   /** Construct a matrix from a one-dimensional packed array
     *
@@ -113,39 +116,39 @@ class Matrix extends js.Object {
     * @param m    Number of rows.
     * @exception IllegalArgumentException Array length must be a multiple of m.
     */
-  def this(vals: Array[Double], m: Int) = this()
+  def this(vals: js.Array[Double], m: Int) = this()
 
   /** Make a deep copy of a matrix
     */
   def copy: Matrix = js.native
 
-//  /** Clone the Matrix object.
-//    */
-//  override def clone: Any = js.native
+  //  /** Clone the Matrix object.
+  //    */
+  //  override def clone: Any = js.native
 
   /** Access the internal two-dimensional array.
     *
     * @return Pointer to the two-dimensional array of matrix elements.
     */
-  def getArray: Array[Array[Double]] = js.native
+  def getArray: js.Array[js.Array[Double]] = js.native
 
   /** Copy the internal two-dimensional array.
     *
     * @return Two-dimensional array copy of matrix elements.
     */
-  def getArrayCopy: Array[Array[Double]] = js.native
+  def getArrayCopy: js.Array[js.Array[Double]] = js.native
 
   /** Make a one-dimensional column packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by columns.
     */
-  def getColumnPackedCopy: Array[Double] = js.native
+  def getColumnPackedCopy: js.Array[Double] = js.native
 
   /** Make a one-dimensional row packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by rows.
     */
-  def getRowPackedCopy: Array[Double] = js.native
+  def getRowPackedCopy: js.Array[Double] = js.native
 
   /** Get row dimension.
     *
@@ -186,7 +189,7 @@ class Matrix extends js.Object {
     * @return A(r(:),c(:))
     * @exception ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(r: Array[Int], c: Array[Int]): Matrix = js.native
+  def getMatrix(r: js.Array[Int], c: js.Array[Int]): Matrix = js.native
 
   /** Get a submatrix.
     *
@@ -196,7 +199,7 @@ class Matrix extends js.Object {
     * @return A(i0:i1,c(:))
     * @exception ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(i0: Int, i1: Int, c: Array[Int]): Matrix = js.native
+  def getMatrix(i0: Int, i1: Int, c: js.Array[Int]): Matrix = js.native
 
   /** Get a submatrix.
     *
@@ -206,7 +209,7 @@ class Matrix extends js.Object {
     * @return A(r(:),j0:j1)
     * @exception ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(r: Array[Int], j0: Int, j1: Int): Matrix = js.native
+  def getMatrix(r: js.Array[Int], j0: Int, j1: Int): Matrix = js.native
 
   /** Set a single element.
     *
@@ -235,7 +238,7 @@ class Matrix extends js.Object {
     * @param X A(r(:),c(:))
     * @exception ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(r: Array[Int], c: Array[Int], X: Matrix): Unit = js.native
+  def setMatrix(r: js.Array[Int], c: js.Array[Int], X: Matrix): Unit = js.native
 
   /** Set a submatrix.
     *
@@ -245,7 +248,7 @@ class Matrix extends js.Object {
     * @param X  A(r(:),j0:j1)
     * @exception ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(r: Array[Int], j0: Int, j1: Int, X: Matrix): Unit = js.native
+  def setMatrix(r: js.Array[Int], j0: Int, j1: Int, X: Matrix): Unit = js.native
 
   /** Set a submatrix.
     *
@@ -255,7 +258,7 @@ class Matrix extends js.Object {
     * @param X  A(i0:i1,c(:))
     * @exception ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(i0: Int, i1: Int, c: Array[Int], X: Matrix): Unit = js.native
+  def setMatrix(i0: Int, i1: Int, c: js.Array[Int], X: Matrix): Unit = js.native
 
   /** Matrix transpose.
     *
