@@ -5,7 +5,7 @@ import ai.dragonfly.math.matrix._
 
 import scala.scalajs.js.annotation.{JSExportAll, JSExportTopLevel}
 
-@JSExportTopLevel("MatrixTest") @JSExportAll
+@JSExportTopLevel("ai.dragonfly.matrix.tests.MatrixTest") @JSExportAll
 object MatrixTest extends App {
 
   override def main(args: Array[String]): Unit = {
