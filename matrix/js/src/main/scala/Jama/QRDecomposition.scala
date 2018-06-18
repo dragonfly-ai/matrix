@@ -1,8 +1,7 @@
 package Jama
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport.Namespace
-import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
+import scala.scalajs.js.annotation.JSImport
 
 
 /** QR Decomposition.
@@ -22,8 +21,7 @@ import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
   *
   * @param A Rectangular matrix
   */
-@JSImport("jama", "QRDecomposition")
-@js.native
+@JSImport("jama", "QRDecomposition") @js.native
 class QRDecomposition(val A: Matrix) extends js.Object {
 
   /** Is the matrix full rank?

@@ -1,8 +1,7 @@
 package Jama
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport.Namespace
-import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
+import scala.scalajs.js.annotation.JSImport
 
 /** LU Decomposition.
   * <P>
@@ -23,8 +22,7 @@ import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
   * @param  A Rectangular matrix
   */
 
-@JSImport("jama", "LUDecomposition")
-@js.native
+@JSImport("jama", "LUDecomposition") @js.native
 class LUDecomposition(val A: Matrix) extends js.Object {  // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
   /** Is the matrix nonsingular?

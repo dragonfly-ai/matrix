@@ -1,8 +1,7 @@
 package Jama
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport.Namespace
-import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
+import scala.scalajs.js.annotation.JSImport
 
 
 /** Eigenvalues and eigenvectors of a real matrix.
@@ -26,8 +25,7 @@ import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
   *
   * @param Arg Square matrix
   */
-@JSImport("jama", "EigenvalueDecomposition")
-@js.native
+@JSImport("jama", "EigenvalueDecomposition") @js.native
 class EigenvalueDecomposition(val Arg: Matrix) extends js.Object {
 
   /** Return the eigenvector matrix

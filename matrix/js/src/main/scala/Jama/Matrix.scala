@@ -1,8 +1,7 @@
 package Jama
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport.Namespace
-import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSGlobal, JSImport}
+import scala.scalajs.js.annotation.JSImport
 
 
 /**
@@ -48,8 +47,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportAll, JSGlobal, JSImport}
   * @author The MathWorks, Inc. and the National Institute of Standards and Technology.
   * @version 5 August 1998
   */
-@JSImport("jama", "Matrix")
-@js.native
+@JSImport("jama", "Matrix") @js.native
 object Matrix extends js.Object { // with Cloneable {
   /** Construct a matrix from a copy of a 2-D array.
     *
@@ -75,8 +73,7 @@ object Matrix extends js.Object { // with Cloneable {
   def identity(m: Int, n: Int): Matrix = js.native
 }
 
-@JSImport("jama", "Matrix")
-@js.native
+@JSImport("jama", "Matrix") @js.native
 class Matrix extends js.Object {
 
   /** Construct an m-by-n matrix of zeros.

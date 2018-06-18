@@ -18,7 +18,7 @@ val matrix = crossProject.settings(
   // JS-specific settings here
   //scalaJSUseMainModuleInitializer := true
 ).enablePlugins(ScalaJSBundlerPlugin).jsSettings(
-  npmDependencies in Compile += "jama" -> "1.0.1"
+  npmDependencies in Compile += "jama" -> "1.0.4"
 ).jsSettings(
   webpackBundlingMode := BundlingMode.LibraryAndApplication("Jama")
 ).jvmSettings(

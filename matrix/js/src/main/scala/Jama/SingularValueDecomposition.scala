@@ -1,10 +1,14 @@
 package Jama
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport.Namespace
-import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
+import scala.scalajs.js.annotation.JSImport
 
-/** Singular Value Decomposition.
+@JSImport("jama", "SingularValueDecomposition") @js.native
+object SingularValueDecomposition extends js.Object {
+
+}
+
+  /** Singular Value Decomposition.
   * <P>
   * For an m-by-n matrix A with m >= n, the singular value decomposition is
   * an m-by-n orthogonal matrix U, an n-by-n diagonal matrix S, and
@@ -18,15 +22,16 @@ import scala.scalajs.js.annotation.{JSExportAll, JSGlobal, JSImport}
   * rank can be computed from this decomposition.
   */
 
-/** Construct the singular value decomposition
-  * Structure to access U, S and V.
-  *
-  * @param Arg Rectangular matrix
-  */
 // Derived from LINPACK code.
-@JSImport("jama", "SingularValueDecomposition")
-@js.native
-class SingularValueDecomposition(val Arg: Matrix) extends js.Object {
+@JSImport("jama", "SingularValueDecomposition") @js.native
+class SingularValueDecomposition extends js.Object {
+
+  /** Construct the singular value decomposition
+    * Structure to access U, S and V.
+    *
+    * @param Arg Rectangular matrix
+    */
+  def this(Arg: Matrix) = this()
 
   /** Return the left singular vectors
     *
