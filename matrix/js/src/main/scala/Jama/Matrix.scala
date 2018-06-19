@@ -47,14 +47,29 @@ import scala.scalajs.js.annotation.JSImport
   * @author The MathWorks, Inc. and the National Institute of Standards and Technology.
   * @version 5 August 1998
   */
-@JSImport("jama", "Matrix") @js.native
-object Matrix extends js.Object { // with Cloneable {
+
+
+/*
+  Because scala.js does not support static methods or fields, this object is not exported.
+  However, the MatrixExports export of Matrix contains the native JS static methods for the Matrix class.
+ */
+object Matrix extends js.Object {
   /** Construct a matrix from a copy of a 2-D array.
     *
     * @param A Two-dimensional array of doubles.
     * @exception IllegalArgumentException All rows must have the same length
     */
-  def constructWithCopy(A: js.Array[js.Array[Double]]): Matrix = js.native
+  def constructWithCopy(A: js.Array[js.Array[Double]]): Matrix = {
+    val a = new js.Array[js.Array[Double]](A.length)
+    for (i <- a.indices) {
+      val row = new js.Array[Double](A(i).length)
+      for (j <- row.indices) {
+        row(j) = A(i)(j)
+      }
+      a(i) = row
+    }
+    new Matrix(a)
+  }
 
   /** Generate matrix with random elements
     *
@@ -62,7 +77,17 @@ object Matrix extends js.Object { // with Cloneable {
     * @param n Number of colums.
     * @return An m-by-n matrix with uniformly distributed random elements.
     */
-  def random(m: Int, n: Int): Matrix = js.native
+  def random(m: Int, n: Int): Matrix = {
+    val a = new js.Array[js.Array[Double]](m)
+    for (i <- a.indices) {
+      val row = new js.Array[Double](n)
+      for (j <- row.indices) {
+        row(j) = Math.random()
+      }
+      a(i) = row
+    }
+    new Matrix(a)
+  }
 
   /** Generate identity matrix
     *
@@ -70,7 +95,17 @@ object Matrix extends js.Object { // with Cloneable {
     * @param n Number of colums.
     * @return An m-by-n matrix with ones on the diagonal and zeros elsewhere.
     */
-  def identity(m: Int, n: Int): Matrix = js.native
+  def identity(m: Int, n: Int): Matrix = {
+    val a = new js.Array[js.Array[Double]](m)
+    for (i <- a.indices) {
+      val row = new js.Array[Double](n)
+      for (j <- row.indices) {
+        row(j) = if (i == j) 1 else 0
+      }
+      a(i) = row
+    }
+    new Matrix(a)
+  }
 }
 
 @JSImport("jama", "Matrix") @js.native
