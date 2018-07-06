@@ -1,4 +1,8 @@
-package Jama
+package Jama.js
+
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
+
 
 /** QR Decomposition.
   * <P>
@@ -12,35 +16,37 @@ package Jama
   * of simultaneous linear equations.  This will fail if isFullRank()
   * returns false.
   */
-
 /** QR Decomposition, computed by Householder reflections.
+  * Structure to access R and the Householder vectors and compute Q.
   *
   * @param A Rectangular matrix
-  * @return Structure to access R and the Householder vectors and compute Q.
   */
-class QRDecomposition(val A: Matrix) extends Serializable { // Initialize.
+@JSImport("jama", "QRDecomposition") @js.native
+class QRDecomposition(val A: Matrix) extends js.Object {
 
-  val qrDec = new Jama.js.QRDecomposition(A.jsMatrix)
-
-  def isFullRank: Boolean = qrDec.isFullRank
+  /** Is the matrix full rank?
+    *
+    * @return true if R, and hence A, has full rank.
+    */
+  def isFullRank: Boolean = js.native
 
   /** Return the Householder vectors
     *
     * @return Lower trapezoidal matrix whose columns define the reflections
     */
-  def getH: Matrix = new Matrix(qrDec.getH)
+  def getH: Matrix = js.native
 
   /** Return the upper triangular factor
     *
     * @return R
     */
-  def getR: Matrix = new Matrix(qrDec.getR)
+  def getR: Matrix = js.native
 
   /** Generate and return the (economy-sized) orthogonal factor
     *
     * @return Q
     */
-  def getQ: Matrix = new Matrix(qrDec.getQ)
+  def getQ: Matrix = js.native
 
   /** Least squares solution of A*X = B
     *
@@ -49,5 +55,6 @@ class QRDecomposition(val A: Matrix) extends Serializable { // Initialize.
     * @throws IllegalArgumentException  Matrix row dimensions must agree.
     * @throws RuntimeException  Matrix is rank deficient.
     */
-  def solve(B: Matrix): Matrix = new Matrix(qrDec.solve(B.jsMatrix))
+  def solve(B: Matrix): Matrix = js.native
+
 }

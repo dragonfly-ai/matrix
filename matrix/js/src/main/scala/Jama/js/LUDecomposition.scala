@@ -1,4 +1,7 @@
-package Jama
+package Jama.js
+
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
 
 /** LU Decomposition.
   * <P>
@@ -14,49 +17,50 @@ package Jama
   */
 
 /** LU Decomposition
+  * Structure to access L, U and piv.
   *
   * @param  A Rectangular matrix
-  * @return Structure to access L, U and piv.
   */
-class LUDecomposition(val A: Matrix) extends Serializable { // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
-  val luD = new Jama.js.LUDecomposition(A.jsMatrix)
+@JSImport("jama", "LUDecomposition") @js.native
+class LUDecomposition(val A: Matrix) extends js.Object {  // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
+
   /** Is the matrix nonsingular?
     *
     * @return true if U, and hence A, is nonsingular.
     */
-  def isNonsingular: Boolean = luD.isNonsingular
+  def isNonsingular: Boolean = js.native
 
   /** Return lower triangular factor
     *
     * @return L
     */
-  def getL: Matrix = new Matrix(luD.getL)
+  def getL: Matrix = js.native
 
   /** Return upper triangular factor
     *
     * @return U
     */
-  def getU: Matrix = new Matrix(luD.getU)
+  def getU: Matrix = js.native
 
   /** Return pivot permutation vector
     *
     * @return piv
     */
-  def getPivot: Array[Int] = luD.getPivot.toArray
+  def getPivot: js.Array[Int] = js.native
 
   /** Return pivot permutation vector as a one-dimensional double array
     *
     * @return (double) piv
     */
-  def getDoublePivot: Array[Double] = luD.getDoublePivot.toArray
+  def getDoublePivot: js.Array[Double] = js.native
 
   /** Determinant
     *
     * @return det(A)
     * @throws IllegalArgumentException  Matrix must be square
     */
-  def det: Double = luD.det
+  def det: Double = js.native
 
   /** Solve A*X = B
     *
@@ -65,5 +69,5 @@ class LUDecomposition(val A: Matrix) extends Serializable { // Use a "left-looki
     * @throws IllegalArgumentException Matrix row dimensions must agree.
     * @throws RuntimeException  Matrix is singular.
     */
-  def solve(B: Matrix): Matrix = new Matrix(luD.solve(B.jsMatrix))
+  def solve(B: Matrix): Matrix = js.native
 }

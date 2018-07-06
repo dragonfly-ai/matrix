@@ -1,4 +1,7 @@
-package Jama
+package Jama.js
+
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
 
 
 /** Eigenvalues and eigenvectors of a real matrix.
@@ -18,36 +21,34 @@ package Jama
   * */
 
 /** Check for symmetry, then construct the eigenvalue decomposition
+  * Structure to access D and V.
   *
   * @param Arg Square matrix
-  * @return Structure to access D and V.
   */
-
-class EigenvalueDecomposition(val Arg: Matrix) extends Serializable {
-
-  private val eigDec = new Jama.js.EigenvalueDecomposition(Arg.jsMatrix)
+@JSImport("jama", "EigenvalueDecomposition") @js.native
+class EigenvalueDecomposition(val Arg: Matrix) extends js.Object {
 
   /** Return the eigenvector matrix
     *
     * @return V
     */
-  def getV: Matrix = new Matrix(eigDec.getV)
+  def getV: Matrix = js.native
 
   /** Return the real parts of the eigenvalues
     *
     * @return real(diag(D))
     */
-  def getRealEigenvalues: Array[Double] = eigDec.getRealEigenvalues.toArray
+  def getRealEigenvalues: js.Array[Double] = js.native
 
   /** Return the imaginary parts of the eigenvalues
     *
     * @return imag(diag(D))
     */
-  def getImagEigenvalues: Array[Double] = eigDec.getImagEigenvalues.toArray
+  def getImagEigenvalues: js.Array[Double] = js.native
 
   /** Return the block diagonal eigenvalue matrix
     *
     * @return D
     */
-  def getD: Matrix = new Matrix(eigDec.getD)
+  def getD: Matrix = js.native
 }

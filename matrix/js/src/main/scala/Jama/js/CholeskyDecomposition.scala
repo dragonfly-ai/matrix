@@ -1,4 +1,7 @@
-package Jama
+package Jama.js
+
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
 
 /** Cholesky Decomposition.
   * <P>
@@ -9,23 +12,25 @@ package Jama
   * returns a partial decomposition and sets an internal flag that may
   * be queried by the isSPD() method.
   */
-
 /** Cholesky algorithm for symmetric and positive definite matrix.
+  * Structure to access L and isspd flag.
   *
   * @param  Arg Square, symmetric matrix.
-  * @return Structure to access L and isspd flag.
   */
-class CholeskyDecomposition(val Arg: Matrix) extends Serializable { // Initialize.
+@JSImport("jama", "CholeskyDecomposition") @js.native
+class CholeskyDecomposition(val Arg: Matrix) extends js.Object { // Initialize.
 
-  val cholDec = new js.CholeskyDecomposition(Arg.jsMatrix)
-
-  def isSPD: Boolean = cholDec.isSPD
+  /** Is the matrix symmetric and positive definite?
+    *
+    * @return true if A is symmetric and positive definite.
+    */
+  def isSPD: Boolean = js.native
 
   /** Return triangular factor.
     *
     * @return L
     */
-  def getL = new Matrix(cholDec.getL)
+  def getL: Matrix = js.native
 
   /** Solve A*X = B
     *
@@ -34,6 +39,6 @@ class CholeskyDecomposition(val Arg: Matrix) extends Serializable { // Initializ
     * @throws IllegalArgumentException  Matrix row dimensions must agree.
     * @throws RuntimeException  Matrix is not symmetric positive definite.
     */
-  def solve(B: Matrix): Matrix = new Matrix(cholDec.solve(B.jsMatrix))
-
+  def solve(B: Matrix): Matrix = js.native
 }
+
