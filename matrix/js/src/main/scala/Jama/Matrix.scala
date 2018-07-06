@@ -6,7 +6,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import java.io.PrintWriter
 
-import ai.dragonfly.math.MatrixUtils._
+import ai.dragonfly.math.matrix.MatrixUtils._
 
 import scala.scalajs.js.JSConverters._
 

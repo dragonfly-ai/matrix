@@ -31,7 +31,7 @@ object PCA {
     // Computer Singular Value Decomposition
 
     new PCA(
-      X.transpose().times(X).times(1.0 / points.length).svd(),
+      X.transpose.times(X).times(1.0 / points.length).svd,
       mean,
       dim
     )
