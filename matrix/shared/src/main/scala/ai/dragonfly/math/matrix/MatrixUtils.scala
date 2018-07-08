@@ -3,7 +3,7 @@ package ai.dragonfly.math.matrix
 import Jama.Matrix
 
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
+import js.JSConverters._
 import ai.dragonfly.math.vector._
 
 object MatrixUtils {
