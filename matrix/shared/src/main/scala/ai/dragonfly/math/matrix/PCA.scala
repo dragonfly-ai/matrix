@@ -31,7 +31,7 @@ object PCA {
     // Computer Singular Value Decomposition
 
     new PCA(
-      X.transpose.times(X).times(1.0 / points.length).svd,
+      X.transpose().times(X).times(1.0 / points.length).svd,
       mean,
       dim
     )
@@ -42,9 +42,9 @@ object PCA {
 case class PCA (svd: SingularValueDecomposition, mean: Vector, dimension: Double) {
 
   def getReducer(k: Int): DimensionalityReducerPCA = {
-    val U = svd.getU
+    val U = svd.getU()
     DimensionalityReducerPCA(
-      U.getMatrix(0, U.getRowDimension - 1, 0, k-1),
+      U.getMatrix(0, U.getRowDimension() - 1, 0, k-1),
       mean,
       k
     )

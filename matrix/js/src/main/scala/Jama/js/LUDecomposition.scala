@@ -29,38 +29,38 @@ class LUDecomposition(val A: Matrix) extends js.Object {  // Use a "left-looking
     *
     * @return true if U, and hence A, is nonsingular.
     */
-  def isNonsingular: Boolean = js.native
+  def isNonsingular(): Boolean = js.native
 
   /** Return lower triangular factor
     *
     * @return L
     */
-  def getL: Matrix = js.native
+  def getL(): Matrix = js.native
 
   /** Return upper triangular factor
     *
     * @return U
     */
-  def getU: Matrix = js.native
+  def getU(): Matrix = js.native
 
   /** Return pivot permutation vector
     *
     * @return piv
     */
-  def getPivot: js.Array[Int] = js.native
+  def getPivot(): js.Array[Int] = js.native
 
   /** Return pivot permutation vector as a one-dimensional double array
     *
     * @return (double) piv
     */
-  def getDoublePivot: js.Array[Double] = js.native
+  def getDoublePivot(): js.Array[Double] = js.native
 
   /** Determinant
     *
     * @return det(A)
     * @throws IllegalArgumentException  Matrix must be square
     */
-  def det: Double = js.native
+  def det(): Double = js.native
 
   /** Solve A*X = B
     *

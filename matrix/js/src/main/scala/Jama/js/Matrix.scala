@@ -152,7 +152,7 @@ class Matrix extends js.Object {
 
   /** Make a deep copy of a matrix
     */
-  def copy: Matrix = js.native
+  def copy(): Matrix = js.native
 
   //  /** Clone the Matrix object.
   //    */
@@ -162,37 +162,37 @@ class Matrix extends js.Object {
     *
     * @return Pointer to the two-dimensional array of matrix elements.
     */
-  def getArray: js.Array[js.Array[Double]] = js.native
+  def getArray(): js.Array[js.Array[Double]] = js.native
 
   /** Copy the internal two-dimensional array.
     *
     * @return Two-dimensional array copy of matrix elements.
     */
-  def getArrayCopy: js.Array[js.Array[Double]] = js.native
+  def getArrayCopy(): js.Array[js.Array[Double]] = js.native
 
   /** Make a one-dimensional column packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by columns.
     */
-  def getColumnPackedCopy: js.Array[Double] = js.native
+  def getColumnPackedCopy(): js.Array[Double] = js.native
 
   /** Make a one-dimensional row packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by rows.
     */
-  def getRowPackedCopy: js.Array[Double] = js.native
+  def getRowPackedCopy(): js.Array[Double] = js.native
 
   /** Get row dimension.
     *
     * @return m, the number of rows.
     */
-  def getRowDimension: Int = js.native
+  def getRowDimension(): Int = js.native
 
   /** Get column dimension.
     *
     * @return n, the number of columns.
     */
-  def getColumnDimension: Int = js.native
+  def getColumnDimension(): Int = js.native
 
   /** Get a single element.
     *
@@ -296,37 +296,37 @@ class Matrix extends js.Object {
     *
     * @return A'
     */
-  def transpose: Matrix = js.native
+  def transpose(): Matrix = js.native
 
   /** One norm
     *
     * @return maximum column sum.
     */
-  def norm1: Double = js.native
+  def norm1(): Double = js.native
 
   /** Two norm
     *
     * @return maximum singular value.
     */
-  def norm2: Double = js.native
+  def norm2(): Double = js.native
 
   /** Infinity norm
     *
     * @return maximum row sum.
     */
-  def normInf: Double = js.native
+  def normInf(): Double = js.native
 
   /** Frobenius norm
     *
     * @return sqrt of sum of squares of all elements.
     */
-  def normF: Double = js.native
+  def normF(): Double = js.native
 
   /** Unary minus
     *
     * @return -A
     */
-  def uminus: Matrix = js.native
+  def uminus(): Matrix = js.native
 
   /** C = A + B
     *
@@ -425,35 +425,35 @@ class Matrix extends js.Object {
     * @return LUDecomposition
     * @see LUDecomposition
     */
-  def lu: LUDecomposition = js.native
+  def lu(): LUDecomposition = js.native
 
   /** QR Decomposition
     *
     * @return QRDecomposition
     * @see QRDecomposition
     */
-  def qr: QRDecomposition = js.native
+  def qr(): QRDecomposition = js.native
 
   /** Cholesky Decomposition
     *
     * @return CholeskyDecomposition
     * @see CholeskyDecomposition
     */
-  def chol: CholeskyDecomposition = js.native
+  def chol(): CholeskyDecomposition = js.native
 
   /** Singular Value Decomposition
     *
     * @return SingularValueDecomposition
     * @see SingularValueDecomposition
     */
-  def svd: SingularValueDecomposition = js.native
+  def svd(): SingularValueDecomposition = js.native
 
   /** Eigenvalue Decomposition
     *
     * @return EigenvalueDecomposition
     * @see EigenvalueDecomposition
     */
-  def eig: EigenvalueDecomposition = js.native
+  def eig(): EigenvalueDecomposition = js.native
 
   /** Solve A*X = B
     *
@@ -473,30 +473,30 @@ class Matrix extends js.Object {
     *
     * @return inverse(A) if A is square, pseudoinverse otherwise.
     */
-  def inverse: Matrix = js.native
+  def inverse(): Matrix = js.native
 
   /** Matrix determinant
     *
     * @return determinant
     */
-  def det: Double = js.native
+  def det(): Double = js.native
 
   /** Matrix rank
     *
     * @return effective numerical rank, obtained from SVD.
     */
-  def rank: Int = js.native
+  def rank(): Int = js.native
 
   /** Matrix condition (2 norm)
     *
     * @return ratio of largest to smallest singular value.
     */
-  def cond: Double = js.native
+  def cond(): Double = js.native
 
   /** Matrix trace.
     *
     * @return sum of the diagonal elements.
     */
-  def trace: Double = js.native
+  def trace(): Double = js.native
 
 }

@@ -31,23 +31,23 @@ class EigenvalueDecomposition(val Arg: Matrix) extends Serializable {
     *
     * @return V
     */
-  def getV: Matrix = new Matrix(eigDec.getV)
+  def getV(): Matrix = new Matrix(eigDec.getV)
 
   /** Return the real parts of the eigenvalues
     *
     * @return real(diag(D))
     */
-  def getRealEigenvalues: Array[Double] = eigDec.getRealEigenvalues.toArray
+  def getRealEigenvalues(): Array[Double] = eigDec.getRealEigenvalues.toArray
 
   /** Return the imaginary parts of the eigenvalues
     *
     * @return imag(diag(D))
     */
-  def getImagEigenvalues: Array[Double] = eigDec.getImagEigenvalues.toArray
+  def getImagEigenvalues(): Array[Double] = eigDec.getImagEigenvalues.toArray
 
   /** Return the block diagonal eigenvalue matrix
     *
     * @return D
     */
-  def getD: Matrix = new Matrix(eigDec.getD)
+  def getD(): Matrix = new Matrix(eigDec.getD)
 }

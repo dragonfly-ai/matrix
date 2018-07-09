@@ -1,6 +1,7 @@
 package ai.dragonfly.math.MatrixUtils.test
 
 import Jama._
+import ai.dragonfly.math.matrix.TestPCA
 
 import scala.scalajs.js.annotation.{JSExportAll, JSExportTopLevel}
 
@@ -23,6 +24,8 @@ object MatrixTest extends App {
     println(m)
     val svd = new SingularValueDecomposition(m)
     println(svd)
+
+    TestPCA.testDimensionalityReduction()
   }
 
 }

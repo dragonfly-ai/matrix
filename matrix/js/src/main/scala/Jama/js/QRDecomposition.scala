@@ -28,25 +28,25 @@ class QRDecomposition(val A: Matrix) extends js.Object {
     *
     * @return true if R, and hence A, has full rank.
     */
-  def isFullRank: Boolean = js.native
+  def isFullRank(): Boolean = js.native
 
   /** Return the Householder vectors
     *
     * @return Lower trapezoidal matrix whose columns define the reflections
     */
-  def getH: Matrix = js.native
+  def getH(): Matrix = js.native
 
   /** Return the upper triangular factor
     *
     * @return R
     */
-  def getR: Matrix = js.native
+  def getR(): Matrix = js.native
 
   /** Generate and return the (economy-sized) orthogonal factor
     *
     * @return Q
     */
-  def getQ: Matrix = js.native
+  def getQ(): Matrix = js.native
 
   /** Least squares solution of A*X = B
     *

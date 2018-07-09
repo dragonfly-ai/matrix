@@ -19,13 +19,13 @@ class CholeskyDecomposition(val Arg: Matrix) extends Serializable { // Initializ
 
   val cholDec = new js.CholeskyDecomposition(Arg.jsMatrix)
 
-  def isSPD: Boolean = cholDec.isSPD
+  def isSPD(): Boolean = cholDec.isSPD
 
   /** Return triangular factor.
     *
     * @return L
     */
-  def getL = new Matrix(cholDec.getL)
+  def getL() = new Matrix(cholDec.getL)
 
   /** Solve A*X = B
     *

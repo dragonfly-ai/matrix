@@ -22,25 +22,25 @@ class QRDecomposition(val A: Matrix) extends Serializable { // Initialize.
 
   val qrDec = new Jama.js.QRDecomposition(A.jsMatrix)
 
-  def isFullRank: Boolean = qrDec.isFullRank
+  def isFullRank(): Boolean = qrDec.isFullRank
 
   /** Return the Householder vectors
     *
     * @return Lower trapezoidal matrix whose columns define the reflections
     */
-  def getH: Matrix = new Matrix(qrDec.getH)
+  def getH(): Matrix = new Matrix(qrDec.getH)
 
   /** Return the upper triangular factor
     *
     * @return R
     */
-  def getR: Matrix = new Matrix(qrDec.getR)
+  def getR(): Matrix = new Matrix(qrDec.getR)
 
   /** Generate and return the (economy-sized) orthogonal factor
     *
     * @return Q
     */
-  def getQ: Matrix = new Matrix(qrDec.getQ)
+  def getQ(): Matrix = new Matrix(qrDec.getQ)
 
   /** Least squares solution of A*X = B
     *

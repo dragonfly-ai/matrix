@@ -32,23 +32,23 @@ class EigenvalueDecomposition(val Arg: Matrix) extends js.Object {
     *
     * @return V
     */
-  def getV: Matrix = js.native
+  def getV(): Matrix = js.native
 
   /** Return the real parts of the eigenvalues
     *
     * @return real(diag(D))
     */
-  def getRealEigenvalues: js.Array[Double] = js.native
+  def getRealEigenvalues(): js.Array[Double] = js.native
 
   /** Return the imaginary parts of the eigenvalues
     *
     * @return imag(diag(D))
     */
-  def getImagEigenvalues: js.Array[Double] = js.native
+  def getImagEigenvalues(): js.Array[Double] = js.native
 
   /** Return the block diagonal eigenvalue matrix
     *
     * @return D
     */
-  def getD: Matrix = js.native
+  def getD(): Matrix = js.native
 }

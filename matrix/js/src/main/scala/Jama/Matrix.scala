@@ -164,53 +164,53 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     this(new js.Matrix(vals.toJSArray, m))
   }
 
-  def jsMatrix: js.Matrix = mtrx
+  def jsMatrix(): js.Matrix = mtrx
 
   /** Make a deep copy of a matrix
     */
-  def copy: Matrix = {
+  def copy(): Matrix = {
     new Matrix(mtrx.copy)
   }
 
   /** Clone the Matrix object.
     */
-  override def clone: Object = this.copy
+  override def clone(): Object = this.copy
 
   /** Access the internal two-dimensional array.
     *
     * @return Pointer to the two-dimensional array of matrix elements.
     */
-  def getArray: Array[Array[Double]] = mtrx.getArray
+  def getArray(): Array[Array[Double]] = mtrx.getArray
 
   /** Copy the internal two-dimensional array.
     *
     * @return Two-dimensional array copy of matrix elements.
     */
-  def getArrayCopy: Array[Array[Double]] = copy.getArray
+  def getArrayCopy(): Array[Array[Double]] = copy.getArray
 
   /** Make a one-dimensional column packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by columns.
     */
-  def getColumnPackedCopy: Array[Double] = mtrx.getColumnPackedCopy.toArray
+  def getColumnPackedCopy(): Array[Double] = mtrx.getColumnPackedCopy().toArray
 
   /** Make a one-dimensional row packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by rows.
     */
-  def getRowPackedCopy: Array[Double] = mtrx.getRowPackedCopy.toArray
+  def getRowPackedCopy(): Array[Double] = mtrx.getRowPackedCopy().toArray
 
   /** Get row dimension.
     *
     * @return m, the number of rows.
     */
-  def getRowDimension: Int = mtrx.getRowDimension
+  def getRowDimension(): Int = mtrx.getRowDimension()
 
   /** Get column dimension.
     *
     * @return n, the number of columns.
     */
-  def getColumnDimension: Int = mtrx.getColumnDimension
+  def getColumnDimension(): Int = mtrx.getColumnDimension()
 
   /** Get a single element.
     *
@@ -331,37 +331,37 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     *
     * @return A'
     */
-  def transpose: Matrix = new Matrix(mtrx.transpose)
+  def transpose(): Matrix = new Matrix(mtrx.transpose())
 
   /** One norm
     *
     * @return maximum column sum.
     */
-  def norm1: Double = mtrx.norm1
+  def norm1(): Double = mtrx.norm1
 
   /** Two norm
     *
     * @return maximum singular value.
     */
-  def norm2: Double = mtrx.norm2
+  def norm2(): Double = mtrx.norm2
 
   /** Infinity norm
     *
     * @return maximum row sum.
     */
-  def normInf: Double = mtrx.normInf
+  def normInf(): Double = mtrx.normInf
 
   /** Frobenius norm
     *
     * @return sqrt of sum of squares of all elements.
     */
-  def normF: Double = mtrx.normF
+  def normF(): Double = mtrx.normF
 
   /** Unary minus
     *
     * @return -A
     */
-  def uminus: Matrix = new Matrix(mtrx.uminus)
+  def uminus(): Matrix = new Matrix(mtrx.uminus)
 
   /** C = A + B
     *
@@ -463,45 +463,35 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @return LUDecomposition
     * @see LUDecomposition
     */
-  def lu: LUDecomposition = {
-    return new LUDecomposition(this)
-  }
+  def lu(): LUDecomposition = new LUDecomposition(this)
 
   /** QR Decomposition
     *
     * @return QRDecomposition
     * @see QRDecomposition
     */
-  def qr: QRDecomposition = {
-    return new QRDecomposition(this)
-  }
+  def qr(): QRDecomposition = new QRDecomposition(this)
 
   /** Cholesky Decomposition
     *
     * @return CholeskyDecomposition
     * @see CholeskyDecomposition
     */
-  def chol: CholeskyDecomposition = {
-    return new CholeskyDecomposition(this)
-  }
+  def chol(): CholeskyDecomposition = new CholeskyDecomposition(this)
 
   /** Singular Value Decomposition
     *
     * @return SingularValueDecomposition
     * @see SingularValueDecomposition
     */
-  def svd: SingularValueDecomposition = {
-    return new SingularValueDecomposition(this)
-  }
+  def svd(): SingularValueDecomposition = new SingularValueDecomposition(this)
 
   /** Eigenvalue Decomposition
     *
     * @return EigenvalueDecomposition
     * @see EigenvalueDecomposition
     */
-  def eig: EigenvalueDecomposition = {
-    return new EigenvalueDecomposition(this)
-  }
+  def eig(): EigenvalueDecomposition = new EigenvalueDecomposition(this)
 
   /** Solve A*X = B
     *
@@ -521,31 +511,31 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     *
     * @return inverse(A) if A is square, pseudoinverse otherwise.
     */
-  def inverse: Matrix = new Matrix(mtrx.inverse)
+  def inverse(): Matrix = new Matrix(mtrx.inverse)
 
   /** Matrix determinant
     *
     * @return determinant
     */
-  def det: Double = mtrx.det
+  def det(): Double = mtrx.det
 
   /** Matrix rank
     *
     * @return effective numerical rank, obtained from SVD.
     */
-  def rank: Int = mtrx.rank
+  def rank(): Int = mtrx.rank
 
   /** Matrix condition (2 norm)
     *
     * @return ratio of largest to smallest singular value.
     */
-  def cond: Double = mtrx.cond
+  def cond(): Double = mtrx.cond
 
   /** Matrix trace.
     *
     * @return sum of the diagonal elements.
     */
-  def trace: Double = mtrx.trace
+  def trace(): Double = mtrx.trace
 
   /** Print the matrix to stdout.   Line the elements up in columns
     *
@@ -606,8 +596,8 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
   def print(output: PrintWriter, format: NumberFormat, width: Int): Unit = {
     output.println() // start on new line.
 
-    val m: Int = mtrx.getRowDimension
-    val n: Int = mtrx.getColumnDimension
+    val m: Int = mtrx.getRowDimension()
+    val n: Int = mtrx.getColumnDimension()
 
     output.println()  // start on new line.
     for (i <- 0 until m) {
@@ -622,10 +612,4 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     output.println()   // end with blank line.
   }
 
-  /** Check if size(A) == size(B) **/
-  private def checkMatrixDimensions(B: Matrix): Unit = {
-    if (B.getRowDimension != mtrx.getRowDimension || B.getColumnDimension != mtrx.getColumnDimension ) {
-      throw new IllegalArgumentException("Matrix dimensions must agree.")
-    }
-  }
 }

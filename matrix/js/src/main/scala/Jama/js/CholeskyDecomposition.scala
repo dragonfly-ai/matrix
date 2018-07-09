@@ -24,13 +24,13 @@ class CholeskyDecomposition(val Arg: Matrix) extends js.Object { // Initialize.
     *
     * @return true if A is symmetric and positive definite.
     */
-  def isSPD: Boolean = js.native
+  def isSPD(): Boolean = js.native
 
   /** Return triangular factor.
     *
     * @return L
     */
-  def getL: Matrix = js.native
+  def getL(): Matrix = js.native
 
   /** Solve A*X = B
     *

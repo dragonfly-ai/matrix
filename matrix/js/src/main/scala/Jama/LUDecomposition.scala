@@ -25,38 +25,38 @@ class LUDecomposition(val A: Matrix) extends Serializable { // Use a "left-looki
     *
     * @return true if U, and hence A, is nonsingular.
     */
-  def isNonsingular: Boolean = luD.isNonsingular
+  def isNonsingular(): Boolean = luD.isNonsingular
 
   /** Return lower triangular factor
     *
     * @return L
     */
-  def getL: Matrix = new Matrix(luD.getL)
+  def getL(): Matrix = new Matrix(luD.getL)
 
   /** Return upper triangular factor
     *
     * @return U
     */
-  def getU: Matrix = new Matrix(luD.getU)
+  def getU(): Matrix = new Matrix(luD.getU)
 
   /** Return pivot permutation vector
     *
     * @return piv
     */
-  def getPivot: Array[Int] = luD.getPivot.toArray
+  def getPivot(): Array[Int] = luD.getPivot.toArray
 
   /** Return pivot permutation vector as a one-dimensional double array
     *
     * @return (double) piv
     */
-  def getDoublePivot: Array[Double] = luD.getDoublePivot.toArray
+  def getDoublePivot(): Array[Double] = luD.getDoublePivot.toArray
 
   /** Determinant
     *
     * @return det(A)
     * @throws IllegalArgumentException  Matrix must be square
     */
-  def det: Double = luD.det
+  def det(): Double = luD.det
 
   /** Solve A*X = B
     *

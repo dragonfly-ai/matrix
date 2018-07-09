@@ -37,41 +37,41 @@ class SingularValueDecomposition extends js.Object {
     *
     * @return U
     */
-  def getU: Matrix = js.native
+  def getU(): Matrix = js.native
 
   /** Return the right singular vectors
     *
     * @return V
     */
-  def getV: Matrix = js.native
+  def getV(): Matrix = js.native
 
   /** Return the one-dimensional array of singular values
     *
     * @return diagonal of S.
     */
-  def getSingularValues: js.Array[Double] = js.native
+  def getSingularValues(): js.Array[Double] = js.native
 
   /** Return the diagonal matrix of singular values
     *
     * @return S
     */
-  def getS: Matrix = js.native
+  def getS(): Matrix = js.native
 
   /** Two norm
     *
     * @return max(S)
     */
-  def norm2: Double = js.native
+  def norm2(): Double = js.native
 
   /** Two norm condition number
     *
     * @return max(S)/min(S)
     */
-  def cond: Double = js.native
+  def cond(): Double = js.native
 
   /** Effective numerical matrix rank
     *
     * @return Number of nonnegligible singular values.
     */
-  def rank: Int = js.native
+  def rank(): Int = js.native
 }
