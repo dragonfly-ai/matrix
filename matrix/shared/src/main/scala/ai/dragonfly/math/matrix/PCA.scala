@@ -43,17 +43,34 @@ case class PCA (svd: SingularValueDecomposition, mean: Vector, dimension: Double
 
   def getReducer(k: Int): DimensionalityReducerPCA = {
     val U = svd.getU
-    DimensionalityReducerPCA(U.getMatrix(0, U.getRowDimension, 0, k), k)
+    DimensionalityReducerPCA(U.getMatrix(0, U.getRowDimension - 1, 0, k-1), k)
   }
 
 }
 
 case class DimensionalityReducerPCA(U: Matrix, k: Int) {
-
-  def project(v: Vector): Vector = U.times(v)
+  //println(U.getRowDimension + " " + U.getColumnDimension)
+  def project(v: Vector): Vector = {
+    val vM: Matrix = v
+    //println(vM.getRowDimension + " " + vM.getColumnDimension)
+    U.transpose().times(vM)
+  }
 
   //  Recover matrix from projection onto reduced principle components
 //  def recover(Z, Ureduce) {
 //    return numeric.dot(Z, numeric.transpose(Ureduce))
 //  }
+}
+
+object TestPCA {
+
+  def testDimensionalityReduction(): Unit = {
+    val vArr = Array.fill[Vector] (100) (VectorN.random (3) )
+    val reducer = PCA (vArr).getReducer(2)
+
+    for (v <- vArr) {
+      print (s"$v -> ${reducer.project (v)}")
+    }
+  }
+
 }
