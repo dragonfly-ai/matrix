@@ -53,7 +53,7 @@ case class DimensionalityReducerPCA(U: Matrix, k: Int) {
   def project(v: Vector): Vector = {
     val vM: Matrix = v
     //println(vM.getRowDimension + " " + vM.getColumnDimension)
-    U.transpose().times(vM)
+    U.transpose.times(vM)
   }
 
   //  Recover matrix from projection onto reduced principle components
@@ -69,7 +69,7 @@ object TestPCA {
     val reducer = PCA (vArr).getReducer(2)
 
     for (v <- vArr) {
-      print (s"$v -> ${reducer.project (v)}")
+      println(s"$v -> ${reducer.project (v)}")
     }
   }
 
