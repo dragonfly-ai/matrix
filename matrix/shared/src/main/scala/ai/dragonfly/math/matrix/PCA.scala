@@ -5,6 +5,8 @@ import ai.dragonfly.math.stats.StreamingVectorStats
 import ai.dragonfly.math.vector._
 import ai.dragonfly.math.matrix.MatrixUtils._
 
+import scala.collection.mutable.ListBuffer
+
 object PCA {
 
   // Create a PCA object from a set of data points.
@@ -41,8 +43,10 @@ object PCA {
 
 case class PCA (svd: SingularValueDecomposition, mean: Vector, dimension: Double) {
 
+  val U = svd.getU
+
   def getReducer(k: Int): DimensionalityReducerPCA = {
-    val U = svd.getU()
+
     DimensionalityReducerPCA(
       U.getMatrix(0, U.getRowDimension() - 1, 0, k-1),
       mean,
@@ -50,7 +54,29 @@ case class PCA (svd: SingularValueDecomposition, mean: Vector, dimension: Double
     )
   }
 
+  def getRankedBasisPairs: Seq[BasisPair] = {
+    val size = svd.getU.getRowDimension
+    val dim = svd.getU.getColumnDimension
+    val singularValues = svd.getSingularValues
+    var pairs: ListBuffer[BasisPair] = new ListBuffer[BasisPair]()
+    val m: Matrix = svd.getU
+
+    for (i <- 0 until size) {
+      val vectorValues = new Array[Double](dim)
+
+      for (j <- 0 until dim) vectorValues(j) = m.get(i, j)
+
+      pairs = pairs += BasisPair(
+        singularValues(i),
+        new VectorN(vectorValues)
+      )
+    }
+    pairs.toList
+  }
+
 }
+
+case class BasisPair (variance: Double, basisVector: Vector)
 
 case class DimensionalityReducerPCA(U: Matrix, mean: Vector, k: Int) {
   //println(U.getRowDimension + " " + U.getColumnDimension)
@@ -71,11 +97,14 @@ object TestPCA {
 
   def testDimensionalityReduction(): Unit = {
     val vArr = Array.fill[Vector] (100) (VectorN.random (3) )
-    val reducer = PCA (vArr).getReducer(2)
+    val pca = PCA (vArr)
+    val reducer = pca.getReducer(2)
 
-    for (v <- vArr) {
-      println(s"$v -> ${reducer.project (v)}")
-    }
+    val basisPairs = pca.getRankedBasisPairs
+    println(s"basisPairs: $basisPairs")
+
+    for (v <- vArr) println(s"$v -> ${reducer.project (v)}")
+
   }
 
 }
