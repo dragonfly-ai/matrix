@@ -8,6 +8,8 @@ import ai.dragonfly.math.vector._
 
 object MatrixUtils {
 
+  import scala.language.implicitConversions
+
   implicit def toJsArray(a: Array[Array[Double]]): js.Array[js.Array[Double]] = {
     val jsArr = js.Array[js.Array[Double]]()
     for (r <- a) {
