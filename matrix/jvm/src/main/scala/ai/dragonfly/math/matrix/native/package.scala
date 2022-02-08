@@ -1,5 +1,6 @@
-package ai.dragonfly.math.matrix.native
+package ai.dragonfly.math.matrix
 
-type MatrixValues = Array[ai.dragonfly.math.vector.VectorValues]
-
-type MatrixIndices = Array[Int]
+package object native {
+  type MatrixValues = Array[ai.dragonfly.math.vector.VectorValues]
+  type MatrixIndices = Array[Int]
+}
