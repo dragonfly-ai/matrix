@@ -17,15 +17,15 @@ package Jama
   */
 class CholeskyDecomposition(val Arg: Matrix) extends Serializable { // Initialize.
 
-  val cholDec = new js.CholeskyDecomposition(Arg.jsMatrix)
+  val cholDec = new js.CholeskyDecomposition(Arg.jsMatrix())
 
-  def isSPD(): Boolean = cholDec.isSPD
+  def isSPD(): Boolean = cholDec.isSPD()
 
   /** Return triangular factor.
     *
     * @return L
     */
-  def getL() = new Matrix(cholDec.getL)
+  def getL() = new Matrix(cholDec.getL())
 
   /** Solve A*X = B
     *
@@ -34,6 +34,6 @@ class CholeskyDecomposition(val Arg: Matrix) extends Serializable { // Initializ
     * @throws IllegalArgumentException  Matrix row dimensions must agree.
     * @throws RuntimeException  Matrix is not symmetric positive definite.
     */
-  def solve(B: Matrix): Matrix = new Matrix(cholDec.solve(B.jsMatrix))
+  def solve(B: Matrix): Matrix = new Matrix(cholDec.solve(B.jsMatrix()))
 
 }

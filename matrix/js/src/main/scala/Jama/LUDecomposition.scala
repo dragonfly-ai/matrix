@@ -20,43 +20,43 @@ package Jama
   */
 class LUDecomposition(val A: Matrix) extends Serializable { // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
-  val luD = new Jama.js.LUDecomposition(A.jsMatrix)
+  val luD = new Jama.js.LUDecomposition(A.jsMatrix())
   /** Is the matrix nonsingular?
     *
     * @return true if U, and hence A, is nonsingular.
     */
-  def isNonsingular(): Boolean = luD.isNonsingular
+  def isNonsingular(): Boolean = luD.isNonsingular()
 
   /** Return lower triangular factor
     *
     * @return L
     */
-  def getL(): Matrix = new Matrix(luD.getL)
+  def getL(): Matrix = new Matrix(luD.getL())
 
   /** Return upper triangular factor
     *
     * @return U
     */
-  def getU(): Matrix = new Matrix(luD.getU)
+  def getU(): Matrix = new Matrix(luD.getU())
 
   /** Return pivot permutation vector
     *
     * @return piv
     */
-  def getPivot(): Array[Int] = luD.getPivot.toArray
+  def getPivot(): Array[Int] = luD.getPivot().toArray
 
   /** Return pivot permutation vector as a one-dimensional double array
     *
     * @return (double) piv
     */
-  def getDoublePivot(): Array[Double] = luD.getDoublePivot.toArray
+  def getDoublePivot(): Array[Double] = luD.getDoublePivot().toArray
 
   /** Determinant
     *
     * @return det(A)
     * @throws IllegalArgumentException  Matrix must be square
     */
-  def det(): Double = luD.det
+  def det(): Double = luD.det()
 
   /** Solve A*X = B
     *
@@ -65,5 +65,5 @@ class LUDecomposition(val A: Matrix) extends Serializable { // Use a "left-looki
     * @throws IllegalArgumentException Matrix row dimensions must agree.
     * @throws RuntimeException  Matrix is singular.
     */
-  def solve(B: Matrix): Matrix = new Matrix(luD.solve(B.jsMatrix))
+  def solve(B: Matrix): Matrix = new Matrix(luD.solve(B.jsMatrix()))
 }

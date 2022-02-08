@@ -5,10 +5,10 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import java.io.PrintWriter
+import ai.dragonfly.math.matrix.*
+import MatrixUtils.*
+import ai.dragonfly.math.vector.*
 
-import ai.dragonfly.math.matrix.MatrixUtils._
-
-import scala.scalajs.js.JSConverters._
 
 /**
   * Jama = Java Matrix class.
@@ -60,10 +60,10 @@ object Matrix {
     * @param A Two-dimensional array of doubles.
     * @throws IllegalArgumentException All rows must have the same length
     */
-  def constructWithCopy(A: Array[Array[Double]]): Matrix = {
-    val a = new scala.scalajs.js.Array[scala.scalajs.js.Array[Double]](A.length)
+  def constructWithCopy(A: MatrixValues): Matrix = {
+    val a = new MatrixValues(A.length)
     for (i <- a.indices) {
-      val row = new scala.scalajs.js.Array[Double](A(i).length)
+      val row = new VectorValues(A(i).length)
       for (j <- row.indices) {
         row(j) = A(i)(j)
       }
@@ -79,9 +79,9 @@ object Matrix {
     * @return An m-by-n matrix with uniformly distributed random elements.
     */
   def random(m: Int, n: Int): Matrix = {
-    val a = new scala.scalajs.js.Array[scala.scalajs.js.Array[Double]](m)
+    val a = new MatrixValues(m)
     for (i <- a.indices) {
-      val row = new scala.scalajs.js.Array[Double](n)
+      val row = new VectorValues(n)
       for (j <- row.indices) {
         row(j) = Math.random()
       }
@@ -97,9 +97,9 @@ object Matrix {
     * @return An m-by-n matrix with ones on the diagonal and zeros elsewhere.
     */
   def identity(m: Int, n: Int): Matrix = {
-    val a = new scala.scalajs.js.Array[scala.scalajs.js.Array[Double]](m)
+    val a = new MatrixValues(m)
     for (i <- a.indices) {
-      val row = new scala.scalajs.js.Array[Double](n)
+      val row = new VectorValues(n)
       for (j <- row.indices) {
         row(j) = if (i == j) 1 else 0
       }
@@ -117,7 +117,7 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @param m Number of rows.
     * @param n Number of colums.
     */
-  def this(m: Int, n: Int) {
+  def this(m: Int, n: Int) = {
     this(new js.Matrix(m, n))
   }
 
@@ -127,7 +127,7 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @param n Number of colums.
     * @param s Fill the matrix with this scalar value.
     */
-  def this(m: Int, n: Int, s: Double) {
+  def this(m: Int, n: Int, s: Double) = {
     this(new js.Matrix(m, n, s))
   }
 
@@ -137,7 +137,7 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @throws IllegalArgumentException All rows must have the same length
     * @see #constructWithCopy
     */
-  def this(A: Array[Array[Double]]) {
+  def this(A: MatrixValues) = {
     this(new js.Matrix(A))
   }
 
@@ -147,7 +147,7 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @param m Number of rows.
     * @param n Number of colums.
     */
-  def this(A: Array[Array[Double]], m: Int, n: Int) {
+  def this(A: MatrixValues, m: Int, n: Int) = {
     // This constructor was a bad idea.
     // Checking array.length is safer and incurs no meaningful performance penalties.
     // We don't use it.
@@ -160,8 +160,8 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @param m    Number of rows.
     * @throws IllegalArgumentException Array length must be a multiple of m.
     */
-  def this(vals: Array[Double], m: Int) {
-    this(new js.Matrix(vals.toJSArray, m))
+  def this(vals: VectorValues, m: Int) = {
+    this(new js.Matrix(vals, m))
   }
 
   def jsMatrix(): js.Matrix = mtrx
@@ -169,36 +169,36 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
   /** Make a deep copy of a matrix
     */
   def copy(): Matrix = {
-    new Matrix(mtrx.copy)
+    new Matrix(mtrx.copy())
   }
 
   /** Clone the Matrix object.
     */
-  override def clone(): Object = this.copy
+  override def clone(): Object = this.copy()
 
   /** Access the internal two-dimensional array.
     *
     * @return Pointer to the two-dimensional array of matrix elements.
     */
-  def getArray(): Array[Array[Double]] = mtrx.getArray
+  def getArray(): MatrixValues = mtrx.getArray()
 
   /** Copy the internal two-dimensional array.
     *
     * @return Two-dimensional array copy of matrix elements.
     */
-  def getArrayCopy(): Array[Array[Double]] = copy.getArray
+  def getArrayCopy(): MatrixValues = copy().getArray()
 
   /** Make a one-dimensional column packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by columns.
     */
-  def getColumnPackedCopy(): Array[Double] = mtrx.getColumnPackedCopy().toArray
+  def getColumnPackedCopy(): VectorValues = mtrx.getColumnPackedCopy()
 
   /** Make a one-dimensional row packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by rows.
     */
-  def getRowPackedCopy(): Array[Double] = mtrx.getRowPackedCopy().toArray
+  def getRowPackedCopy(): VectorValues = mtrx.getRowPackedCopy()
 
   /** Get row dimension.
     *
@@ -239,10 +239,10 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @return A(r(:),c(:))
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(r: Array[Int], c: Array[Int]): Matrix = new Matrix(
+  def getMatrix(r: MatrixIndices, c: MatrixIndices): Matrix = new Matrix(
     mtrx.getMatrix(
-      r.toJSArray,
-      c.toJSArray
+      r,
+      c
     )
   )
 
@@ -254,8 +254,8 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @return A(i0:i1,c(:))
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(i0: Int, i1: Int, c: Array[Int]): Matrix = new Matrix(
-    mtrx.getMatrix(i0, i1, c.toJSArray)
+  def getMatrix(i0: Int, i1: Int, c: MatrixIndices): Matrix = new Matrix(
+    mtrx.getMatrix(i0, i1, c)
   )
 
   /** Get a submatrix.
@@ -266,8 +266,8 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @return A(r(:),j0:j1)
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(r: Array[Int], j0: Int, j1: Int): Matrix = new Matrix(
-    mtrx.getMatrix(r.toJSArray, j0, j1)
+  def getMatrix(r: MatrixIndices, j0: Int, j1: Int): Matrix = new Matrix(
+    mtrx.getMatrix(r, j0, j1)
   )
 
   /** Set a single element.
@@ -289,7 +289,7 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
   def setMatrix(i0: Int, i1: Int, j0: Int, j1: Int, X: Matrix): Unit = mtrx.setMatrix(
-    i0, i1, j0, j1, X.jsMatrix
+    i0, i1, j0, j1, X.jsMatrix()
   )
 
   /** Set a submatrix.
@@ -299,8 +299,8 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @param X A(r(:),c(:))
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(r: Array[Int], c: Array[Int], X: Matrix): Unit = mtrx.setMatrix(
-    r.toJSArray, c.toJSArray, X.jsMatrix
+  def setMatrix(r: MatrixIndices, c: MatrixIndices, X: Matrix): Unit = mtrx.setMatrix(
+    r, c, X.jsMatrix()
   )
 
   /** Set a submatrix.
@@ -311,8 +311,8 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @param X  A(r(:),j0:j1)
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(r: Array[Int], j0: Int, j1: Int, X: Matrix): Unit = mtrx.setMatrix(
-    r.toJSArray, j0, j1, X.jsMatrix
+  def setMatrix(r: MatrixIndices, j0: Int, j1: Int, X: Matrix): Unit = mtrx.setMatrix(
+    r, j0, j1, X.jsMatrix()
   )
 
   /** Set a submatrix.
@@ -323,8 +323,8 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @param X  A(i0:i1,c(:))
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(i0: Int, i1: Int, c: Array[Int], X: Matrix): Unit = mtrx.setMatrix(
-    i0, i1, c.toJSArray, X.jsMatrix
+  def setMatrix(i0: Int, i1: Int, c: MatrixIndices, X: Matrix): Unit = mtrx.setMatrix(
+    i0, i1, c, X.jsMatrix()
   )
 
   /** Matrix transpose.
@@ -337,101 +337,101 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     *
     * @return maximum column sum.
     */
-  def norm1(): Double = mtrx.norm1
+  def norm1(): Double = mtrx.norm1()
 
   /** Two norm
     *
     * @return maximum singular value.
     */
-  def norm2(): Double = mtrx.norm2
+  def norm2(): Double = mtrx.norm2()
 
   /** Infinity norm
     *
     * @return maximum row sum.
     */
-  def normInf(): Double = mtrx.normInf
+  def normInf(): Double = mtrx.normInf()
 
   /** Frobenius norm
     *
     * @return sqrt of sum of squares of all elements.
     */
-  def normF(): Double = mtrx.normF
+  def normF(): Double = mtrx.normF()
 
   /** Unary minus
     *
     * @return -A
     */
-  def uminus(): Matrix = new Matrix(mtrx.uminus)
+  def uminus(): Matrix = new Matrix(mtrx.uminus())
 
   /** C = A + B
     *
     * @param B another matrix
     * @return A + B
     */
-  def plus(B: Matrix): Matrix = new Matrix(mtrx.plus(B.jsMatrix))
+  def plus(B: Matrix): Matrix = new Matrix(mtrx.plus(B.jsMatrix()))
 
   /** A = A + B
     *
     * @param B another matrix
     * @return A + B
     */
-  def plusEquals(B: Matrix): Matrix = new Matrix(mtrx.plusEquals(B.jsMatrix))
+  def plusEquals(B: Matrix): Matrix = new Matrix(mtrx.plusEquals(B.jsMatrix()))
 
   /** C = A - B
     *
     * @param B another matrix
     * @return A - B
     */
-  def minus(B: Matrix): Matrix = new Matrix(mtrx.minus(B.jsMatrix))
+  def minus(B: Matrix): Matrix = new Matrix(mtrx.minus(B.jsMatrix()))
 
   /** A = A - B
     *
     * @param B another matrix
     * @return A - B
     */
-  def minusEquals(B: Matrix): Matrix = new Matrix(mtrx.minusEquals(B.jsMatrix))
+  def minusEquals(B: Matrix): Matrix = new Matrix(mtrx.minusEquals(B.jsMatrix()))
 
   /** Element-by-element multiplication, C = A.*B
     *
     * @param B another matrix
     * @return A.*B
     */
-  def arrayTimes(B: Matrix): Matrix = new Matrix(mtrx.arrayTimes(B.jsMatrix))
+  def arrayTimes(B: Matrix): Matrix = new Matrix(mtrx.arrayTimes(B.jsMatrix()))
 
   /** Element-by-element multiplication in place, A = A.*B
     *
     * @param B another matrix
     * @return A.*B
     */
-  def arrayTimesEquals(B: Matrix): Matrix = new Matrix(mtrx.arrayTimesEquals(B.jsMatrix))
+  def arrayTimesEquals(B: Matrix): Matrix = new Matrix(mtrx.arrayTimesEquals(B.jsMatrix()))
 
   /** Element-by-element right division, C = A./B
     *
     * @param B another matrix
     * @return A./B
     */
-  def arrayRightDivide(B: Matrix): Matrix = new Matrix(mtrx.arrayRightDivide(B.jsMatrix))
+  def arrayRightDivide(B: Matrix): Matrix = new Matrix(mtrx.arrayRightDivide(B.jsMatrix()))
 
   /** Element-by-element right division in place, A = A./B
     *
     * @param B another matrix
     * @return A./B
     */
-  def arrayRightDivideEquals(B: Matrix): Matrix = new Matrix(mtrx.arrayRightDivideEquals(B.jsMatrix))
+  def arrayRightDivideEquals(B: Matrix): Matrix = new Matrix(mtrx.arrayRightDivideEquals(B.jsMatrix()))
 
   /** Element-by-element left division, C = A.\B
     *
     * @param B another matrix
     * @return A.\B
     */
-  def arrayLeftDivide(B: Matrix): Matrix = new Matrix(mtrx.arrayLeftDivide(B.jsMatrix))
+  def arrayLeftDivide(B: Matrix): Matrix = new Matrix(mtrx.arrayLeftDivide(B.jsMatrix()))
 
   /** Element-by-element left division in place, A = A.\B
     *
     * @param B another matrix
     * @return A.\B
     */
-  def arrayLeftDivideEquals(B: Matrix): Matrix = new Matrix(mtrx.arrayLeftDivideEquals(B.jsMatrix))
+  def arrayLeftDivideEquals(B: Matrix): Matrix = new Matrix(mtrx.arrayLeftDivideEquals(B.jsMatrix()))
 
   /** Multiply a matrix by a scalar, C = s*A
     *
@@ -456,7 +456,7 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @return Matrix product, A * B
     * @throws IllegalArgumentException Matrix inner dimensions must agree.
     */
-  def times(B: Matrix): Matrix = new Matrix(mtrx.times(B.jsMatrix))
+  def times(B: Matrix): Matrix = new Matrix(mtrx.times(B.jsMatrix()))
 
   /** LU Decomposition
     *
@@ -498,44 +498,44 @@ class Matrix(mtrx: js.Matrix) extends Cloneable with Serializable {
     * @param B right hand side
     * @return solution if A is square, least squares solution otherwise
     */
-  def solve(B: Matrix): Matrix = new Matrix(mtrx.solve(B.jsMatrix))
+  def solve(B: Matrix): Matrix = new Matrix(mtrx.solve(B.jsMatrix()))
 
   /** Solve X*A = B, which is also A'*X' = B'
     *
     * @param B right hand side
     * @return solution if A is square, least squares solution otherwise.
     */
-  def solveTranspose(B: Matrix): Matrix = transpose.solve(B.transpose)
+  def solveTranspose(B: Matrix): Matrix = transpose().solve(B.transpose())
 
   /** Matrix inverse or pseudoinverse
     *
     * @return inverse(A) if A is square, pseudoinverse otherwise.
     */
-  def inverse(): Matrix = new Matrix(mtrx.inverse)
+  def inverse(): Matrix = new Matrix(mtrx.inverse())
 
   /** Matrix determinant
     *
     * @return determinant
     */
-  def det(): Double = mtrx.det
+  def det(): Double = mtrx.det()
 
   /** Matrix rank
     *
     * @return effective numerical rank, obtained from SVD.
     */
-  def rank(): Int = mtrx.rank
+  def rank(): Int = mtrx.rank()
 
   /** Matrix condition (2 norm)
     *
     * @return ratio of largest to smallest singular value.
     */
-  def cond(): Double = mtrx.cond
+  def cond(): Double = mtrx.cond()
 
   /** Matrix trace.
     *
     * @return sum of the diagonal elements.
     */
-  def trace(): Double = mtrx.trace
+  def trace(): Double = mtrx.trace()
 
   /** Print the matrix to stdout.   Line the elements up in columns
     *

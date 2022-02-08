@@ -1,44 +1,25 @@
 package ai.dragonfly.math.matrix
 
 import Jama.Matrix
-
 import scala.scalajs.js
-import js.JSConverters._
 import ai.dragonfly.math.vector._
 
 object MatrixUtils {
 
-  import scala.language.implicitConversions
-
-  implicit def toJsArray(a: Array[Array[Double]]): js.Array[js.Array[Double]] = {
-    val jsArr = js.Array[js.Array[Double]]()
-    for (r <- a) {
-      jsArr.push(r.toJSArray)
+  given Conversion[Vector, Matrix] with
+    def apply(v: Vector): Matrix = {
+      val marr = new MatrixValues(v.dimension)
+      for (i <- v.values.indices) {
+        marr(i) = VectorValues.fill(1)(_ => v.values(i))
+      }
+      new Matrix(marr)
     }
-    jsArr
-  }
 
-  implicit def toArray(jsArr: js.Array[js.Array[Double]]): Array[Array[Double]] = {
-    val arr = Array[Array[Double]]()
-    for (i <- jsArr.indices) {
-      arr(i) = jsArr(i).toArray
+  given Conversion[Matrix, Vector] with
+    def apply(m: Matrix): Vector = {
+      if (m.getColumnDimension() == 1) {
+        Vector(m.getRowPackedCopy())
+      } else throw ai.dragonfly.math.vector.MismatchedVectorDimensionsException(Vector.random(m.getRowDimension()), Vector.random(m.getRowDimension() * m.getColumnDimension()))
     }
-    arr
-  }
 
-  implicit def toMatrix(a: Array[Double]): Matrix = {
-    val marr = new Array[Array[Double]](a.length)
-    for (i <- a.indices) {
-      marr(i) = Array[Double](a(i))
-    }
-    new Matrix(marr)
-  }
-
-  implicit def toMatrix(v: Vector): Matrix = v.values
-
-  implicit def toVector(m: Matrix): Vector = {
-    if (m.getColumnDimension == 1) {
-      new VectorN(m.getRowPackedCopy)
-    } else throw MismatchedVectorDimensionsException(s"expected column dimension 1, found ${m.getColumnDimension}")
-  }
 }

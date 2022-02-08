@@ -1,24 +1,21 @@
-package ai.dragonfly.math.MatrixUtils.test
+package ai.dragonfly.math.matrix.test
 
 import Jama._
-import ai.dragonfly.math.matrix.TestPCA
+import ai.dragonfly.math.vector.*
+import ai.dragonfly.math.matrix.*
 
-import scala.scalajs.js.annotation.{JSExportAll, JSExportTopLevel}
+object MatrixTest {
 
-@JSExportTopLevel("ai.dragonfly.matrix.tests.MatrixTest") @JSExportAll
-object MatrixTest extends App {
-
-  override def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
     test()
   }
 
   def test(): Unit = {
-    println("hi?")
-    val a = Array[Array[Double]](
-      Array[Double](Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5),
-      Array[Double](Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5),
-      Array[Double](Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
-    )
+    val a = new MatrixValues(3)
+    a(0) = VectorValues(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+    a(1) = VectorValues(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+    a(2) = VectorValues(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+
     println(a)
     val m = new Matrix(a)
     println(m)

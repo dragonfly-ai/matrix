@@ -21,47 +21,47 @@ package Jama
   */
 class SingularValueDecomposition(val Arg: Matrix) extends Serializable { // Derived from LINPACK code.
 
-  val svd = new Jama.js.SingularValueDecomposition(Arg.jsMatrix)
+  val svd = new Jama.js.SingularValueDecomposition(Arg.jsMatrix())
 
   /** Return the left singular vectors
     *
     * @return U
     */
-  def getU(): Matrix = new Matrix(svd.getU)
+  def getU(): Matrix = new Matrix(svd.getU())
 
   /** Return the right singular vectors
     *
     * @return V
     */
-  def getV(): Matrix = new Matrix(svd.getV)
+  def getV(): Matrix = new Matrix(svd.getV())
 
   /** Return the one-dimensional array of singular values
     *
     * @return diagonal of S.
     */
-  def getSingularValues(): Array[Double] = svd.getSingularValues.toArray
+  def getSingularValues(): Array[Double] = svd.getSingularValues().toArray
 
   /** Return the diagonal matrix of singular values
     *
     * @return S
     */
-  def getS(): Matrix = new Matrix(svd.getS)
+  def getS(): Matrix = new Matrix(svd.getS())
 
   /** Two norm
     *
     * @return max(S)
     */
-  def norm2(): Double = svd.norm2
+  def norm2(): Double = svd.norm2()
 
   /** Two norm condition number
     *
     * @return max(S)/min(S)
     */
-  def cond(): Double = svd.cond
+  def cond(): Double = svd.cond()
 
   /** Effective numerical matrix rank
     *
     * @return Number of nonnegligible singular values.
     */
-  def rank(): Int = svd.rank
+  def rank(): Int = svd.rank()
 }

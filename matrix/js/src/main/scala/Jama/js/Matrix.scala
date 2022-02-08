@@ -2,6 +2,8 @@ package Jama.js
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
+import ai.dragonfly.math.matrix.*
+import ai.dragonfly.math.vector.*
 
 
 /**
@@ -59,10 +61,10 @@ object Matrix {
     * @param A Two-dimensional array of doubles.
     * @throws IllegalArgumentException All rows must have the same length
     */
-  def constructWithCopy(A: js.Array[js.Array[Double]]): Matrix = {
-    val a = new js.Array[js.Array[Double]](A.length)
+  def constructWithCopy(A: MatrixValues): Matrix = {
+    val a = new MatrixValues(A.length)
     for (i <- a.indices) {
-      val row = new js.Array[Double](A(i).length)
+      val row = new VectorValues(A(i).length)
       for (j <- row.indices) {
         row(j) = A(i)(j)
       }
@@ -78,9 +80,9 @@ object Matrix {
     * @return An m-by-n matrix with uniformly distributed random elements.
     */
   def random(m: Int, n: Int): Matrix = {
-    val a = new js.Array[js.Array[Double]](m)
+    val a = new MatrixValues(m)
     for (i <- a.indices) {
-      val row = new js.Array[Double](n)
+      val row = new VectorValues(n)
       for (j <- row.indices) {
         row(j) = Math.random()
       }
@@ -96,9 +98,9 @@ object Matrix {
     * @return An m-by-n matrix with ones on the diagonal and zeros elsewhere.
     */
   def identity(m: Int, n: Int): Matrix = {
-    val a = new js.Array[js.Array[Double]](m)
+    val a = new MatrixValues(m)
     for (i <- a.indices) {
-      val row = new js.Array[Double](n)
+      val row = new VectorValues(n)
       for (j <- row.indices) {
         row(j) = if (i == j) 1 else 0
       }
@@ -132,7 +134,7 @@ class Matrix extends js.Object {
     * @throws IllegalArgumentException All rows must have the same length
     * @see #constructWithCopy
     */
-  def this(A: js.Array[js.Array[Double]]) = this()
+  def this(A: MatrixValues) = this()
 
   /** Construct a matrix quickly without checking arguments.
     *
@@ -140,7 +142,7 @@ class Matrix extends js.Object {
     * @param m Number of rows.
     * @param n Number of colums.
     */
-  def this(A: js.Array[js.Array[Double]], m: Int, n: Int)  = this()
+  def this(A: MatrixValues, m: Int, n: Int)  = this()
 
   /** Construct a matrix from a one-dimensional packed array
     *
@@ -148,7 +150,7 @@ class Matrix extends js.Object {
     * @param m    Number of rows.
     * @throws IllegalArgumentException Array length must be a multiple of m.
     */
-  def this(vals: js.Array[Double], m: Int) = this()
+  def this(vals: VectorValues, m: Int) = this()
 
   /** Make a deep copy of a matrix
     */
@@ -162,25 +164,25 @@ class Matrix extends js.Object {
     *
     * @return Pointer to the two-dimensional array of matrix elements.
     */
-  def getArray(): js.Array[js.Array[Double]] = js.native
+  def getArray(): MatrixValues = js.native
 
   /** Copy the internal two-dimensional array.
     *
     * @return Two-dimensional array copy of matrix elements.
     */
-  def getArrayCopy(): js.Array[js.Array[Double]] = js.native
+  def getArrayCopy(): MatrixValues = js.native
 
   /** Make a one-dimensional column packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by columns.
     */
-  def getColumnPackedCopy(): js.Array[Double] = js.native
+  def getColumnPackedCopy(): VectorValues = js.native
 
   /** Make a one-dimensional row packed copy of the internal array.
     *
     * @return Matrix elements packed in a one-dimensional array by rows.
     */
-  def getRowPackedCopy(): js.Array[Double] = js.native
+  def getRowPackedCopy(): VectorValues = js.native
 
   /** Get row dimension.
     *
