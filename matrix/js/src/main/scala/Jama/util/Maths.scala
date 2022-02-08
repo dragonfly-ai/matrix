@@ -1,4 +1,4 @@
-package Jama.js.util
+package Jama.util
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport.Namespace

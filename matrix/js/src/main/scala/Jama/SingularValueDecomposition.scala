@@ -1,6 +1,14 @@
 package Jama
 
-/** Singular Value Decomposition.
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
+
+@JSImport("jama", "SingularValueDecomposition") @js.native
+object SingularValueDecomposition extends js.Object {
+
+}
+
+  /** Singular Value Decomposition.
   * <P>
   * For an m-by-n matrix A with m >= n, the singular value decomposition is
   * an m-by-n orthogonal matrix U, an n-by-n diagonal matrix S, and
@@ -14,54 +22,56 @@ package Jama
   * rank can be computed from this decomposition.
   */
 
-/** Construct the singular value decomposition
-  *
-  * @param Arg Rectangular matrix
-  * @return Structure to access U, S and V.
-  */
-class SingularValueDecomposition(val Arg: Matrix) extends Serializable { // Derived from LINPACK code.
+// Derived from LINPACK code.
+@JSImport("jama", "SingularValueDecomposition") @js.native
+class SingularValueDecomposition extends js.Object {
 
-  val svd = new Jama.js.SingularValueDecomposition(Arg.jsMatrix())
+  /** Construct the singular value decomposition
+    * Structure to access U, S and V.
+    *
+    * @param Arg Rectangular matrix
+    */
+  def this(Arg: Matrix) = this()
 
   /** Return the left singular vectors
     *
     * @return U
     */
-  def getU(): Matrix = new Matrix(svd.getU())
+  def getU(): Matrix = js.native
 
   /** Return the right singular vectors
     *
     * @return V
     */
-  def getV(): Matrix = new Matrix(svd.getV())
+  def getV(): Matrix = js.native
 
   /** Return the one-dimensional array of singular values
     *
     * @return diagonal of S.
     */
-  def getSingularValues(): Array[Double] = svd.getSingularValues().toArray
+  def getSingularValues(): js.Array[Double] = js.native
 
   /** Return the diagonal matrix of singular values
     *
     * @return S
     */
-  def getS(): Matrix = new Matrix(svd.getS())
+  def getS(): Matrix = js.native
 
   /** Two norm
     *
     * @return max(S)
     */
-  def norm2(): Double = svd.norm2()
+  def norm2(): Double = js.native
 
   /** Two norm condition number
     *
     * @return max(S)/min(S)
     */
-  def cond(): Double = svd.cond()
+  def cond(): Double = js.native
 
   /** Effective numerical matrix rank
     *
     * @return Number of nonnegligible singular values.
     */
-  def rank(): Int = svd.rank()
+  def rank(): Int = js.native
 }
