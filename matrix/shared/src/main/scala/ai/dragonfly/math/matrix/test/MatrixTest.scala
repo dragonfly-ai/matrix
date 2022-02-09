@@ -22,7 +22,15 @@ object MatrixTest {
     val svd = new SingularValueDecomposition(m)
     println(svd)
 
-    TestPCA.testDimensionalityReduction()
+    println("\n\nTest PCA:")
+    TestPCA()
+
+    println("\n\nLinear Regression Tests: ")
+    val lrt: LinearRegressionTest = new LinearRegressionTest(7, 100, 1000.0)
+    println("\n\nTest LinearRegressionQR:")
+    println(s"\tLinearRegressionQR.evaluate(lrt) => ${LinearRegressionQR.evaluate(lrt)}")
+    println("\n\nTest LinearRegressionSVD:")
+    println(s"\tLinearRegressionSVD.evaluate(lrt) => ${LinearRegressionSVD.evaluate(lrt)}")
   }
 
 }

@@ -9,7 +9,7 @@ lazy val matrix = crossProject(JSPlatform, JVMPlatform)
     organization := "ai.dragonfly.code",
     resolvers += "dragonfly.ai" at "https://code.dragonfly.ai/",
     scalacOptions ++= Seq("-feature","-deprecation"),
-    libraryDependencies += "ai.dragonfly.code" %%% "vector" % "0.306",
+    libraryDependencies += "ai.dragonfly.code" %%% "vector" % "0.308",
     Compile / mainClass := Some("ai.dragonfly.math.matrix.test.MatrixTest")
   )
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin)).jsSettings(
