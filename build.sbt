@@ -5,11 +5,11 @@ lazy val matrix = crossProject(JSPlatform, JVMPlatform)
   .settings(
     publishTo := Some(Resolver.file("file",  new File( "/var/www/maven" ))),
     name := "matrix",
-    version := "0.31",
+    version := "0.32",
     organization := "ai.dragonfly.code",
     resolvers += "dragonfly.ai" at "https://code.dragonfly.ai/",
     scalacOptions ++= Seq("-feature","-deprecation"),
-    libraryDependencies += "ai.dragonfly.code" %%% "vector" % "0.308",
+    libraryDependencies += "ai.dragonfly.code" %%% "vector" % "0.309",
     Compile / mainClass := Some("ai.dragonfly.math.matrix.test.MatrixTest")
   )
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin)).jsSettings(
