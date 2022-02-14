@@ -6,27 +6,30 @@ import math.vector.Vector
 import math.stats.LabeledVector
 
 trait LinearRegressionTest {
+  def trainingData:Array[LabeledVector]
+  def testData:Array[LabeledVector]
   def evaluate(model: LinearRegressionModel):LinearRegressionTestScore
 }
 
-class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double = 1.0) {
+class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double = 1.0) extends LinearRegressionTest {
   val maxNorm = dimension * sampleSize
 
   val trueCoefficients: Vector = Vector.fill(dimension){ _ =>  Math.random() * maxNorm }
   val constant:Double = (Math.random() * maxNorm) / dimension
 
-  val data: Array[LabeledVector] = new Array[LabeledVector](sampleSize)
+  override val trainingData: Array[LabeledVector] = new Array[LabeledVector](sampleSize)
+  override def testData: Array[LabeledVector] = trainingData
   val error: Array[Double] = new Array[Double](sampleSize)
 
   var syntheticError: Double = 0.0
 
-  for (i <- 0 until data.length) {
+  for (i <- 0 until trainingData.length) {
     val xi:Vector = Vector.random(dimension, maxNorm)
 
     val yi: Double = f(xi)
     val yi_noisy = yi + (noise * (Math.random() - 0.5))
 
-    data(i) = LabeledVector(yi_noisy, xi)
+    trainingData(i) = LabeledVector(yi_noisy, xi)
 
     val err = yi_noisy - yi
     error(i) = err * err
@@ -35,10 +38,10 @@ class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double 
 
   private def f(xi:Vector):Double = xi.dot(trueCoefficients) + constant
 
-  def evaluate(model: LinearRegressionModel):LinearRegressionTestScore = {
+  override def evaluate(model: LinearRegressionModel):LinearRegressionTestScore = {
     var observedError:Double = 0.0
-    for (i <- 0 until data.length) {
-      val lv = data(i)
+    for (i <- 0 until testData.length) {
+      val lv = testData(i)
       val err = model(lv.x) - f(lv.x)
       println(s"\ty = ${f(lv.x)} y' = ${model(lv.x)} error = $err : $lv")
       observedError = observedError + (err * err)
@@ -48,8 +51,8 @@ class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double 
 }
 
 
-case class EmpiricalRegressionTest(testData:Iterable[LabeledVector]) {
-  def evaluate(model: LinearRegressionModel):LinearRegressionTestScore = {
+case class EmpiricalRegressionTest(override val trainingData:Array[LabeledVector], override val testData:Array[LabeledVector]) extends LinearRegressionTest {
+  override def evaluate(model: LinearRegressionModel):LinearRegressionTestScore = {
     var observedError:Double = 0.0
     for (lv <- testData) {
       val err = model(lv.x) - lv.y
@@ -60,4 +63,4 @@ case class EmpiricalRegressionTest(testData:Iterable[LabeledVector]) {
   }
 }
 
-case class LinearRegressionTestScore(trueError:Double, observedError:Double) {}
+case class LinearRegressionTestScore(trainingError:Double, testError:Double) {}

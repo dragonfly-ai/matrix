@@ -2,7 +2,7 @@ package ai.dragonfly.math.matrix
 
 import Jama.{Matrix, QRDecomposition, SingularValueDecomposition}
 import ai.dragonfly.math.matrix.LinearRegressionQR.train
-import ai.dragonfly.math.matrix.test.{SyntheticLinearRegressionTest, LinearRegressionTestScore}
+import ai.dragonfly.math.matrix.test.{LinearRegressionTest, LinearRegressionTestScore, SyntheticLinearRegressionTest}
 import ai.dragonfly.math.stats.LabeledVector
 import ai.dragonfly.math.stats.stream.*
 import ai.dragonfly.math.vector.*
@@ -14,25 +14,25 @@ import scala.language.implicitConversions
  * by Robert Sedgewick and Kevin Wayne.
 */
 
-object LinearRegressionSVD {
+object LinearRegressionSVD extends LinearRegression {
 
-  def train(labeledPoints:LabeledVector*): LinearRegressionModel = {
-    val xDim = labeledPoints(0).vector.dimension
+  override def train(trainingData:Array[LabeledVector]): LinearRegressionModel = {
+    val xDim = trainingData(0).vector.dimension
     val yDist:Gaussian = Gaussian()
     // Compute the average Vector
     val mean: Vector = {
       val svs = new StreamingVectorStats(xDim)
-      labeledPoints.foreach(lv => {
+      trainingData.foreach(lv => {
         yDist(lv.y)
         svs(lv.vector)
       })
       svs.average()
     }
 
-    val vX: MatrixValues = new MatrixValues(labeledPoints.size)
-    val vY: MatrixValues = new MatrixValues(labeledPoints.size)
+    val vX: MatrixValues = new MatrixValues(trainingData.size)
+    val vY: MatrixValues = new MatrixValues(trainingData.size)
     var i = 0
-    for (lv <- labeledPoints) {
+    for (lv <- trainingData) {
       vX(i) = lv.vector.values //.copy().subtract(mean).values
       vY(i) = new VectorValues(1)
       vY(i)(0) = lv.label
@@ -60,8 +60,4 @@ object LinearRegressionSVD {
     LinearRegressionModel(mean, beta, 1.0 - (errors*errors / yDist.variance))
   }
 
-  def evaluate(lrt: SyntheticLinearRegressionTest): LinearRegressionTestScore = {
-    val model: LinearRegressionModel = train(lrt.data:_*)
-    lrt.evaluate(model)
-  }
 }
