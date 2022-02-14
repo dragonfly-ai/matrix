@@ -5,7 +5,11 @@ import ai.dragonfly.math.matrix.LinearRegressionModel
 import math.vector.Vector
 import math.stats.LabeledVector
 
-class LinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double = 1.0) {
+trait LinearRegressionTest {
+  def evaluate(model: LinearRegressionModel):LinearRegressionTestScore
+}
+
+class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double = 1.0) {
   val maxNorm = dimension * sampleSize
 
   val trueCoefficients: Vector = Vector.fill(dimension){ _ =>  Math.random() * maxNorm }
@@ -29,7 +33,7 @@ class LinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double = 1.0) {
     syntheticError = syntheticError + error(i)
   }
 
-  def f(xi:Vector):Double = xi.dot(trueCoefficients) + constant
+  private def f(xi:Vector):Double = xi.dot(trueCoefficients) + constant
 
   def evaluate(model: LinearRegressionModel):LinearRegressionTestScore = {
     var observedError:Double = 0.0
@@ -40,6 +44,19 @@ class LinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double = 1.0) {
       observedError = observedError + (err * err)
     }
     LinearRegressionTestScore(syntheticError, observedError)
+  }
+}
+
+
+case class EmpiricalRegressionTest(testData:Iterable[LabeledVector]) {
+  def evaluate(model: LinearRegressionModel):LinearRegressionTestScore = {
+    var observedError:Double = 0.0
+    for (lv <- testData) {
+      val err = model(lv.x) - lv.y
+      println(s"\ty = ${lv.y} y' = ${model(lv.x)} error = $err : $lv")
+      observedError = observedError + (err * err)
+    }
+    LinearRegressionTestScore(model.error, observedError)
   }
 }
 

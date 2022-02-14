@@ -1,7 +1,7 @@
 package ai.dragonfly.math.matrix
 
 import Jama.{Matrix, QRDecomposition}
-import ai.dragonfly.math.matrix.test.{LinearRegressionTest, LinearRegressionTestScore}
+import ai.dragonfly.math.matrix.test.{SyntheticLinearRegressionTest, LinearRegressionTestScore}
 import ai.dragonfly.math.stats.LabeledVector
 import ai.dragonfly.math.stats.stream.*
 import ai.dragonfly.math.vector.*
@@ -48,7 +48,7 @@ object LinearRegressionQR {
     LinearRegressionModel(mean, beta, 1.0 - (errors*errors / yDist.variance))
   }
 
-  def evaluate(lrt: LinearRegressionTest): LinearRegressionTestScore = {
+  def evaluate(lrt: SyntheticLinearRegressionTest): LinearRegressionTestScore = {
     val model: LinearRegressionModel = train(lrt.data:_*)
     lrt.evaluate(model)
   }

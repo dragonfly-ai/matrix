@@ -26,7 +26,7 @@ object MatrixTest {
     TestPCA()
 
     println("\n\nLinear Regression Tests: ")
-    val lrt: LinearRegressionTest = new LinearRegressionTest(7, 100, 1000.0)
+    val lrt: SyntheticLinearRegressionTest = new SyntheticLinearRegressionTest(7, 100, 1000.0)
     println("\n\nTest LinearRegressionQR:")
     println(s"\tLinearRegressionQR.evaluate(lrt) => ${LinearRegressionQR.evaluate(lrt)}")
     println("\n\nTest LinearRegressionSVD:")
