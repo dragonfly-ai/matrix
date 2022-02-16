@@ -3,7 +3,7 @@ package ai.dragonfly.math.matrix.test
 import ai.dragonfly.math
 import ai.dragonfly.math.matrix.LinearRegressionModel
 import math.vector.Vector
-import math.stats.LabeledVector
+import math.stats.*
 
 trait LinearRegressionTest {
   def trainingData:Array[LabeledVector]
@@ -28,7 +28,7 @@ class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double 
     val yi: Double = f(xi)
     val yi_noisy = yi + (noise * (Math.random() - 0.5))
 
-    trainingData(i) = LabeledVector(yi_noisy, xi)
+    trainingData(i) = SimpleLabeledVector(yi_noisy, xi)
 
     val err = yi_noisy - yi
     syntheticError = syntheticError + err * err
