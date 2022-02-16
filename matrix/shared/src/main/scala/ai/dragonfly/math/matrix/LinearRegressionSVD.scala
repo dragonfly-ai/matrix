@@ -1,8 +1,6 @@
 package ai.dragonfly.math.matrix
 
-import Jama.{Matrix, QRDecomposition, SingularValueDecomposition}
-import ai.dragonfly.math.matrix.LinearRegressionQR.train
-import ai.dragonfly.math.matrix.test.{LinearRegressionTest, LinearRegressionTestScore, SyntheticLinearRegressionTest}
+import Jama.{Matrix, SingularValueDecomposition}
 import ai.dragonfly.math.stats.LabeledVector
 import ai.dragonfly.math.stats.stream.*
 import ai.dragonfly.math.vector.*
@@ -19,15 +17,11 @@ object LinearRegressionSVD extends LinearRegression {
   override def train(trainingData:Array[LabeledVector]): LinearRegressionModel = {
     val xDim = trainingData(0).vector.dimension
     val yDist:Gaussian = Gaussian()
-    // Compute the average Vector
-    val mean: Vector = {
-      val svs = new StreamingVectorStats(xDim)
-      trainingData.foreach(lv => {
-        yDist(lv.y)
-        svs(lv.vector)
-      })
-      svs.average()
-    }
+
+    trainingData.foreach(lv => {
+      yDist(lv.y)
+
+    })
 
     val vX: MatrixValues = new MatrixValues(trainingData.size)
     val vY: MatrixValues = new MatrixValues(trainingData.size)
@@ -55,9 +49,9 @@ object LinearRegressionSVD extends LinearRegression {
 //    println(s"dim(Y) = ${Y.getRowDimension()} x ${Y.getColumnDimension()}")
     val beta: Matrix = Apsi.times(Y)
 //    println(s"dim(beta) = ${beta.getRowDimension()} x ${beta.getColumnDimension()}")
-    val errors:Double = X.times(beta).minus(Y).norm2()
+    val errors:Double = (X.times(beta).minus(Y)).norm2()
 
-    LinearRegressionModel(mean, beta, 1.0 - (errors*errors / yDist.variance))
+    LinearRegressionModel(beta, Math.sqrt(errors/trainingData.length), 1.0 - (errors*errors / (yDist.variance * yDist.sampleSize)))
   }
 
 }

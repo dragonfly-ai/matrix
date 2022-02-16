@@ -5,9 +5,4 @@ import ai.dragonfly.math.stats.LabeledVector
 
 trait LinearRegression {
   def train(trainingData:Array[LabeledVector]): LinearRegressionModel
-
-  def evaluate(lrt: LinearRegressionTest): LinearRegressionTestScore = {
-    val model: LinearRegressionModel = train(lrt.trainingData)
-    lrt.evaluate(model)
-  }
 }

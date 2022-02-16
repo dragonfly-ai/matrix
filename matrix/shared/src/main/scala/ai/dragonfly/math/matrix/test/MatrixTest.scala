@@ -1,6 +1,7 @@
 package ai.dragonfly.math.matrix.test
 
 import Jama._
+import ai.dragonfly.math.*
 import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.matrix.*
 
@@ -28,9 +29,15 @@ object MatrixTest {
     println("\n\nLinear Regression Tests: ")
     val lrt: SyntheticLinearRegressionTest = new SyntheticLinearRegressionTest(7, 100, 1000.0)
     println("\n\nTest LinearRegressionQR:")
-    println(s"\tLinearRegressionQR.evaluate(lrt) => ${LinearRegressionQR.evaluate(lrt)}")
+
+    val lrQR = LinearRegressionQR.train(lrt.trainingData)
+    println(s"\tLinearRegressionQR.train(lrt.trainingData) => $lrQR")
+    println(s"\tlrt.evaluate(lrQR) => ${lrt.evaluate(lrQR)}")
+
     println("\n\nTest LinearRegressionSVD:")
-    println(s"\tLinearRegressionSVD.evaluate(lrt) => ${LinearRegressionSVD.evaluate(lrt)}")
+    val lrSVD = LinearRegressionSVD.train(lrt.trainingData)
+    println(s"\tLinearRegressionSVD.train(lrt.trainingData) => $lrSVD")
+    println(s"\tlrt.evaluate(lrSVD) => ${lrt.evaluate(lrSVD)}")
   }
 
 }

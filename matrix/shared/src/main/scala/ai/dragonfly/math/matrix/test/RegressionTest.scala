@@ -19,7 +19,6 @@ class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double 
 
   override val trainingData: Array[LabeledVector] = new Array[LabeledVector](sampleSize)
   override def testData: Array[LabeledVector] = trainingData
-  val error: Array[Double] = new Array[Double](sampleSize)
 
   var syntheticError: Double = 0.0
 
@@ -32,9 +31,10 @@ class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double 
     trainingData(i) = LabeledVector(yi_noisy, xi)
 
     val err = yi_noisy - yi
-    error(i) = err * err
-    syntheticError = syntheticError + error(i)
+    syntheticError = syntheticError + err * err
   }
+
+  syntheticError = Math.sqrt(syntheticError / trainingData.length)
 
   private def f(xi:Vector):Double = xi.dot(trueCoefficients) + constant
 
@@ -43,10 +43,11 @@ class SyntheticLinearRegressionTest(dimension:Int, sampleSize:Int, noise:Double 
     for (i <- 0 until testData.length) {
       val lv = testData(i)
       val err = model(lv.x) - f(lv.x)
-      println(s"\ty = ${f(lv.x)} y' = ${model(lv.x)} error = $err : $lv")
+//      println(s"\ty = ${f(lv.x)} y' = ${model(lv.x)} error = $err : $lv")
       observedError = observedError + (err * err)
     }
-    LinearRegressionTestScore(syntheticError, observedError)
+    observedError = Math.sqrt( observedError / testData.length )
+    LinearRegressionTestScore(model.standardError, observedError)
   }
 }
 
@@ -56,11 +57,12 @@ case class EmpiricalRegressionTest(override val trainingData:Array[LabeledVector
     var observedError:Double = 0.0
     for (lv <- testData) {
       val err = model(lv.x) - lv.y
-      println(s"\ty = ${lv.y} y' = ${model(lv.x)} error = $err : $lv")
+//      println(s"\ty = ${lv.y} y' = ${model(lv.x)} error = $err : $lv")
       observedError = observedError + (err * err)
     }
-    LinearRegressionTestScore(model.error, observedError)
+    observedError = Math.sqrt(observedError / testData.length)
+    LinearRegressionTestScore(model.standardError, observedError)
   }
 }
 
-case class LinearRegressionTestScore(trainingError:Double, testError:Double) {}
+case class LinearRegressionTestScore(standardError:Double, testError:Double) {}

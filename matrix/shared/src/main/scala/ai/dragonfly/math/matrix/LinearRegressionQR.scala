@@ -1,7 +1,6 @@
 package ai.dragonfly.math.matrix
 
 import Jama.{Matrix, QRDecomposition}
-import ai.dragonfly.math.matrix.test.{LinearRegressionTest, LinearRegressionTestScore, SyntheticLinearRegressionTest}
 import ai.dragonfly.math.stats.LabeledVector
 import ai.dragonfly.math.stats.stream.*
 import ai.dragonfly.math.vector.*
@@ -18,15 +17,10 @@ object LinearRegressionQR extends LinearRegression {
   override def train(trainingData:Array[LabeledVector]): LinearRegressionModel = {
     val xDim = trainingData(0).vector.dimension
     val yDist:Gaussian = Gaussian()
-    // Compute the average Vector
-    val mean: Vector = {
-      val svs = new StreamingVectorStats(xDim)
-      trainingData.foreach(lv => {
-        yDist(lv.y)
-        svs(lv.vector)
-      })
-      svs.average()
-    }
+
+    trainingData.foreach(lv => {
+      yDist(lv.y)
+    })
 
     val vX: MatrixValues = new MatrixValues(trainingData.size)
     val vY: MatrixValues = new MatrixValues(trainingData.size)
@@ -45,7 +39,7 @@ object LinearRegressionQR extends LinearRegression {
 
     val errors:Double = X.times(beta).minus(Y).norm2()
 
-    LinearRegressionModel(mean, beta, 1.0 - (errors*errors / yDist.variance))
+    LinearRegressionModel(beta, Math.sqrt(errors/trainingData.length), 1.0 - (errors*errors / (yDist.variance * yDist.sampleSize)))
   }
 
 }

@@ -1,7 +1,6 @@
 package ai.dragonfly.math.matrix
 
 import Jama.Matrix
-import scala.scalajs.js
 import ai.dragonfly.math.vector._
 
 object MatrixUtils {
