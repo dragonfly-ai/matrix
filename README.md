@@ -4,7 +4,7 @@ This Matrix library ports <a href="https://math.nist.gov/javanumerics/jama/">JAM
 
 It also includes a growing number of convenience features for making common tasks more accessible:
   - Principal Components Analysis
-  - Multiple Linear Regression
+  - Linear Regression: QR Decomposition and Singular Value Decomposition.
 
 To use this library with SBT:
 
