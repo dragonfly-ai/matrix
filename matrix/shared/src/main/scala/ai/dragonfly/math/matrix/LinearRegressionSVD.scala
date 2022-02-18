@@ -2,7 +2,7 @@ package ai.dragonfly.math.matrix
 
 import Jama.{Matrix, SingularValueDecomposition}
 import ai.dragonfly.math.stats.LabeledVector
-import ai.dragonfly.math.stats.stream.*
+import ai.dragonfly.math.stats.probability.distributions.stream.*
 import ai.dragonfly.math.vector.*
 
 import scala.language.implicitConversions

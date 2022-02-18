@@ -5,7 +5,7 @@ import scala.language.implicitConversions
 import Jama.{Matrix, SingularValueDecomposition}
 import ai.dragonfly.math
 import math.vector._
-import math.stats.stream.StreamingVectorStats
+import math.stats.probability.distributions.stream.StreamingVectorStats
 
 import ai.dragonfly.math.matrix.MatrixUtils.*
 import scala.collection.mutable.ListBuffer
