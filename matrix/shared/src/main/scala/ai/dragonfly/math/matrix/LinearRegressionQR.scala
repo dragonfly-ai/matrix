@@ -2,6 +2,7 @@ package ai.dragonfly.math.matrix
 
 import Jama.{Matrix, QRDecomposition}
 import ai.dragonfly.math.stats.LabeledVector
+import ai.dragonfly.math.stats.probability.distributions.{EstimatedGaussian, stream}
 import ai.dragonfly.math.stats.probability.distributions.stream.*
 import ai.dragonfly.math.vector.*
 
@@ -16,11 +17,14 @@ object LinearRegressionQR extends LinearRegression {
 
   override def train(trainingData:Array[LabeledVector]): LinearRegressionModel = {
     val xDim = trainingData(0).vector.dimension
-    val yDist:Gaussian = Gaussian()
 
-    trainingData.foreach(lv => {
-      yDist(lv.y)
-    })
+    val yDist:EstimatedGaussian = {
+      var eG = stream.Gaussian()
+      trainingData.foreach(lv => {
+        eG(1.0, lv.y)
+      })
+      eG.estimate
+    }
 
     val vX: MatrixValues = new MatrixValues(trainingData.size)
     val vY: MatrixValues = new MatrixValues(trainingData.size)
@@ -39,7 +43,7 @@ object LinearRegressionQR extends LinearRegression {
 
     val errors:Double = X.times(beta).minus(Y).norm2()
 
-    LinearRegressionModel(beta, Math.sqrt(errors/trainingData.length), 1.0 - (errors*errors / (yDist.variance * yDist.sampleSize)))
+    LinearRegressionModel(beta, Math.sqrt(errors/trainingData.length), 1.0 - (errors*errors / (yDist.σ̂ * yDist.ℕ̂)))
   }
 
 }

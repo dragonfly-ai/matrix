@@ -2,7 +2,7 @@ package ai.dragonfly.math.matrix
 
 import Jama.{Matrix, SingularValueDecomposition}
 import ai.dragonfly.math.stats.LabeledVector
-import ai.dragonfly.math.stats.probability.distributions.stream.*
+import ai.dragonfly.math.stats.probability.distributions.*
 import ai.dragonfly.math.vector.*
 
 import scala.language.implicitConversions
@@ -16,13 +16,13 @@ object LinearRegressionSVD extends LinearRegression {
 
   override def train(trainingData:Array[LabeledVector]): LinearRegressionModel = {
     val xDim = trainingData(0).vector.dimension
-    val yDist:Gaussian = Gaussian()
-
-    trainingData.foreach(lv => {
-      yDist(lv.y)
-
-    })
-
+    val yDist:EstimatedGaussian = {
+      var eG = stream.Gaussian()
+      trainingData.foreach(lv => {
+        eG(1.0, lv.y)
+      })
+      eG.estimate
+    }
     val vX: MatrixValues = new MatrixValues(trainingData.size)
     val vY: MatrixValues = new MatrixValues(trainingData.size)
     var i = 0
@@ -51,7 +51,7 @@ object LinearRegressionSVD extends LinearRegression {
 //    println(s"dim(beta) = ${beta.getRowDimension()} x ${beta.getColumnDimension()}")
     val errors:Double = (X.times(beta).minus(Y)).norm2()
 
-    LinearRegressionModel(beta, Math.sqrt(errors/trainingData.length), 1.0 - (errors*errors / (yDist.variance * yDist.sampleSize)))
+    LinearRegressionModel(beta, Math.sqrt(errors/trainingData.length), 1.0 - (errors*errors / (yDist.σ̂ * yDist.ℕ̂)))
   }
 
 }
