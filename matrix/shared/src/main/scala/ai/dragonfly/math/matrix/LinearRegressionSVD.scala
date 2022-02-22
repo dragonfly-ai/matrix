@@ -7,35 +7,10 @@ import ai.dragonfly.math.vector.*
 
 import scala.language.implicitConversions
 
-/*
- * Ported from: https://introcs.cs.princeton.edu/java/97data/MultipleLinearRegression.java.html
- * by Robert Sedgewick and Kevin Wayne.
-*/
-
 object LinearRegressionSVD extends LinearRegression {
 
-  override def train(trainingData:Array[LabeledVector]): LinearRegressionModel = {
-    val xDim = trainingData(0).vector.dimension
-    val yDist:EstimatedGaussian = {
-      var eG = stream.Gaussian()
-      trainingData.foreach(lv => {
-        eG(1.0, lv.y)
-      })
-      eG.estimate
-    }
-    val vX: MatrixValues = new MatrixValues(trainingData.size)
-    val vY: MatrixValues = new MatrixValues(trainingData.size)
-    var i = 0
-    for (lv <- trainingData) {
-      vX(i) = lv.vector.values //.copy().subtract(mean).values
-      vY(i) = new VectorValues(1)
-      vY(i)(0) = lv.label
-      i = i + 1
-    }
-    val X: Matrix = new Matrix(vX)
-    val Y: Matrix = new Matrix(vY)
+  override def estimateBeta(X: Matrix, Y: Matrix): Matrix = {
 
-//    val svd:SingularValueDecomposition = X.transpose().times(X).times(1.0 / xDim).svd()
     val svd:SingularValueDecomposition = X.svd()
 
     // Construct Spsi, the Pseudo Inverse of S
@@ -45,13 +20,10 @@ object LinearRegressionSVD extends LinearRegression {
 
     // Compute Apsi, the Pseudo Inverse of A
     val Apsi: Matrix = svd.getU().times(Spsi).times(svd.getV().transpose()).transpose()
-//    println(s"dim(Apsi) = ${Apsi.getRowDimension()} x ${Apsi.getColumnDimension()}")
-//    println(s"dim(Y) = ${Y.getRowDimension()} x ${Y.getColumnDimension()}")
-    val beta: Matrix = Apsi.times(Y)
-//    println(s"dim(beta) = ${beta.getRowDimension()} x ${beta.getColumnDimension()}")
-    val errors:Double = (X.times(beta).minus(Y)).norm2()
 
-    LinearRegressionModel(beta, Math.sqrt(errors/trainingData.length), 1.0 - (errors*errors / (yDist.σ̂ * yDist.ℕ̂)))
+    // estimated Beta
+    Apsi.times(Y)
   }
+
 
 }

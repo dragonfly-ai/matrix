@@ -27,17 +27,36 @@ object MatrixTest {
     TestPCA()
 
     println("\n\nLinear Regression Tests: ")
-    val lrt: SyntheticLinearRegressionTest = new SyntheticLinearRegressionTest(7, 100, 1000.0)
+    println("\nSynthetic Tests: ")
+    val slrt: SyntheticLinearRegressionTest = new SyntheticLinearRegressionTest(7, 100, 1000.0)
     println("\n\nTest LinearRegressionQR:")
 
-    val lrQR = LinearRegressionQR.train(lrt.trainingData)
-    println(s"\tLinearRegressionQR.train(lrt.trainingData) => $lrQR")
-    println(s"\tlrt.evaluate(lrQR) => ${lrt.evaluate(lrQR)}")
+    val syntProbLR: LinearRegressionProblem = LinearRegressionProblem(slrt.trainingData)
+
+    val slrQR = LinearRegressionQR.train(syntProbLR)
+    println(s"\tLinearRegressionQR.train(syntProbLR) => $slrQR")
+    println(s"\tslrt.evaluate(slrQR) => ${slrt.evaluate(slrQR)}")
 
     println("\n\nTest LinearRegressionSVD:")
-    val lrSVD = LinearRegressionSVD.train(lrt.trainingData)
-    println(s"\tLinearRegressionSVD.train(lrt.trainingData) => $lrSVD")
-    println(s"\tlrt.evaluate(lrSVD) => ${lrt.evaluate(lrSVD)}")
+    val slrSVD = LinearRegressionSVD.train(syntProbLR)
+    println(s"\tLinearRegressionSVD.train(syntProbLR) => $slrSVD")
+    println(s"\tslrt.evaluate(slrSVD) => ${slrt.evaluate(slrSVD)}")
+
+    println("\nEmperical Tests: ")
+    val elrt: EmpiricalRegressionTest = new EmpiricalRegressionTest(EmpericalData.trainingData_01, EmpericalData.testData_01)
+    println("\nTest LinearRegressionQR:")
+
+    val emProbLR:LinearRegressionProblem = LinearRegressionProblem(EmpericalData.trainingData_01)
+
+    val elrQR = LinearRegressionQR.train(emProbLR)
+    println(s"\tLinearRegressionQR.train(emProbLR) => $elrQR")
+    println(s"\tslrt.evaluate(elrQR) => ${elrt.evaluate(elrQR)}")
+
+    println("\n\nTest LinearRegressionSVD:")
+    val elrSVD = LinearRegressionSVD.train(emProbLR)
+    println(s"\tLinearRegressionSVD.train(emProbLR) => $elrSVD")
+    println(s"\tslrt.evaluate(elrSVD) => ${elrt.evaluate(elrSVD)}")
+
   }
 
 }

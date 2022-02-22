@@ -15,35 +15,9 @@ import scala.language.implicitConversions
 
 object LinearRegressionQR extends LinearRegression {
 
-  override def train(trainingData:Array[LabeledVector]): LinearRegressionModel = {
-    val xDim = trainingData(0).vector.dimension
-
-    val yDist:EstimatedGaussian = {
-      var eG = stream.Gaussian()
-      trainingData.foreach(lv => {
-        eG(1.0, lv.y)
-      })
-      eG.estimate
-    }
-
-    val vX: MatrixValues = new MatrixValues(trainingData.size)
-    val vY: MatrixValues = new MatrixValues(trainingData.size)
-    var i = 0
-    for (lv <- trainingData) {
-      vX(i) = lv.vector.values //.copy().subtract(mean).values
-      vY(i) = new VectorValues(1)
-      vY(i)(0) = lv.label
-      i = i + 1
-    }
-    val X: Matrix = new Matrix(vX)
-    val Y: Matrix = new Matrix(vY)
-
+  override def estimateBeta(X: Matrix, Y: Matrix): Matrix = {
     val QRD: QRDecomposition = new QRDecomposition(X)
-    val beta: Matrix = QRD.solve(Y)
-
-    val errors:Double = X.times(beta).minus(Y).norm2()
-
-    LinearRegressionModel(beta, Math.sqrt(errors/trainingData.length), 1.0 - (errors*errors / (yDist.σ̂ * yDist.ℕ̂)))
+    QRD.solve(Y)
   }
 
 }
