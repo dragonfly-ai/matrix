@@ -1,4 +1,4 @@
-package ai.dragonfly.math.matrix.test
+package ai.dragonfly.math.matrix.demo
 
 import ai.dragonfly.math.stats.{LabeledVector, SimpleLabeledVector}
 import ai.dragonfly.math.vector.*

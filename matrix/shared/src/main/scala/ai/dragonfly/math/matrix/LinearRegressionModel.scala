@@ -1,16 +1,29 @@
 package ai.dragonfly.math.matrix
 
-
-import ai.dragonfly.math.vector.Vector
 import Jama.Matrix
-import ai.dragonfly.math.matrix.MatrixUtils.given_Conversion_Vector_Matrix
-import ai.dragonfly.math.matrix.MatrixUtils.given_Conversion_Matrix_Vector
-import ai.dragonfly.math.matrix.test.{LinearRegressionTest, LinearRegressionTestScore}
 
-case class LinearRegressionModel(beta: Matrix, standardError:Double, `R²`: Double) {
-  def apply(x:Vector):Double = {
-    val m: Matrix = x
-    m.transpose().times(beta).get(0,0)
-  }
-  override def toString(): String = s"LinearRegressionModel(beta = Matrix(${beta.getRowDimension()} x ${beta.getColumnDimension()}), standardError = $standardError, R² = ${`R²`})"
+import ai.dragonfly.math.*
+import vector.*
+import matrix.*
+import util.*
+import demo.{LinearRegressionTest, LinearRegressionTestScore}
+
+import scala.language.implicitConversions
+
+/**
+ * @param A
+ * @param standardError
+ * @param `R²` Coefficient of determination =
+ */
+
+
+case class LinearRegressionModel(A: Matrix, mean:Vector, bias:Double, standardError:Double, `R²`: Double) {
+  val a:Vector = A.asVector
+  def apply(x:Vector):Double = (a dot (x-mean)) + bias
+//  def apply(X:Matrix):Matrix = {
+//    X.times(A)
+//  }
+  import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
+
+  override def toString(): String = s"LinearRegressionModel(\n\t\tA = ${A.dim},\n\t\tmean = $mean,\n\t\tbias = $bias,\n\t\tstandardError = $standardError,\n\t\tR² = ${`R²`}\n\t)"
 }

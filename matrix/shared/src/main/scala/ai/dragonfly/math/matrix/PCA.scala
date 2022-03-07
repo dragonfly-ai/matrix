@@ -1,115 +1,233 @@
 package ai.dragonfly.math.matrix
 
-import scala.language.implicitConversions
 
 import Jama.{Matrix, SingularValueDecomposition}
-import ai.dragonfly.math
-import math.vector._
-import math.stats.probability.distributions.stream.StreamingVectorStats
+import ai.dragonfly.math.*
+import stats.probability.distributions.stream.StreamingVectorStats
+import vector.*
+import ai.dragonfly.math.example.Demonstrable
 
-import ai.dragonfly.math.matrix.MatrixUtils.*
+import ai.dragonfly.math.matrix
+import matrix.data.*
+import matrix.util.*
+import matrix.util.given_Dimensioned_Matrix
+
+import scala.language.implicitConversions
+
 import scala.collection.mutable.ListBuffer
 
 object PCA {
 
   // Create a PCA object from a set of data points
-  def apply(points: VECTORS): PCA = {
-    val dim = points(0).dimension
-
-    // Compute the average Vector
-    val mean: Vector = {
-      val svs = new StreamingVectorStats(dim)
-      points.foreach(p => svs(p))
-      svs.average()
-    }
+  def apply(data: UnsupervisedData): PCA = {
 
     // arrange the matrix of centered points
-    val mArr = new MatrixValues(points.length)
+    val mArr = new MatrixValues(data.size)
 
-    for (i <- points.indices) {
-      mArr(i) = (points(i) - mean).values
+    for (i <- 0 until data.size) {
+      mArr(i) = (data.example(i) - data.sampleMean).values
     }
 
-    val X = new Matrix(mArr)
+    val Xc = new Matrix(mArr)
 
-    // Compute Singular Value Decomposition
     new PCA(
-      X.transpose().times(X).times(1.0 / points.length).svd(),
-      mean,
-      dim
+      Xc.transpose().times(Xc).times(1.0 / data.size).svd(), // Compute Singular Value Decomposition
+      data.sampleMean,
+      data.dimension
     )
   }
+
 
 }
 
 case class PCA (svd: SingularValueDecomposition, mean: Vector, dimension: Double) {
 
-  val U = svd.getU()
+  lazy val Uᵀ:Matrix = svd.getU().transpose()
 
-  def getReducer(k: Int): DimensionalityReducerPCA = DimensionalityReducerPCA(U, mean, k)
+  def getReducer(k: Int): DimensionalityReducerPCA = DimensionalityReducerPCA(new Matrix(Uᵀ.getArray().take(k)), mean)
 
-  def getRankedBasisPairs: Seq[BasisPair] = {
-    val size = svd.getU().getRowDimension()
-    val dim = svd.getU().getColumnDimension()
+  lazy val basisPairs: Seq[BasisPair] = {
     val singularValues = svd.getSingularValues()
-    var pairs: ListBuffer[BasisPair] = new ListBuffer[BasisPair]()
-    val m: Matrix = svd.getU()
-
-    for (i <- 0 until size) {
-      val vectorValues = new Array[Double](dim)
-
-      for (j <- 0 until dim) vectorValues(j) = m.get(i, j)
-
-      pairs = pairs += BasisPair(
+    val arr:MatrixValues = Uᵀ.getArray()
+    var pairs:Seq[BasisPair] = Seq[BasisPair]()
+    for (i <- arr.indices) {
+      pairs = pairs :+ BasisPair(
         singularValues(i),
-        Vector(vectorValues:_*)
+        Vector(arr(i))
       )
     }
-    pairs.toList
+    pairs
   }
-
 }
 
 case class BasisPair (variance: Double, basisVector: Vector)
 
-import ai.dragonfly.math.matrix.MatrixUtils.given_Conversion_Vector_Matrix
-import ai.dragonfly.math.matrix.MatrixUtils.given_Conversion_Matrix_Vector
+case class DimensionalityReducerPCA(Ak:Matrix, mean: Vector) {
 
-object DimensionalityReducerPCA {
-  def apply(U: Matrix, mean: Vector, k: Int):DimensionalityReducerPCA = {
-    DimensionalityReducerPCA(
-      U.getMatrix(0, U.getRowDimension() - 1, 0, k-1).transpose(),
-      mean
-    )
-  }
-}
-
-case class DimensionalityReducerPCA(UT: Matrix, mean: Vector) {
-  def project(v: Vector): Vector = {
-    UT.times(v.copy().subtract(mean))
-  }
+  /**
+   * Reduce dimensionality of vector from domainDimension to rangeDimension
+   * @param v domainDimensioned vector
+   * @return rangeDimensioned vector
+   */
+  def apply(v:Vector):Vector = (Ak * (v - mean).asColumnMatrix).asVector
 
   def domainDimension:Int = mean.dimension
 
-  def rangeDimension:Int = UT.getRowDimension()
-  //  Recover matrix from projection onto reduced principle components
-//  def recover(Z, Ureduce) {
-//    return numeric.dot(Z, numeric.transpose(Ureduce))
-//  }
+  def rangeDimension:Int = Ak.getRowDimension()
+
+  /**
+   * Approximate inverse of dimensionality reduction
+   *
+   * @param v rangeDimensioned vector
+   * @return rangeDimensioned vector
+   */
+  def unapply(v:Vector):Vector = (v.asRowMatrix * Ak).asVector + mean
+
 }
 
-object TestPCA {
+object DemoPCA extends Demonstrable {
+  import interval.*
+  import visualization.ConsoleImage
 
-  def apply(): Unit = {
-    val vArr = new VECTORS(100); for (i <- vArr.indices) vArr(i) = Vector.random(3)
-    val pca = PCA (vArr)
-    val reducer = pca.getReducer(2)
+  def demo(implicit sb:StringBuilder = new StringBuilder()):StringBuilder = {
 
-    val basisPairs = pca.getRankedBasisPairs
-    println(s"basisPairs: $basisPairs")
+    // 2D shapes represented by centered 2D meshes of exactly 9 points each.
+    val square = Vector(
+      -1.000000, 1.000000, // point 1 1
+      0.000000, 1.000000, // point 6 2
+      1.000000, 1.000000, // point 2 3
+      1.000000, 0.000000, // point 7 4
 
-    for (v <- vArr) println(s"$v -> ${reducer.project (v)}")
+      1.000000, -1.000000, // point 4 5
+      0.000000, -1.000000, // point 8 6
+      -1.000000, -1.000000, // point 3 7
+      -1.000000, 0.000000, // point 5 8
+      0.000000, 0.000000 // point 9
+    )
 
+    val circle = Vector(
+      -0.700000, 0.700000,// point 1 1
+      0.000000, 1.000000, // point 6 2
+      0.700000, 0.700000,// point 2 3
+      1.000000, 0.000000, // point 7 4
+      0.700000, -0.700000, // point 4 5
+      0.000000, -1.000000, // point 8 6
+      -0.700000, -0.700000, // point 3 7
+      -1.000000, 0.000000, // point 5 8
+      0.000000, 0.000000 // point 9
+    )
+    val almond = Vector(
+      -0.488187, 0.800000,// point 1 1
+      0.000000, 1.000000, // point 6 2
+      0.503938, 0.800000,// point 2 3
+      0.600000, 0.500000, // point 7 4
+      0.450000, -0.200000, // point 4 5
+      0.000000, -1.000000, // point 8 6
+      -0.450000, -0.200000, // point 3 7
+      -0.600000, 0.500000, // point 5 8
+      0.000000, 0.500000 // point 9
+    )
+    val triangle = Vector(
+      -1.000000, 1.000000,// point 1 1
+      0.000000, 1.000000, // point 6 2
+      1.000000, 1.000000,// point 2 3
+      0.500000, 0.000000, // point 7 4
+      0.100000, -0.800000, // point 4 5
+      0.000000, -1.000000, // point 8 6
+      -0.100000, -0.800000, // point 3 7
+      -0.500000, 0.000000, // point 5 8
+      0.000000, 0.000000 // point 9
+    )
+    val cross = Vector(
+      -0.100000, 0.100000,// point 1 1
+      0.000000, 1.000000, // point 6 2
+      0.100000, 0.100000,// point 2 3
+      1.000000, 0.000000, // point 7 4
+      0.100000, -0.100000, // point 4 5
+      0.000000, -1.000000, // point 8 6
+      -0.100000, -0.100000, // point 3 7
+      -1.000000, 0.000000, // point 5 8
+      0.000000, 0.000000 // point 9
+    )
+    val x = Vector(
+      -1.000000, 1.000000,// point 1 1
+      0.000000, 0.100000, // point 6 2
+      1.000000, 1.000000,// point 2 3
+      0.100000, 0.000000, // point 7 4
+      1.000000, -1.000000, // point 4 5
+      0.000000, -0.100000, // point 8 6
+      -1.000000, -1.000000, // point 3 7
+      -0.100000, 0.000000, // point 5 8
+      0.000000, 0.000000 // point 9
+    )
+
+    val vArr = new VECTORS(6)
+    vArr(0) = square
+    vArr(1) = circle
+    vArr(2) = almond
+    vArr(3) = triangle
+    vArr(4) = cross
+    vArr(5) = x
+
+    val cimg:ConsoleImage = ConsoleImage(50 * vArr.length, 50)
+
+    sb.append("Sample Shapes:\n")
+    for (i <- vArr.indices) {
+      plotVectorOfShape2D(vArr(i), Vector2((i * 50) + 25, 25))(cimg)
+    }
+
+    sb.append(cimg)
+
+    val pca = PCA (StaticUnsupervisedData(vArr))
+    val reducer = pca.getReducer(3)
+
+    sb.append(s"Mean Shape with μ = ${pca.mean}\n")
+    sb.append(plotVectorOfShape2D(pca.mean, Vector2(25, 25))()).append("\n")
+
+    for (bp <- pca.basisPairs) {
+      if (bp.variance > 0.001) {
+        var i = 0
+        val cImg2:ConsoleImage = new ConsoleImage(350, 50)
+        var s: Double = -3.0 * bp.variance
+        while (s <= 3.0 * bp.variance) {
+          plotVectorOfShape2D((s * bp.basisVector) + pca.mean, Vector2((i * 50) + 25, 25))(cImg2)
+          s = s + bp.variance
+          i = i + 1
+        }
+        sb.append(s"Singular Shape with σ = ${bp.variance} and Singular VSector: ${bp.basisVector}").append("\n")
+        sb.append(s"Shape Variation from -3σ to 3σ (${-3.0 * bp.variance} to ${3.0 * bp.variance}):").append("\n")
+        sb.append(cImg2).append("\n")
+      }
+    }
+
+    sb.append(s"Dimensinoality reduction from ${reducer.domainDimension} to ${reducer.rangeDimension}:").append("\n")
+    for (v <- vArr) sb.append(s"$v -> ${reducer(v)}").append("\n")
+
+    sb
+  }
+
+
+  def name:String = "Principle Components Analysis"
+
+  def plotVectorOfShape2D(sv: Vector, position:Vector2)(cimg:ConsoleImage = ConsoleImage(50, 50)):ConsoleImage = {
+    def transform(x:Double, y:Double):Vector2 = Vector2((15 * x) + position.x, (15 * y) + position.y)
+    def segment(i:Int, j:Int):Any = {
+      geometry.Line.discrete(
+        transform(sv.values(i), sv.values(i+1)),
+        transform(sv.values(j), sv.values(j+1)),
+        (dX:Int, dY:Int) => {
+          cimg.setPixel(dX, (cimg.height - 1) - dY, 2)
+        }
+      )
+    }
+    var i = 0
+    while ( i + 3 < sv.values.length) {
+      segment(i, i + 2)
+      segment(i, sv.values.length - 2)
+      i = i + 2
+    }
+    segment(0, sv.values.length - 4)
+    cimg
   }
 
 }
