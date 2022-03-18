@@ -36,7 +36,7 @@ Subscript Words: ᵥₐₗᵤₑₛ ₐᵥ ₘᵢₙ ₘₐₓ
 //  extension (a: Matrix) def *(b: Matrix): Matrix = a.times(b)
 
   extension (a: Matrix) def asVector: Vector = {
-      if (a.getColumnDimension() == 1 || a.getRowDimension == 1) {
+      if (a.getColumnDimension() == 1 || a.getRowDimension() == 1) {
         Vector(a.getRowPackedCopy())
       } else throw CannotExpressMatrixAsVector(a)
     }
