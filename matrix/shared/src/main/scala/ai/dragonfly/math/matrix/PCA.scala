@@ -201,7 +201,15 @@ object DemoPCA extends Demonstrable {
     }
 
     sb.append(s"Dimensinoality reduction from ${reducer.domainDimension} to ${reducer.rangeDimension}:").append("\n")
-    for (v <- vArr) sb.append(s"$v -> ${reducer(v)}").append("\n")
+    for (v <- vArr) {
+      val cImg2:ConsoleImage = new ConsoleImage(100, 50)
+      plotVectorOfShape2D(v, Vector2(25, 25))(cImg2)
+      val reducedV = reducer(v)
+      //plotVectorOfShape2D(reducedV, Vector2(75, 25))(cImg2)
+      plotVectorOfShape2D(reducer.unapply(reducedV), Vector2(75, 25))(cImg2)
+      sb.append(s"$v -> $reducedV").append("\n")
+      sb.append(cImg2).append("\n")
+    }
 
     sb
   }
