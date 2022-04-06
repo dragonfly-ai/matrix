@@ -6,14 +6,13 @@ import ai.dragonfly.math.*
 import stats.probability.distributions.stream.StreamingVectorStats
 import vector.*
 import ai.dragonfly.math.example.Demonstrable
-
+import ai.dragonfly.math.geometry.Line
 import ai.dragonfly.math.matrix
 import matrix.data.*
 import matrix.util.*
 import matrix.util.given_Dimensioned_Matrix
 
 import scala.language.implicitConversions
-
 import scala.collection.mutable.ListBuffer
 
 object PCA {
@@ -220,7 +219,7 @@ object DemoPCA extends Demonstrable {
   def plotVectorOfShape2D(sv: Vector, position:Vector2)(cimg:ConsoleImage = ConsoleImage(50, 50)):ConsoleImage = {
     def transform(x:Double, y:Double):Vector2 = Vector2((15 * x) + position.x, (15 * y) + position.y)
     def segment(i:Int, j:Int):Any = {
-      geometry.Line.discrete(
+      Line.trace2D(
         transform(sv.values(i), sv.values(i+1)),
         transform(sv.values(j), sv.values(j+1)),
         (dX:Int, dY:Int) => {
