@@ -3,6 +3,7 @@ package ai.dragonfly.math.matrix.data
 import Jama.Matrix
 import ai.dragonfly.math.*
 import interval.*
+import Interval.*
 import vector.*
 import stats.{LabeledVector, SimpleLabeledVector}
 import stats.probability.distributions.{EstimatedGaussian, stream}

@@ -2,6 +2,7 @@ package ai.dragonfly.math.matrix.demo
 import ai.dragonfly.math.*
 import vector.*
 import stats.*
+import Random.*
 import matrix.LinearRegressionModel
 import matrix.data.*
 
@@ -14,24 +15,15 @@ trait LinearRegressionTest {
 case class SyntheticLinearRegressionTest(trueCoefficients: Vector, bias: Double, sampleSize:Int, noise:Double = 1.0) extends LinearRegressionTest {
   val maxNorm:Double = trueCoefficients.dimension * trueCoefficients.magnitude() //Math.min(2.0 * dimension, sampleSize)
 
-  val randomVector: Double => Vector = {
-    trueCoefficients.dimension match {
-      case 2 => Vector2.random
-      case 3 => Vector3.random
-      case 4 => Vector4.random
-      case _ => (d:Double) => new VectorN(VectorValues.fill(trueCoefficients.dimension)((d:Int) => maxNorm * Math.random()))
-    }
-  }
-
   var syntheticError: Double = 0.0
   override val trainingData:SupervisedData = {
     val td: Array[LabeledVector] = new Array[LabeledVector](sampleSize)
 
     for (i <- td.indices) {
-      val xi: Vector = randomVector(maxNorm)
+      val xi: Vector = defaultRandom.nextVector(trueCoefficients.dimension, maxNorm)
       val yi: Double = f(xi)
 
-      val yi_noisy = yi + (noise * (Math.random() - 0.5))
+      val yi_noisy = yi + (noise * (defaultRandom.between(-0.5, 0.5)))
 
       td(i) = SimpleLabeledVector(yi_noisy, xi)
       val err = yi_noisy - yi

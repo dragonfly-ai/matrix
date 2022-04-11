@@ -21,11 +21,9 @@ object PCA {
   def apply(data: UnsupervisedData): PCA = {
 
     // arrange the matrix of centered points
-    val mArr = new MatrixValues(data.size)
+    val mArr = MatrixValues( (0 until data.size).map( i => (data.example(i) - data.sampleMean).values ):_* )
 
-    for (i <- 0 until data.size) {
-      mArr(i) = (data.example(i) - data.sampleMean).values
-    }
+
 
     val Xc = new Matrix(mArr)
 
@@ -189,7 +187,7 @@ object DemoPCA extends Demonstrable {
         val cImg2:ConsoleImage = new ConsoleImage(350, 50)
         var s: Double = -3.0 * bp.variance
         while (s <= 3.0 * bp.variance) {
-          plotVectorOfShape2D((s * bp.basisVector) + pca.mean, Vector2((i * 50) + 25, 25))(cImg2)
+          plotVectorOfShape2D((bp.basisVector * s) + pca.mean, Vector2((i * 50) + 25, 25))(cImg2)
           s = s + bp.variance
           i = i + 1
         }

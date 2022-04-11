@@ -1,7 +1,7 @@
 package ai.dragonfly.math.matrix
 
 import Jama.Matrix
-import ai.dragonfly.math.interval.Interval
+import ai.dragonfly.math.interval.Interval.*
 import ai.dragonfly.math.matrix.data.{StaticSupervisedData, SupervisedData}
 import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.matrix.demo.{EmpericalData, EmpiricalRegressionTest, LinearRegressionTest, LinearRegressionTestScore, SyntheticLinearRegressionTest}
