@@ -13,7 +13,7 @@ trait LinearRegressionTest {
 }
 
 case class SyntheticLinearRegressionTest(trueCoefficients: Vector, bias: Double, sampleSize:Int, noise:Double = 1.0) extends LinearRegressionTest {
-  val maxNorm:Double = trueCoefficients.dimension * trueCoefficients.magnitude() //Math.min(2.0 * dimension, sampleSize)
+  val maxNorm:Double = trueCoefficients.dimension * trueCoefficients.magnitude //Math.min(2.0 * dimension, sampleSize)
 
   var syntheticError: Double = 0.0
   override val trainingData:SupervisedData = {

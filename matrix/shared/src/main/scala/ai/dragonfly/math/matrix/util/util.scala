@@ -6,8 +6,6 @@ import ai.dragonfly.math.vector.*
 
 package object util {
 
-
-
   trait Dimensioned[M] {
     extension (m: M) def dim: String
     extension (m: M) def *(m1:Matrix):Matrix

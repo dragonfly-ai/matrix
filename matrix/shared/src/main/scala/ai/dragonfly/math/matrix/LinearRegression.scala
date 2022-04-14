@@ -110,7 +110,7 @@ object DemoLinearRegression extends Demonstrable {
     val xSlopeSVD:Double = slrSVD(p + Vector2(1.0, 0.0)) - yMean
     val ySlopeSVD:Double = slrSVD(p + Vector2(0.0, 1.0)) - yMean
 
-    val c = yMean / slrSVD.a.magnitude()
+    val c = yMean / slrSVD.a.magnitude
     xPlot.line(Vector2(p.component(0), yMean), xSlopeSVD, "SVD (p.x, f'(p))")
     yPlot.line(Vector2(p.component(1), yMean), ySlopeSVD, "SVD (p.y, f'(p))")
 
