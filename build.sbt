@@ -10,17 +10,21 @@ lazy val matrix = crossProject(JSPlatform, JVMPlatform)
     resolvers += "dragonfly.ai" at "https://code.dragonfly.ai/",
     scalacOptions ++= Seq("-feature","-deprecation"),
     libraryDependencies += "ai.dragonfly.code" %%% "vector" % "0.525",
-    Compile / mainClass := Some("ai.dragonfly.math.matrix.demo.Demo")
-  ).jsSettings(
-//  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin)).jsSettings(
-//      Compile / npmDependencies += "jama" -> "1.0.4",
-//      webpackBundlingMode := BundlingMode.LibraryAndApplication("Jama"),
-      scalaJSUseMainModuleInitializer := true
-  )
-  .jvmSettings(
+  ).jsSettings().jvmSettings()
     // JVM-specific settings here
+    /*
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % "1.1.0"
-//      "gov.nist.math" % "jama" % "1.0.2"
     )
-  )
+     */
+
+
+
+lazy val demo = crossProject(JSPlatform, JVMPlatform).dependsOn(matrix).settings(
+  name := "demo",
+  Compile / mainClass := Some("Demo")
+).jsSettings(
+  scalaJSUseMainModuleInitializer := true
+).jvmSettings(
+  libraryDependencies ++= Seq( "gov.nist.math" % "jama" % "1.0.2" )
+)

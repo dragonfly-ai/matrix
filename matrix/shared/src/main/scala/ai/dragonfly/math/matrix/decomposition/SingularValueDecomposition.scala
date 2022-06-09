@@ -1,6 +1,8 @@
-package Jama
+package ai.dragonfly.math.matrix.decomposition
 
+import ai.dragonfly.math.matrix.*
 import bridge.array.*
+import scala.math.hypot
 
 object SingularValueDecomposition {
 
@@ -35,7 +37,7 @@ object SingularValueDecomposition {
         // Compute 2-norm of k-th column without under/overflow.
         s(k) = 0.0
         for (i <- k until rows) {
-          s(k) = util.Maths.hypot(s(k), A(i)(k))
+          s(k) = hypot(s(k), A(i)(k))
         }
         if (s(k) != 0.0) {
           if (A(k)(k) < 0.0) s(k) = -s(k)
@@ -72,7 +74,7 @@ object SingularValueDecomposition {
         // Compute 2-norm without under/overflow.
         e(k) = 0.0
         for (i <- k + 1 until columns) {
-          e(k) = util.Maths.hypot(e(k), e(i))
+          e(k) = hypot(e(k), e(i))
         }
         if (e(k) != 0.0) {
           if (e(k + 1) < 0.0) e(k) = -e(k)
@@ -229,7 +231,7 @@ object SingularValueDecomposition {
           var f = e(p - 2)
           e(p - 2) = 0.0
           for (j <- p - 2 to k by -1) {
-            var t = util.Maths.hypot(s(j), f)
+            var t = hypot(s(j), f)
             val cs = s(j) / t
             val sn = f / t
             s(j) = t
@@ -250,7 +252,7 @@ object SingularValueDecomposition {
           var f = e(k - 1)
           e(k - 1) = 0.0
           for (j <- k until p) {
-            var t = util.Maths.hypot(s(j), f)
+            var t = hypot(s(j), f)
             val cs = s(j) / t
             val sn = f / t
             s(j) = t
@@ -285,7 +287,7 @@ object SingularValueDecomposition {
           var g = sk * ek
           // Chase zeros.
           for (j <- k until p - 1) {
-            var t = util.Maths.hypot(f, g)
+            var t = hypot(f, g)
             var cs = f / t
             var sn = g / t
             if (j != k) e(j - 1) = t
@@ -298,7 +300,7 @@ object SingularValueDecomposition {
               V(i)(j + 1) = -sn * V(i)(j) + cs * V(i)(j + 1)
               V(i)(j) = t
             }
-            t = util.Maths.hypot(f, g)
+            t = hypot(f, g)
             cs = f / t
             sn = g / t
             s(j) = t
@@ -401,7 +403,7 @@ class SingularValueDecomposition private (val U:Matrix, val V:Matrix, singularVa
     *
     * @return S
     */
-  def getS(): Matrix = Jama.Matrix.diagonal(ai.dragonfly.math.vector.Vector(singularValues))
+  def getS(): Matrix = Matrix.diagonal(ai.dragonfly.math.vector.Vector(singularValues))
 
   /** Two norm
     *

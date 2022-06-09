@@ -1,6 +1,9 @@
-package Jama
+package ai.dragonfly.math.matrix.decomposition
 
+import ai.dragonfly.math.matrix.*
 import bridge.array.*
+
+import scala.math.hypot
 
 object QRDecomposition {
 
@@ -15,7 +18,7 @@ object QRDecomposition {
     for (k <- 0 until columns) { // Compute 2-norm of k-th column without under/overflow.
       var nrm:Double = 0.0
       for (i <- k until rows) {
-        nrm = util.Maths.hypot(nrm, QR(i)(k))
+        nrm = hypot(nrm, QR(i)(k))
       }
       if (nrm != 0.0) { // Form k-th Householder vector.
         if (QR(k)(k) < 0) nrm = -nrm

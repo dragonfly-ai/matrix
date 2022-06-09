@@ -1,5 +1,6 @@
-package Jama
+package ai.dragonfly.math.matrix.decomposition
 
+import ai.dragonfly.math.matrix.*
 import bridge.array.*
 
 object LUDecomposition {

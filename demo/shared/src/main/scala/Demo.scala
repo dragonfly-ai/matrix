@@ -1,11 +1,3 @@
-package ai.dragonfly.math.matrix.demo
-
-import ai.dragonfly.math.*
-import ai.dragonfly.math.interval.*
-import ai.dragonfly.math.vector.*
-import ai.dragonfly.math.matrix.*
-import ai.dragonfly.math.matrix.data.StaticSupervisedData
-
 import ai.dragonfly.math.example.Demonstrable
 
 object Demo {
@@ -16,7 +8,7 @@ object Demo {
     DemoEigenValueDecomposition
   )
 
-  import Console.{GREEN, RED, RESET, YELLOW, UNDERLINED, RED_B}
+  import Console.*
 
   lazy val consolidateDemoOutput: String = {
     implicit val sb: StringBuilder = new StringBuilder()

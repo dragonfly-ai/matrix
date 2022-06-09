@@ -1,12 +1,10 @@
-package ai.dragonfly.math.matrix.demo
-
-import bridge.array.*
 import ai.dragonfly.math.*
-import vector.*
-import stats.*
-import Random.*
-import matrix.LinearRegressionModel
-import matrix.data.*
+import ai.dragonfly.math.Random.*
+import ai.dragonfly.math.matrix.ml.data.*
+import ai.dragonfly.math.matrix.ml.supervized.regression.*
+import ai.dragonfly.math.stats.*
+import ai.dragonfly.math.vector.*
+import bridge.array.*
 
 trait LinearRegressionTest {
   def trainingData:SupervisedData

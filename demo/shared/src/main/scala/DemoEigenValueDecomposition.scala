@@ -1,14 +1,12 @@
-package ai.dragonfly.math.matrix.demo
-
-import Jama.*
 import ai.dragonfly.math.example.Demonstrable
-import bridge.array.native.*
+import ai.dragonfly.math.matrix.Matrix
+import ai.dragonfly.math.vector.Vector4
+import bridge.array.ARRAY
 import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
-import ai.dragonfly.math.vector.*
 
 object DemoEigenValueDecomposition extends Demonstrable {
-  def demo(implicit sb:StringBuilder = new StringBuilder()):StringBuilder = {
-    val M0:Matrix = Matrix(
+  def demo(implicit sb: StringBuilder = new StringBuilder()): StringBuilder = {
+    val M0: Matrix = Matrix(
       ARRAY[ARRAY[Double]](
         ARRAY[Double](1.0, 2.0, 3.0, 4.0),
         ARRAY[Double](0.0, -1.0, 0.0, -3.0),
@@ -22,5 +20,6 @@ object DemoEigenValueDecomposition extends Demonstrable {
     sb.append("\n\n")
 
   }
-  def name:String = "DemoEigenValueDecomposition"
+
+  def name: String = "DemoEigenValueDecomposition"
 }

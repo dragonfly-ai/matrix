@@ -1,4 +1,4 @@
-package ai.dragonfly.math.matrix.data
+package ai.dragonfly.math.matrix.ml.data
 
 import bridge.array.*
 import ai.dragonfly.math.*
@@ -9,7 +9,6 @@ import stats.{LabeledVector, SimpleLabeledVector}
 import stats.probability.distributions.{EstimatedGaussian, stream}
 import matrix.*
 import matrix.util.*
-import Jama.*
 
 import scala.language.implicitConversions
 

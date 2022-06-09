@@ -1,6 +1,4 @@
-package ai.dragonfly.math.matrix
-
-import Jama.*
+package ai.dragonfly.math.matrix.util
 
 import ai.dragonfly.math.matrix.*
 import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix

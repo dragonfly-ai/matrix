@@ -3,7 +3,6 @@ package ai.dragonfly.math.matrix
 import bridge.array.*
 import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.matrix.*
-import Jama.*
 
 package object util {
 
@@ -40,15 +39,4 @@ package object util {
 
   extension (a: Vector) def asColumnMatrix: Matrix = new Matrix(a.values, a.dimension)
 
-//  def hypot(a: Double, b: Double): Double = {
-//    var r = .0
-//    if (Math.abs(a) > Math.abs(b)) {
-//      r = b / a
-//      r = Math.abs(a) * Math.sqrt(1 + r * r)
-//    } else if (b != 0) {
-//      r = a / b
-//      r = Math.abs(b) * Math.sqrt(1 + r * r)
-//    } else r = 0.0
-//    r
-//  }
 }

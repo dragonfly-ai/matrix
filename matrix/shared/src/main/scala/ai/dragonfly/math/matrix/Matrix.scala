@@ -1,10 +1,11 @@
-package Jama
+package ai.dragonfly.math.matrix
 
-import Jama.util.Maths.hypot
-
-import scala.scalajs.js
+import ai.dragonfly.math.matrix.decomposition.{CholeskyDecomposition, EigenvalueDecomposition, LUDecomposition, QRDecomposition, SingularValueDecomposition}
 import ai.dragonfly.math.vector.*
 import bridge.array.ARRAY
+
+import scala.math.hypot
+import scala.scalajs.js
 
 
 /**

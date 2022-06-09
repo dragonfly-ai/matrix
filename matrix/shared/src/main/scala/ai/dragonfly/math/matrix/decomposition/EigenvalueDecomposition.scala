@@ -1,6 +1,9 @@
-package Jama
+package ai.dragonfly.math.matrix.decomposition
 
+import ai.dragonfly.math.matrix.*
 import bridge.array.*
+
+import scala.math.hypot
 
 object EigenvalueDecomposition {
 
@@ -148,7 +151,7 @@ object EigenvalueDecomposition {
           // Compute implicit shift
           var g = d(l)
           var p = (d(l + 1) - g) / (2.0 * e(l))
-          var r = util.Maths.hypot(p, 1.0)
+          var r = hypot(p, 1.0)
           if (p < 0) r = -r
           d(l) = e(l) / (p + r)
           d(l + 1) = e(l) * (p + r)
@@ -172,7 +175,7 @@ object EigenvalueDecomposition {
             s2 = s
             g = c * e(i)
             h = c * p
-            r = util.Maths.hypot(p, e(i))
+            r = hypot(p, e(i))
             e(i + 1) = s * r
             s = e(i) / r
             c = p / r
