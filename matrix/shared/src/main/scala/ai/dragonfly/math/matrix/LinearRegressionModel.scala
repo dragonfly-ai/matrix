@@ -1,11 +1,11 @@
 package ai.dragonfly.math.matrix
 
-import Jama.Matrix
+import Jama.*
 
 import ai.dragonfly.math.*
 import vector.*
 import matrix.*
-import util.*
+import matrix.util.*
 import demo.{LinearRegressionTest, LinearRegressionTestScore}
 
 import scala.language.implicitConversions

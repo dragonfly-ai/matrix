@@ -1,11 +1,12 @@
 package ai.dragonfly.math.matrix
 
-import Jama.{Matrix, SingularValueDecomposition}
+import Jama.*
+
 import ai.dragonfly.math.stats.LabeledVector
 import ai.dragonfly.math.stats.probability.distributions.*
 import ai.dragonfly.math.vector.*
-
 import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
+import bridge.array.ARRAY
 
 import scala.language.implicitConversions
 

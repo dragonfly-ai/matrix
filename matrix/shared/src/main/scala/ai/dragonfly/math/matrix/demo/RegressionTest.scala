@@ -1,4 +1,6 @@
 package ai.dragonfly.math.matrix.demo
+
+import bridge.array.*
 import ai.dragonfly.math.*
 import vector.*
 import stats.*
@@ -17,7 +19,7 @@ case class SyntheticLinearRegressionTest(trueCoefficients: Vector, bias: Double,
 
   var syntheticError: Double = 0.0
   override val trainingData:SupervisedData = {
-    val td: Array[LabeledVector] = new Array[LabeledVector](sampleSize)
+    val td: ARRAY[LabeledVector] = new ARRAY[LabeledVector](sampleSize)
 
     for (i <- td.indices) {
       val xi: Vector = defaultRandom.nextVector(trueCoefficients.dimension, maxNorm)

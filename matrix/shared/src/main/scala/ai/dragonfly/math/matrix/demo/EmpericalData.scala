@@ -1,12 +1,13 @@
 package ai.dragonfly.math.matrix.demo
 
+import bridge.array.*
 import ai.dragonfly.math.stats.{LabeledVector, SimpleLabeledVector}
 import ai.dragonfly.math.vector.*
 
 object EmpericalData {
 
-  val trainingData_01:Array[LabeledVector] = new Array[LabeledVector](1416)
-  val testData_01:Array[LabeledVector] = new Array[LabeledVector](160)
+  val trainingData_01:ARRAY[LabeledVector] = new ARRAY[LabeledVector](1416)
+  val testData_01:ARRAY[LabeledVector] = new ARRAY[LabeledVector](160)
 
   def initializeData:Unit = {
     // initialize training data:

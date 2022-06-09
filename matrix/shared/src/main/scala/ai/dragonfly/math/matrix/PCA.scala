@@ -1,7 +1,9 @@
 package ai.dragonfly.math.matrix
 
 
-import Jama.{Matrix, SingularValueDecomposition}
+import bridge.array.*
+import Jama.*
+
 import ai.dragonfly.math.*
 import stats.probability.distributions.stream.StreamingVectorStats
 import vector.*
@@ -21,11 +23,11 @@ object PCA {
   def apply(data: UnsupervisedData): PCA = {
 
     // arrange the matrix of centered points
-    val mArr = MatrixValues( (0 until data.size).map( i => (data.example(i) - data.sampleMean).values ):_* )
-
-
-
-    val Xc = new Matrix(mArr)
+    val Xc = Matrix(
+      ARRAY.tabulate[ARRAY[Double]](data.size)(
+        (row:Int) => (data.example(row) - data.sampleMean).values
+      )
+    )
 
     new PCA(
       Xc.transpose().times(Xc).times(1.0 / data.size).svd(), // Compute Singular Value Decomposition
@@ -41,11 +43,11 @@ case class PCA (svd: SingularValueDecomposition, mean: Vector, dimension: Double
 
   lazy val Uᵀ:Matrix = svd.getU().transpose()
 
-  def getReducer(k: Int): DimensionalityReducerPCA = DimensionalityReducerPCA(new Matrix(Uᵀ.getArray().take(k)), mean)
+  def getReducer(k: Int): DimensionalityReducerPCA = DimensionalityReducerPCA(Matrix(Uᵀ.getArray().take(k)), mean)
 
   lazy val basisPairs: Seq[BasisPair] = {
     val singularValues = svd.getSingularValues()
-    val arr:MatrixValues = Uᵀ.getArray()
+    val arr: ARRAY[ARRAY[Double]] = Uᵀ.getArray()
     var pairs:Seq[BasisPair] = Seq[BasisPair]()
     for (i <- arr.indices) {
       pairs = pairs :+ BasisPair(
@@ -158,13 +160,7 @@ object DemoPCA extends Demonstrable {
       0.000000, 0.000000 // point 9
     )
 
-    val vArr = new VECTORS(6)
-    vArr(0) = square
-    vArr(1) = circle
-    vArr(2) = almond
-    vArr(3) = triangle
-    vArr(4) = cross
-    vArr(5) = x
+    val vArr = ARRAY[Vector]( square, circle, almond, triangle, cross, x )
 
     val cimg:ConsoleImage = ConsoleImage(50 * vArr.length, 50)
 

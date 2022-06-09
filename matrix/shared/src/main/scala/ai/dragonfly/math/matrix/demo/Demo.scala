@@ -1,6 +1,5 @@
 package ai.dragonfly.math.matrix.demo
 
-import Jama.*
 import ai.dragonfly.math.*
 import ai.dragonfly.math.interval.*
 import ai.dragonfly.math.vector.*
@@ -13,7 +12,8 @@ object Demo {
 
   val allDemos: Array[Demonstrable] = Array[Demonstrable](
     DemoPCA,
-    DemoLinearRegression
+    DemoLinearRegression,
+    DemoEigenValueDecomposition
   )
 
   import Console.{GREEN, RED, RESET, YELLOW, UNDERLINED, RED_B}

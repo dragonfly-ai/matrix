@@ -1,8 +1,9 @@
 package ai.dragonfly.math.matrix
 
-import Jama.Matrix
-import ai.dragonfly.math.matrix.MatrixValues
+import bridge.array.*
 import ai.dragonfly.math.vector.*
+import ai.dragonfly.math.matrix.*
+import Jama.*
 
 package object util {
 
@@ -13,7 +14,18 @@ package object util {
 
   given Dimensioned[Matrix] with
     extension (m: Matrix) def dim: String = s"dim(${m.getRowDimension()}x${m.getColumnDimension()})"
-    extension (m: Matrix) def *(m1:Matrix):Matrix = m.times(m1)
+    extension (m: Matrix) def *(m1:Matrix):Matrix = m.times( m1 )
+    extension (m: Matrix) def asString:String = {
+      val values = m.getArray()
+      val sb:StringBuilder = StringBuilder()
+      for ( r <- values.indices ) {
+        sb.append("\n")
+        for ( c <- values(0).indices ){
+          sb.append(s"${values(r)(c)}, ")
+        }
+      }
+      sb.toString()
+    }
 
 
 //  extension (a: Matrix) def *(b: Matrix): Matrix = a.times(b)
@@ -28,31 +40,15 @@ package object util {
 
   extension (a: Vector) def asColumnMatrix: Matrix = new Matrix(a.values, a.dimension)
 
-
-  //  given Multiplies[Double, Vector, Vector] with
-//    extension (a: Double) def *(b: Vector): Vector = {
-//      import ai.dragonfly.math.vector.given_VectorOps_Vector
-//      b.scale(a)
-//    }
-/*
-
-  given Multiplies[Matrix, Vector, Vector] with
-    extension (a: Matrix) def *(b: Vector): Vector = ???
-*/
-
-//  given Multiplies[Vector, Matrix, Vector] with
-//    extension (a: Vector) def *(b: Matrix): Vector = {
-//      Vector((new Matrix(a.values, a.dimension)).times(b).getColumnPackedCopy())
-//    }
-//
-//  given ForceMultiplier[Matrix, Vector] with
-//    extension (m: Matrix) def *(v: Vector): Vector = {
-//      val marr: MatrixValues = m.getArray()
-//      val values: VectorValues = new VectorValues(marr.length)
-//      for (i <- marr.indices) {
-//        values(i) = Vector(marr(i)).dot(v)
-//      }
-//      Vector(values)
-//    }
-
+//  def hypot(a: Double, b: Double): Double = {
+//    var r = .0
+//    if (Math.abs(a) > Math.abs(b)) {
+//      r = b / a
+//      r = Math.abs(a) * Math.sqrt(1 + r * r)
+//    } else if (b != 0) {
+//      r = a / b
+//      r = Math.abs(b) * Math.sqrt(1 + r * r)
+//    } else r = 0.0
+//    r
+//  }
 }
