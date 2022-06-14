@@ -5,11 +5,11 @@ import bridge.array.*
 
 import scala.math.hypot
 
-object EigenvalueDecomposition {
+object EigenDecomposition {
 
   // Symmetric Householder reduction to tridiagonal form.
 
-  private def tred2(V: ARRAY[ARRAY[Double]], n: Int): EigenvalueDecomposition = {
+  private def tred2(V: ARRAY[ARRAY[Double]], n: Int): EigenDecomposition = {
     //  This is derived from the Algol procedures tred2 by
     //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
     //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
@@ -121,7 +121,7 @@ object EigenvalueDecomposition {
 
   // Symmetric tridiagonal QL algorithm.
 
-  private def tql2(V: ARRAY[ARRAY[Double]], d: ARRAY[Double], e: ARRAY[Double], n: Int): EigenvalueDecomposition = {
+  private def tql2(V: ARRAY[ARRAY[Double]], d: ARRAY[Double], e: ARRAY[Double], n: Int): EigenDecomposition = {
     //  This is derived from the Algol procedures tql2, by
     //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
     //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
@@ -221,10 +221,10 @@ object EigenvalueDecomposition {
       }
     }
 
-    new EigenvalueDecomposition(V, d, e, n)
+    new EigenDecomposition(V, d, e, n)
   }
 
-  private def orthes(V: ARRAY[ARRAY[Double]], n: Int): EigenvalueDecomposition = {
+  private def orthes(V: ARRAY[ARRAY[Double]], n: Int): EigenDecomposition = {
     //  This is derived from the Algol procedures orthes and ortran,
     //  by Martin and Wilkinson, Handbook for Auto. Comp.,
     //  Vol.ii-Linear Algebra, and the corresponding
@@ -314,7 +314,7 @@ object EigenvalueDecomposition {
 
   // Nonsymmetric reduction from Hessenberg to real Schur form.
 
-  private def hqr2(V: ARRAY[ARRAY[Double]], H: ARRAY[ARRAY[Double]], dim: Int): EigenvalueDecomposition = {
+  private def hqr2(V: ARRAY[ARRAY[Double]], H: ARRAY[ARRAY[Double]], dim: Int): EigenDecomposition = {
     //  This is derived from the Algol procedure hqr2,
     //  by Martin and Wilkinson, Handbook for Auto. Comp.,
     //  Vol.ii-Linear Algebra, and the corresponding
@@ -596,7 +596,7 @@ object EigenvalueDecomposition {
 
     // Backsubstitute to find vectors of upper triangular form
 
-    if (norm == 0.0) return new EigenvalueDecomposition(V, d, e, ni)
+    if (norm == 0.0) return new EigenDecomposition(V, d, e, ni)
 
     ni = nn - 1
     while (ni >= 0) {
@@ -724,7 +724,7 @@ object EigenvalueDecomposition {
     }
 
 
-    new EigenvalueDecomposition(V, d, e, dim)
+    new EigenDecomposition(V, d, e, dim)
   }
 
   def apply(Arg: Matrix) = {
@@ -750,63 +750,63 @@ object EigenvalueDecomposition {
 
 }
 
-        /** Eigenvalues and eigenvectors of a real matrix.
-         * <P>
-         * If A is symmetric, then A = V*D*V' where the eigenvalue matrix D is
-         * diagonal and the eigenvector matrix V is orthogonal.
-         *I.e. A = V.times(D.times(V.transpose())) and
-         *V.times(V.transpose()) equals the identity matrix.
-         * <P>
-         * If A is not symmetric, then the eigenvalue matrix D is block diagonal
-         * with the real eigenvalues in 1-by-1 blocks and any complex eigenvalues,
-         * lambda + i*mu, in 2-by-2 blocks, [lambda, mu; -mu, lambda].  The
-         * columns of V represent the eigenvectors in the sense that A*V = V*D,
-         *i.e. A.times(V) equals V.times(D).  The matrix V may be badly
-         * conditioned, or even singular, so the validity of the equation
-         * A = V*D*inverse(V) depends upon V.cond().
-         * */
+/** Eigenvalues and eigenvectors of a real matrix.
+ * <P>
+ * If A is symmetric, then A = V*D*V' where the eigenvalue matrix D is
+ * diagonal and the eigenvector matrix V is orthogonal.
+ *I.e. A = V.times(D.times(V.transpose())) and
+ *V.times(V.transpose()) equals the identity matrix.
+ * <P>
+ * If A is not symmetric, then the eigenvalue matrix D is block diagonal
+ * with the real eigenvalues in 1-by-1 blocks and any complex eigenvalues,
+ * lambda + i*mu, in 2-by-2 blocks, [lambda, mu; -mu, lambda].  The
+ * columns of V represent the eigenvectors in the sense that A*V = V*D,
+ *i.e. A.times(V) equals V.times(D).  The matrix V may be badly
+ * conditioned, or even singular, so the validity of the equation
+ * A = V*D*inverse(V) depends upon V.cond().
+ * */
 
-        /** Check for symmetry, then construct the eigenvalue decomposition
-         * Structure to access D and V.
-         *
-         * @param Arg Square matrix
-         */
+/** Check for symmetry, then construct the eigenvalue decomposition
+ * Structure to access D and V.
+ *
+ * @param Arg Square matrix
+ */
 
-        class EigenvalueDecomposition(V:ARRAY[ARRAY[Double]], d:ARRAY[Double], e:ARRAY[Double], n:Int) {
+class EigenDecomposition(V:ARRAY[ARRAY[Double]], d:ARRAY[Double], e:ARRAY[Double], n:Int) {
 
-          /** Return the eigenvector matrix
-           *
-           * @return V
-           */
-          def getV(): Matrix = Matrix(V)
+  /** Return the eigenvector matrix
+   *
+   * @return V
+   */
+  def getV(): Matrix = Matrix(V)
 
-          /** Return the real parts of the eigenvalues
-           *
-           * @return real(diag(D))
-           */
-          def getRealEigenvalues(): ARRAY[Double] = d
+  /** Return the real parts of the eigenvalues
+   *
+   * @return real(diag(D))
+   */
+  def getRealEigenvalues(): ARRAY[Double] = d
 
-          /** Return the imaginary parts of the eigenvalues
-           *
-           * @return imag(diag(D))
-           */
-          def getImagEigenvalues(): ARRAY[Double] = e
+  /** Return the imaginary parts of the eigenvalues
+   *
+   * @return imag(diag(D))
+   */
+  def getImagEigenvalues(): ARRAY[Double] = e
 
-          /** Return the block diagonal eigenvalue matrix
-           *
-           * @return D
-           */
-          def getD(): Matrix = {
-            val X = new Matrix(n, n)
-            val D = X.getArray()
-            for (i <- 0 until n) {
-              for (j <- 0 until n) {
-                D(i)(j) = 0.0
-              }
-              D(i)(i) = d(i)
-              if (e(i) > 0) D(i)(i + 1) = e(i)
-              else if (e(i) < 0) D(i)(i - 1) = e(i)
-            }
-            X
-          }
-        }
+  /** Return the block diagonal eigenvalue matrix
+   *
+   * @return D
+   */
+  def getD(): Matrix = {
+    val X = new Matrix(n, n)
+    val D = X.getArray()
+    for (i <- 0 until n) {
+      for (j <- 0 until n) {
+        D(i)(j) = 0.0
+      }
+      D(i)(i) = d(i)
+      if (e(i) > 0) D(i)(i + 1) = e(i)
+      else if (e(i) < 0) D(i)(i - 1) = e(i)
+    }
+    X
+  }
+}

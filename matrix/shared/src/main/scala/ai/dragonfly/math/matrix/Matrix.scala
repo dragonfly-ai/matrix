@@ -1,6 +1,6 @@
 package ai.dragonfly.math.matrix
 
-import ai.dragonfly.math.matrix.decomposition.{CholeskyDecomposition, EigenvalueDecomposition, LUDecomposition, QRDecomposition, SingularValueDecomposition}
+import ai.dragonfly.math.matrix.decomposition.{CholeskyDecomposition, EigenDecomposition, LUDecomposition, QRDecomposition, SingularValueDecomposition}
 import ai.dragonfly.math.vector.*
 import bridge.array.ARRAY
 
@@ -696,7 +696,7 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return EigenvalueDecomposition
     * @see EigenvalueDecomposition
     */
-  def eig(): EigenvalueDecomposition = EigenvalueDecomposition(this)
+  def eig(): EigenDecomposition = EigenDecomposition(this)
 
   /** Solve A*X = B
     *
