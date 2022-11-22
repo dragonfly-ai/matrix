@@ -5,7 +5,6 @@ import ai.dragonfly.math.vector.*
 import narr.*
 
 import scala.math.hypot
-import scala.scalajs.js
 
 
 /**
