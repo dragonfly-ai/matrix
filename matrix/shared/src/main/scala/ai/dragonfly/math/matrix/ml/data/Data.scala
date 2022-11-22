@@ -1,6 +1,6 @@
 package ai.dragonfly.math.matrix.ml.data
 
-import bridge.array.*
+import narr.*
 import ai.dragonfly.math.*
 import interval.*
 import Interval.*
@@ -29,12 +29,12 @@ trait UnsupervisedData extends Data {
 
 }
 
-class StaticUnsupervisedData(examples:ARRAY[Vector]) extends UnsupervisedData {
+class StaticUnsupervisedData(examples:NArray[Vector]) extends UnsupervisedData {
 
   override val dimension: Int = examples(0).dimension
   override def size: Int = examples.length
 
-  private val Xar:ARRAY[ARRAY[Double]] = new ARRAY[ARRAY[Double]](size)
+  private val Xar:NArray[NArray[Double]] = NArray.ofSize[NArray[Double]](size)
 
   // Compute sample point statistics and populate Xar and X
   val temp = {
@@ -42,21 +42,21 @@ class StaticUnsupervisedData(examples:ARRAY[Vector]) extends UnsupervisedData {
 
     for (i <- 0 until size) sampleVectorStats(examples(i))
 
-    val sampleMean = sampleVectorStats.average()
+    val sampleMean:VectorN = sampleVectorStats.average()
 
     for (i <- 0 until size) Xar(i) = (examples(i) - sampleMean).values
 
-    val intervals:ARRAY[Interval[Double]] = new ARRAY(dimension)
+    val intervals:NArray[Interval[Double]] = NArray.ofSize[Interval[Double]](dimension)
     for (i <- 0 until dimension) {
       intervals(i) = `[]`(sampleVectorStats.minValues(i), sampleVectorStats.maxValues(i))
     }
     (sampleMean, sampleVectorStats.variance, sampleVectorStats.standardDeviation, intervals)
   }
-  //(sampleMean:Vector, sampleVariance:Vector, sampleStandardDeviation:Vector, intervals:ARRAY[Interval[Double]]): Vector
+  //(sampleMean:Vector, sampleVariance:Vector, sampleStandardDeviation:Vector, intervals:NArray[Interval[Double]]): Vector
   override val sampleMean:Vector = temp._1
   override val sampleVariance:Vector = temp._2
   override val sampleStandardDeviation:Vector = temp._3
-  val intervals:ARRAY[Interval[Double]] = temp._4
+  val intervals:NArray[Interval[Double]] = temp._4
 
   override def domainComponent(i: Int):Interval[Double] = intervals(i)
 
@@ -74,13 +74,13 @@ trait SupervisedData extends Data {
   def rangeBias:Double = labelStats.sampleMean
 }
 
-class StaticSupervisedData(labeledExamples:ARRAY[LabeledVector]) extends SupervisedData {
+class StaticSupervisedData(labeledExamples:NArray[LabeledVector]) extends SupervisedData {
 
   override val dimension: Int = labeledExamples(0).vector.dimension
   override def size: Int = labeledExamples.length
 
-  private val Xar:ARRAY[ARRAY[Double]] = new ARRAY[ARRAY[Double]](size)
-  private val Yar:ARRAY[Double] = new ARRAY[Double](size)
+  private val Xar:NArray[NArray[Double]] = NArray.ofSize[NArray[Double]](size)
+  private val Yar:NArray[Double] = NArray.ofSize[Double](size)
 
   // Compute the average Vector
   val temp = {
@@ -92,7 +92,7 @@ class StaticSupervisedData(labeledExamples:ARRAY[LabeledVector]) extends Supervi
       labelStatsEstimator.observe(labeledExamples(i).y)
     }
 
-    val sampleMean = sampleVectorStats.average()
+    val sampleMean:Vector = sampleVectorStats.average()
     val labelStats:EstimatedGaussian = labelStatsEstimator.estimate
 
     for (i <- 0 until size) {
@@ -100,7 +100,7 @@ class StaticSupervisedData(labeledExamples:ARRAY[LabeledVector]) extends Supervi
       Yar(i) = labeledExamples(i).y - labelStats.sampleMean
     }
 
-    val intervals:ARRAY[Interval[Double]] = new ARRAY(dimension)
+    val intervals:NArray[Interval[Double]] = NArray.ofSize[Interval[Double]](dimension)
     for (i <- 0 until dimension) {
       intervals(i) = `[]`(sampleVectorStats.minValues(i), sampleVectorStats.maxValues(i))
     }
@@ -112,7 +112,7 @@ class StaticSupervisedData(labeledExamples:ARRAY[LabeledVector]) extends Supervi
   override val sampleVariance:Vector = temp._3
   override val sampleStandardDeviation:Vector = temp._4
 
-  val intervals: ARRAY[Interval[Double]] = temp._5
+  val intervals: NArray[Interval[Double]] = temp._5
 
   override val y: Vector = Vector(Yar)
 

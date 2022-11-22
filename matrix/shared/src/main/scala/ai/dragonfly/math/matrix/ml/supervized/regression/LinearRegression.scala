@@ -9,7 +9,6 @@ import ai.dragonfly.math.matrix.ml.supervized.regression
 import ai.dragonfly.math.stats.LabeledVector
 import ai.dragonfly.math.stats.probability.distributions.{EstimatedGaussian, stream}
 import ai.dragonfly.math.vector.*
-import ai.dragonfly.math.visualization
 
 trait LinearRegression {
 
@@ -61,4 +60,3 @@ object LinearRegressionProblem {
 }
 
 
-import ai.dragonfly.math.example.Demonstrable

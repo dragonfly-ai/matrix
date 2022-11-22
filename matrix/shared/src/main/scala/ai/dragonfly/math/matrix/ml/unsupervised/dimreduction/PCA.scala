@@ -1,16 +1,15 @@
 package ai.dragonfly.math.matrix.ml.unsupervised.dimreduction
 
 import ai.dragonfly.math.*
-import ai.dragonfly.math.example.Demonstrable
 import ai.dragonfly.math.geometry.Line
 import ai.dragonfly.math.matrix.util.*
 import ai.dragonfly.math.matrix.*
 import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
-import ai.dragonfly.math.matrix.decomposition.SingularValueDecomposition
+import ai.dragonfly.math.matrix.decomposition.SV
 import ai.dragonfly.math.matrix.ml.data.*
 import ai.dragonfly.math.stats.probability.distributions.stream.StreamingVectorStats
 import ai.dragonfly.math.vector.*
-import bridge.array.*
+import narr.*
 
 import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
@@ -22,7 +21,7 @@ object PCA {
 
     // arrange the matrix of centered points
     val Xc = Matrix(
-      ARRAY.tabulate[ARRAY[Double]](data.size)(
+      NArray.tabulate[NArray[Double]](data.size)(
         (row:Int) => (data.example(row) - data.sampleMean).values
       )
     )
@@ -37,7 +36,7 @@ object PCA {
 
 }
 
-case class PCA (svd: SingularValueDecomposition, mean: Vector, dimension: Double) {
+case class PCA (svd: SV, mean: Vector, dimension: Double) {
 
   lazy val Uᵀ:Matrix = svd.getU().transpose()
 
@@ -45,7 +44,7 @@ case class PCA (svd: SingularValueDecomposition, mean: Vector, dimension: Double
 
   lazy val basisPairs: Seq[BasisPair] = {
     val singularValues = svd.getSingularValues()
-    val arr: ARRAY[ARRAY[Double]] = Uᵀ.getArray()
+    val arr: NArray[NArray[Double]] = Uᵀ.getArray()
     var pairs:Seq[BasisPair] = Seq[BasisPair]()
     for (i <- arr.indices) {
       pairs = pairs :+ BasisPair(

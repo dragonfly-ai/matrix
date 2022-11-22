@@ -1,47 +1,51 @@
 package ai.dragonfly.math.matrix.decomposition
 
 import ai.dragonfly.math.matrix.*
-import bridge.array.*
+import narr.*
 
 import scala.math.hypot
 
-object EigenDecomposition {
+object Eigen {
 
   // Symmetric Householder reduction to tridiagonal form.
 
-  private def tred2(V: ARRAY[ARRAY[Double]], n: Int): EigenDecomposition = {
+  private def tred2(V: NArray[NArray[Double]], n: Int): Eigen = {
     //  This is derived from the Algol procedures tred2 by
     //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
     //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
     //  Fortran subroutine in EISPACK.
 
-    val d: ARRAY[Double] = ARRAY.fill[Double](n)(0.0)
-    val e: ARRAY[Double] = ARRAY.fill[Double](n)(0.0)
+    val d: NArray[Double] = NArray.fill[Double](n)(0.0)
+    val e: NArray[Double] = NArray.fill[Double](n)(0.0)
 
-    for (j <- 0 until n) {
-      d(j) = V(n - 1)(j)
+    var j0:Int = 0; while (j0 < n) {
+      d(j0) = V(n - 1)(j0)
+      j0 += 1
     }
 
     // Householder reduction to tridiagonal form.
 
-    for (i <- n - 1 until 0 by -1) { // Scale to avoid under/overflow.
+    var i:Int = n - 1; while ( i > 0) { // Scale to avoid under/overflow.
       var scale = 0.0
       var h = 0.0
-      for (k <- 0 until i) {
-        scale = scale + Math.abs(d(k))
+      var s:Int = 0; while (s < i) {
+        scale = scale + Math.abs(d(s))
+        s += 1
       }
+
       if (scale == 0.0) {
         e(i) = d(i - 1)
-        for (j <- 0 until i) {
+        var j:Int = 0; while (j < i) {
           d(j) = V(i - 1)(j)
           V(i)(j) = 0.0
           V(j)(i) = 0.0
+          j += 1
         }
-      }
-      else { // Generate Householder vector.
-        for (k <- 0 until i) {
+      } else { // Generate Householder vector.
+        var k:Int = 0; while (k < i) {
           d(k) = d(k) / scale
           h += d(k) * d(k)
+          k += 1
         }
         var f = d(i - 1)
         var g = Math.sqrt(h)
@@ -49,69 +53,85 @@ object EigenDecomposition {
         e(i) = scale * g
         h = h - f * g
         d(i - 1) = f - g
-        for (j <- 0 until i) {
+
+        var j:Int = 0; while (j < i) {
           e(j) = 0.0
+          j += 1
         }
+
         // Apply similarity transformation to remaining columns.
-        for (j <- 0 until i) {
+        j = 0; while (j < i) { // recycling j
           f = d(j)
           V(j)(i) = f
           g = e(j) + V(j)(j) * f
-          for (k <- j + 1 to i - 1) {
+          k = j + 1; while (k <= i - 1) { // recycling k
             g += V(k)(j) * d(k)
             e(k) = e(k) + (V(k)(j) * f)
+            k += 1
           }
           e(j) = g
+          j += 1
         }
         f = 0.0
-        for (j <- 0 until i) {
+        j = 0; while (j < i) {  // recycling j
           e(j) = e(j) / h
           f += e(j) * d(j)
+          j += 1
         }
         val hh = f / (h + h)
-        for (j <- 0 until i) {
+        j = 0; while (j < i) {  // recycling j
           e(j) = e(j) - (hh * d(j))
+          j += 1
         }
-        for (j <- 0 until i) {
+        j = 0; while (j < i) {  // recycling j
           f = d(j)
           g = e(j)
-          for (k <- j to i - 1) {
+          k = j; while (k <= i - 1) { // recycling k
             V(k)(j) = V(k)(j) - (f * e(k) + g * d(k))
+            k += 1
           }
           d(j) = V(i - 1)(j)
           V(i)(j) = 0.0
+          j += 1
         }
       }
       d(i) = h
+      i -= 1
     }
 
     // Accumulate transformations.
-
-    for (i <- 0 until n - 1) {
+    i = 0; while (i < n - 1) { // recycling i
       V(n - 1)(i) = V(i)(i)
       V(i)(i) = 1.0
       val h = d(i + 1)
       if (h != 0.0) {
-        for (k <- 0 to i) {
+        var k:Int = 0; while (k <= i) {
           d(k) = V(k)(i + 1) / h
+          i += 1
         }
-        for (j <- 0 to i) {
+        var j:Int = 0; while (j <= i) {
           var g = 0.0
-          for (k <- 0 to i) {
+          k = 0; while (k <= i) { // recycling k
             g += V(k)(i + 1) * V(k)(j)
+            k += 1
           }
-          for (k <- 0 to i) {
+          k = 0; while (k <= i) { // recycling k
             V(k)(j) = V(k)(j) - (g * d(k))
+            k += 1
           }
+          j += 1
         }
       }
-      for (k <- 0 to i) {
+      var k:Int = 0; while (k <= i) {
         V(k)(i + 1) = 0.0
+        k += 1
       }
+      i += 1
     }
-    for (j <- 0 until n) {
+    var j:Int =0; while (j < n) {
       d(j) = V(n - 1)(j)
       V(n - 1)(j) = 0.0
+      j += 1
     }
     V(n - 1)(n - 1) = 1.0
     e(0) = 0.0
@@ -121,20 +141,22 @@ object EigenDecomposition {
 
   // Symmetric tridiagonal QL algorithm.
 
-  private def tql2(V: ARRAY[ARRAY[Double]], d: ARRAY[Double], e: ARRAY[Double], n: Int): EigenDecomposition = {
+  private def tql2(V: NArray[NArray[Double]], d: NArray[Double], e: NArray[Double], n: Int): Eigen = {
     //  This is derived from the Algol procedures tql2, by
     //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
     //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
     //  Fortran subroutine in EISPACK.
-    for (i <- 1 until n) {
-      e(i - 1) = e(i)
+    var i0:Int = 1; while (i0 < n) {
+      e(i0 - 1) = e(i0)
+      i0 += 1
     }
     e(n - 1) = 0.0
 
     var f = 0.0
     var tst1 = 0.0
     val eps = Math.pow(2.0, -52.0)
-    for (l <- 0 until n) { // Find small subdiagonal element
+
+    var l:Int = 0; while (l < n) { // Find small subdiagonal element
       tst1 = Math.max(tst1, Math.abs(d(l)) + Math.abs(e(l)))
       var m = l
 
@@ -157,8 +179,9 @@ object EigenDecomposition {
           d(l + 1) = e(l) * (p + r)
           val dl1 = d(l + 1)
           var h = g - d(l)
-          for (i <- l + 2 until n) {
+          var i:Int = l + 2; while (i < n) {
             d(i) = d(i) - h
+            i += 1
           }
           f = f + h
           // Implicit QL transformation.
@@ -169,7 +192,7 @@ object EigenDecomposition {
           val el1 = e(l + 1)
           var s = 0.0
           var s2 = 0.0
-          for (i <- m - 1 to l by -1) {
+          i = m - 1; while (i >= l) {
             c3 = c2
             c2 = c
             s2 = s
@@ -182,11 +205,13 @@ object EigenDecomposition {
             p = c * d(i) - s * g
             d(i + 1) = h + s * (c * g + s * d(i))
             // Accumulate transformation.
-            for (k <- 0 until n) {
+            var k:Int = 0; while (k < n) {
               h = V(k)(i + 1)
               V(k)(i + 1) = s * V(k)(i) + c * h
               V(k)(i) = c * V(k)(i) - s * h
+              k += 1
             }
+            i -= 1
           }
           p = -s * s2 * c3 * el1 * e(l) / dl1
           e(l) = s * p
@@ -197,56 +222,61 @@ object EigenDecomposition {
       }
       d(l) = d(l) + f
       e(l) = 0.0
+      l += 1
     }
 
     // Sort eigenvalues and corresponding vectors.
 
-    for (i <- 0 until n - 1) {
+    var i:Int = 0; while (i < n - 1) {
       var k = i
       var p = d(i)
-      for (j <- i + 1 until n) {
+      var j:Int = i + 1; while (j < n) {
         if (d(j) < p) {
           k = j
           p = d(j)
         }
+        j += 1
       }
       if (k != i) {
         d(k) = d(i)
         d(i) = p
-        for (j <- 0 until n) {
+        j = 0; while (j < n) { // recycling j
           p = V(j)(i)
           V(j)(i) = V(j)(k)
           V(j)(k) = p
+          j += 1
         }
       }
+      i += 1
     }
 
-    new EigenDecomposition(V, d, e, n)
+    new Eigen(V, d, e, n)
   }
 
-  private def orthes(V: ARRAY[ARRAY[Double]], n: Int): EigenDecomposition = {
+  private def orthes(V: NArray[NArray[Double]], n: Int): Eigen = {
     //  This is derived from the Algol procedures orthes and ortran,
     //  by Martin and Wilkinson, Handbook for Auto. Comp.,
     //  Vol.ii-Linear Algebra, and the corresponding
     //  Fortran subroutines in EISPACK.
 
-    val H: ARRAY[ARRAY[Double]] = Matrix(V).getArrayCopy()
+    val H: NArray[NArray[Double]] = Matrix(V).getArrayCopy()
 
-    val ort: ARRAY[Double] = ARRAY.fill[Double](n)(0.0)
+    val ort: NArray[Double] = NArray.fill[Double](n)(0.0)
 
-    val low = 0
     val high = n - 1
 
-    for (m <- low + 1 to high - 1) { // Scale column.
+    var m:Int = 1; while (m < high) { // Scale column.
       var scale = 0.0
-      for (i <- m to high) {
-        scale = scale + Math.abs(H(i)(m - 1))
+      var s:Int = m; while (s <= high) {
+        scale = scale + Math.abs(H(s)(m - 1))
+        s += 1
       }
       if (scale != 0.0) { // Compute Householder transformation.
         var h = 0.0
-        for (i <- high to m by -1) {
-          ort(i) = H(i)(m - 1) / scale
-          h += ort(i) * ort(i)
+        var i0:Int = high; while (i0 >= m) {
+          ort(i0) = H(i0)(m - 1) / scale
+          h += ort(i0) * ort(i0)
+          i0 -= 1
         }
         var g = Math.sqrt(h)
         if (ort(m) > 0) g = -g
@@ -254,57 +284,71 @@ object EigenDecomposition {
         ort(m) = ort(m) - g
         // Apply Householder similarity transformation
         // H = (I-u*u'/h)*H*(I-u*u')/h)
-        for (j <- m until n) {
+        var j0:Int = m; while (j0 < n) {
           var f = 0.0
-          for (i <- high to m by -1) {
-            f += ort(i) * H(i)(j)
+          var i:Int = high; while (i >= m) {
+            f += ort(i) * H(i)(j0)
+            i -= 1
           }
           f = f / h
-          for (i <- m to high) {
-            H(i)(j) = H(i)(j) - (f * ort(i))
+          i = m; while (i <= high) { // recycling i
+            H(i)(j0) = H(i)(j0) - (f * ort(i))
+            i += 1
           }
+          j0 += 1
         }
-        for (i <- 0 to high) {
+
+        var i:Int = 0; while (i <= high) {
           var f = 0.0
-          for (j <- high to m by -1) {
+          var j:Int = high; while (j >= m) {
             f += ort(j) * H(i)(j)
+            j -= 1
           }
           f = f / h
-          for (j <- m to high) {
+          j = m; while (j <= high) { // recycling j
             H(i)(j) = H(i)(j) - (f * ort(j))
+            j += 1
           }
+          i += 1
         }
         ort(m) = scale * ort(m)
         H(m)(m - 1) = scale * g
       }
+      m += 1
     }
 
     // Accumulate transformations (Algol's ortran).
 
-    for (i <- 0 until n) {
-      for (j <- 0 until n) {
-        V(i)(j) = if (i == j) 1.0
-        else 0.0
+    var i0:Int = 0; while (i0 < n) {
+      var j:Int = 0; while (j < n) {
+        V(i0)(j) = if (i0 == j) 1.0 else 0.0
+        j += 1
       }
+      i0 += 1
     }
 
-    for (m <- high - 1 to low + 1 by -1) {
-      if (H(m)(m - 1) != 0.0) {
-        for (i <- m + 1 to high) {
-          ort(i) = H(i)(m - 1)
+    var m0:Int = high - 1; while (m0 > 0) {
+      if (H(m0)(m0 - 1) != 0.0) {
+        var i1:Int = m0 + 1; while (i1 <= high) {
+          ort(i1) = H(i1)(m0 - 1)
+          i1 += 1
         }
-        for (j <- m to high) {
+        var j:Int = m0; while (j <= high) {
           var g = 0.0
-          for (i <- m to high) {
+          var i:Int = m0; while (i <= high) {
             g += ort(i) * V(i)(j)
+            i += 1
           }
           // Double division avoids possible underflow
-          g = (g / ort(m)) / H(m)(m - 1)
-          for (i <- m to high) {
+          g = (g / ort(m0)) / H(m0)(m0 - 1)
+          i = m0; while (i <= high) { // recycling i
             V(i)(j) = V(i)(j) + (g * ort(i))
+            i += 1
           }
+          j += 1
         }
       }
+      m0 -= 1
     }
 
     // Reduce Hessenberg to real Schur form.
@@ -314,15 +358,15 @@ object EigenDecomposition {
 
   // Nonsymmetric reduction from Hessenberg to real Schur form.
 
-  private def hqr2(V: ARRAY[ARRAY[Double]], H: ARRAY[ARRAY[Double]], dim: Int): EigenDecomposition = {
+  private def hqr2(V: NArray[NArray[Double]], H: NArray[NArray[Double]], dim: Int): Eigen = {
     //  This is derived from the Algol procedure hqr2,
     //  by Martin and Wilkinson, Handbook for Auto. Comp.,
     //  Vol.ii-Linear Algebra, and the corresponding
     //  Fortran subroutine in EISPACK.
     // Initialize
 
-    val d: ARRAY[Double] = ARRAY.fill[Double](dim)(0.0)
-    val e: ARRAY[Double] = ARRAY.fill[Double](dim)(0.0)
+    val d: NArray[Double] = NArray.fill[Double](dim)(0.0)
+    val e: NArray[Double] = NArray.fill[Double](dim)(0.0)
 
     val nn: Int = dim
     var ni: Int = nn - 1
@@ -364,14 +408,16 @@ object EigenDecomposition {
     // Store roots isolated by balanc and compute matrix norm
 
     var norm = 0.0
-    for (i <- 0 until nn) {
+    var i:Int = 0; while (i < nn) {
       if (i < low | i > high) {
         d(i) = H(i)(i)
         e(i) = 0.0
       }
-      for (j <- Math.max(i - 1, 0) until nn) {
+      var j:Int = Math.max(i - 1, 0); while (j < nn) {
         norm = norm + Math.abs(H(i)(j))
+        j += 1
       }
+      i += 1
     }
 
     // Outer loop over eigenvalue index
@@ -422,22 +468,25 @@ object EigenDecomposition {
           p = p / r
           q = q / r
           // Row modification
-          for (j <- ni - 1 until nn) {
-            z = H(ni - 1)(j)
-            H(ni - 1)(j) = q * z + p * H(ni)(j)
-            H(ni)(j) = q * H(ni)(j) - p * z
+          var j0:Int = ni - 1; while (j0 < nn) {
+            z = H(ni - 1)(j0)
+            H(ni - 1)(j0) = q * z + p * H(ni)(j0)
+            H(ni)(j0) = q * H(ni)(j0) - p * z
+            j0 += 1
           }
           // Column modification
-          for (i <- 0 to ni) {
-            z = H(i)(ni - 1)
-            H(i)(ni - 1) = q * z + p * H(i)(ni)
-            H(i)(ni) = q * H(i)(ni) - p * z
+          var i0:Int = 0; while (i0 <= ni) {
+            z = H(i0)(ni - 1)
+            H(i0)(ni - 1) = q * z + p * H(i0)(ni)
+            H(i0)(ni) = q * H(i0)(ni) - p * z
+            i0 += 1
           }
           // Accumulate transformations
-          for (i <- low to high) {
-            z = V(i)(ni - 1)
-            V(i)(ni - 1) = q * z + p * V(i)(ni)
-            V(i)(ni) = q * V(i)(ni) - p * z
+          i0 = low; while (i0 <= high) { // recycling i0
+            z = V(i0)(ni - 1)
+            V(i0)(ni - 1) = q * z + p * V(i0)(ni)
+            V(i0)(ni) = q * V(i0)(ni) - p * z
+            i0 += 1
           }
           // Complex pair
         } else {
@@ -462,8 +511,9 @@ object EigenDecomposition {
         // Wilkinson's original ad hoc shift
         if (iter == 10) {
           exshift += x
-          for (i <- low to ni) {
+          var i:Int = low; while (i <= ni) {
             H(i)(i) = H(i)(i) - x
+            i += 1
           }
           s = Math.abs(H(ni)(ni - 1)) + Math.abs(H(ni - 1)(ni - 2))
           y = 0.75 * s
@@ -480,8 +530,9 @@ object EigenDecomposition {
             s = Math.sqrt(s)
             if (y < x) s = -s
             s = x - w / ((y - x) / 2.0 + s)
-            for (i <- low to ni) {
+            var i:Int = low; while (i <= ni) {
               H(i)(i) = H(i)(i) - s
+              i += 1
             }
             exshift += s
             w = 0.964
@@ -495,7 +546,6 @@ object EigenDecomposition {
         var m: Int = ni - 2
         continue = true
         while (m >= l && continue) {
-
           z = H(m)(m)
           r = x - z
           s = y - z
@@ -511,23 +561,23 @@ object EigenDecomposition {
           } else m -= 1
         }
 
-        for (i <- m + 2 to ni) {
+        var i:Int = m + 2; while (i <= ni) {
           H(i)(i - 2) = 0.0
           if (i > m + 2) {
             H(i)(i - 3) = 0.0
           }
+          i += 1
         }
 
         // Double QR step involving rows l:ni and columns m:ni
 
-
-        for (k <- m until ni) {
+        var k:Int = m; while (k < ni) {
           continue = true
-          val notlast: Boolean = k != ni - 1
+          val notLast: Boolean = k != ni - 1
           if (k != m) {
             p = H(k)(k - 1)
             q = H(k + 1)(k - 1)
-            r = (if (notlast) H(k + 2)(k - 1) else 0.0)
+            r = if (notLast) H(k + 2)(k - 1) else 0.0
             x = Math.abs(p) + Math.abs(q) + Math.abs(r)
 
             if (x == 0.0) {
@@ -558,45 +608,52 @@ object EigenDecomposition {
               z = r / s
               q = q / p
               r = r / p
+
               // Row modification
-              for (j <- k until nn) {
+              var j:Int = k; while (j < nn) {
                 p = H(k)(j) + q * H(k + 1)(j)
-                if (notlast) {
+                if (notLast) {
                   p = p + r * H(k + 2)(j)
                   H(k + 2)(j) = H(k + 2)(j) - p * z
                 }
                 H(k)(j) = H(k)(j) - p * x
                 H(k + 1)(j) = H(k + 1)(j) - p * y
+                j += 1
               }
+
               // Column modification
-              for (i <- 0 to Math.min(ni, k + 3)) {
-                p = x * H(i)(k) + y * H(i)(k + 1)
-                if (notlast) {
-                  p = p + z * H(i)(k + 2)
-                  H(i)(k + 2) = H(i)(k + 2) - p * r
+              var i1:Int = 0; while (i1 <= Math.min(ni, k + 3)) {
+                p = x * H(i1)(k) + y * H(i1)(k + 1)
+                if (notLast) {
+                  p = p + z * H(i1)(k + 2)
+                  H(i1)(k + 2) = H(i1)(k + 2) - p * r
                 }
-                H(i)(k) = H(i)(k) - p
-                H(i)(k + 1) = H(i)(k + 1) - p * q
+                H(i1)(k) = H(i1)(k) - p
+                H(i1)(k + 1) = H(i1)(k + 1) - p * q
+                i1 += 1
               }
+
               // Accumulate transformations
-              for (i <- low to high) {
-                p = x * V(i)(k) + y * V(i)(k + 1)
-                if (notlast) {
-                  p = p + z * V(i)(k + 2)
-                  V(i)(k + 2) = V(i)(k + 2) - p * r
+              i1 = low; while (i1 <= high) {
+                p = x * V(i1)(k) + y * V(i1)(k + 1)
+                if (notLast) {
+                  p = p + z * V(i1)(k + 2)
+                  V(i1)(k + 2) = V(i1)(k + 2) - p * r
                 }
-                V(i)(k) = V(i)(k) - p
-                V(i)(k + 1) = V(i)(k + 1) - p * q
+                V(i1)(k) = V(i1)(k) - p
+                V(i1)(k + 1) = V(i1)(k + 1) - p * q
+                i1 += 1
               }
             } // (s != 0)
           } // if (continue)
+          k += 1
         } // k loop
       } // check convergence
     } // while (ni >= low)
 
     // Backsubstitute to find vectors of upper triangular form
 
-    if (norm == 0.0) return new EigenDecomposition(V, d, e, ni)
+    if (norm == 0.0) return new Eigen(V, d, e, ni)
 
     ni = nn - 1
     while (ni >= 0) {
@@ -606,36 +663,41 @@ object EigenDecomposition {
       if (q == 0) {
         var l = ni
         H(ni)(ni) = 1.0
-        for (i <- ni - 1 to 0 by -1) {
-          w = H(i)(i) - p
+        var i0:Int = ni - 1; while (i0 > -1) {
+          w = H(i0)(i0) - p
           r = 0.0
-          for (j <- l to ni) {
-            r = r + H(i)(j) * H(j)(ni)
+          var j:Int = l; while (j <= ni) {
+            r = r + H(i0)(j) * H(j)(ni)
+            j += 1
           }
-          if (e(i) < 0.0) {
+          if (e(i0) < 0.0) {
             z = w
             s = r
           } else {
-            l = i
-            if (e(i) == 0.0) {
-              if (w != 0.0) H(i)(ni) = -r / w
-              else H(i)(ni) = -r / (eps * norm)
+            l = i0
+            if (e(i0) == 0.0) {
+              if (w != 0.0) H(i0)(ni) = -r / w
+              else H(i0)(ni) = -r / (eps * norm)
               // Solve real equations
             } else {
-              x = H(i)(i + 1)
-              y = H(i + 1)(i)
-              q = (d(i) - p) * (d(i) - p) + e(i) * e(i)
+              x = H(i0)(i0 + 1)
+              y = H(i0 + 1)(i0)
+              q = (d(i0) - p) * (d(i0) - p) + e(i0) * e(i0)
               t = (x * s - z * r) / q
-              H(i)(ni) = t
-              if (Math.abs(x) > Math.abs(z)) H(i + 1)(ni) = (-r - w * t) / x
-              else H(i + 1)(ni) = (-s - y * t) / z
+              H(i0)(ni) = t
+              if (Math.abs(x) > Math.abs(z)) H(i0 + 1)(ni) = (-r - w * t) / x
+              else H(i0 + 1)(ni) = (-s - y * t) / z
             }
             // Overflow control
-            t = Math.abs(H(i)(ni))
-            if ((eps * t) * t > 1) for (j <- i to ni) {
-              H(j)(ni) = H(j)(ni) / t
+            t = Math.abs(H(i0)(ni))
+            if ((eps * t) * t > 1) {
+              var j0:Int = i0; while (j0 <= ni) {
+                H(j0)(ni) = H(j0)(ni) / t
+                j0 += 1
+              }
             }
           }
+          i0 -= 1
         }
         // Complex vector
       } else if (q < 0) {
@@ -653,78 +715,90 @@ object EigenDecomposition {
         H(ni)(ni - 1) = 0.0
         H(ni)(ni) = 1.0
 
-        for (i <- ni - 2 to 0 by -1) {
+        var i2:Int = ni - 2; while (i2 > -1) {
           var ra = .0
           var sa = .0
           var vr = .0
           var vi = .0
           ra = 0.0
           sa = 0.0
-          for (j <- l to ni) {
-            ra = ra + H(i)(j) * H(j)(ni - 1)
-            sa = sa + H(i)(j) * H(j)(ni)
+          var j:Int = l; while (j <= ni) {
+            ra = ra + H(i2)(j) * H(j)(ni - 1)
+            sa = sa + H(i2)(j) * H(j)(ni)
+            j += 1
           }
-          w = H(i)(i) - p
-          if (e(i) < 0.0) {
+          w = H(i2)(i2) - p
+          if (e(i2) < 0.0) {
             z = w
             r = ra
             s = sa
           } else {
-            l = i
-            if (e(i) == 0) {
+            l = i2
+            if (e(i2) == 0) {
               val temp = cdiv(-ra, -sa, w, q)
-              H(i)(ni - 1) = temp._1
-              H(i)(ni) = temp._2
+              H(i2)(ni - 1) = temp._1
+              H(i2)(ni) = temp._2
             } else { // Solve complex equations
-              x = H(i)(i + 1)
-              y = H(i + 1)(i)
-              vr = (d(i) - p) * (d(i) - p) + e(i) * e(i) - q * q
-              vi = (d(i) - p) * 2.0 * q
+              x = H(i2)(i2 + 1)
+              y = H(i2 + 1)(i2)
+              vr = (d(i2) - p) * (d(i2) - p) + e(i2) * e(i2) - q * q
+              vi = (d(i2) - p) * 2.0 * q
               if (vr == 0.0 & vi == 0.0) vr = eps * norm * (Math.abs(w) + Math.abs(q) + Math.abs(x) + Math.abs(y) + Math.abs(z))
               val temp = cdiv(x * r - z * ra + q * sa, x * s - z * sa - q * ra, vr, vi)
-              H(i)(ni - 1) = temp._1
-              H(i)(ni) = temp._2
+              H(i2)(ni - 1) = temp._1
+              H(i2)(ni) = temp._2
               if (Math.abs(x) > (Math.abs(z) + Math.abs(q))) {
-                H(i + 1)(ni - 1) = (-ra - w * H(i)(ni - 1) + q * H(i)(ni)) / x
-                H(i + 1)(ni) = (-sa - w * H(i)(ni) - q * H(i)(ni - 1)) / x
+                H(i2 + 1)(ni - 1) = (-ra - w * H(i2)(ni - 1) + q * H(i2)(ni)) / x
+                H(i2 + 1)(ni) = (-sa - w * H(i2)(ni) - q * H(i2)(ni - 1)) / x
               } else {
-                val temp = cdiv(-r - y * H(i)(ni - 1), -s - y * H(i)(ni), z, q)
-                H(i + 1)(ni - 1) = temp._1
-                H(i + 1)(ni) = temp._2
+                val temp = cdiv(-r - y * H(i2)(ni - 1), -s - y * H(i2)(ni), z, q)
+                H(i2 + 1)(ni - 1) = temp._1
+                H(i2 + 1)(ni) = temp._2
               }
             }
-            t = Math.max(Math.abs(H(i)(ni - 1)), Math.abs(H(i)(ni)))
-            if ((eps * t) * t > 1) for (j <- i to ni) {
-              H(j)(ni - 1) = H(j)(ni - 1) / t
-              H(j)(ni) = H(j)(ni) / t
+            t = Math.max(Math.abs(H(i2)(ni - 1)), Math.abs(H(i2)(ni)))
+            if ((eps * t) * t > 1) {
+              var j7:Int = i2; while (j7 <= ni) {
+                H(j7)(ni - 1) = H(j7)(ni - 1) / t
+                H(j7)(ni) = H(j7)(ni) / t
+                j7 += 1
+              }
             }
           }
+          i2 -= 1
         }
       }
 
       ni -= 1
     }
     // Vectors of isolated roots
-    for (i <- 0 until nn) {
-      if (i < low | i > high) for (j <- i until nn) {
-        V(i)(j) = H(i)(j)
+    var i9:Int = 0; while (i9 < nn) {
+      if (i9 < low | i9 > high) {
+        var j5:Int = i9; while (j5 < nn) {
+          V(i9)(j5) = H(i9)(j5)
+          j5 += 1
+        }
       }
+      i9 += 1
     }
 
     // Back transformation to get eigenvectors of original matrix
 
-    for (j <- nn - 1 to low by -1) {
-      for (i <- low to high) {
+    var j8:Int = nn - 1; while (j8 >= low) {
+      var i7:Int = low; while (i7 <= high) {
         z = 0.0
-        for (k <- low to Math.min(j, high)) {
-          z = z + V(i)(k) * H(k)(j)
+        var k:Int = low; while (k <= Math.min(j8, high)) {
+          z = z + V(i7)(k) * H(k)(j8)
+          k += 1
         }
-        V(i)(j) = z
+        V(i7)(j8) = z
+        i7 += 1
       }
+      j8 -= 1
     }
 
 
-    new EigenDecomposition(V, d, e, dim)
+    new Eigen(V, d, e, dim)
   }
 
   def apply(Arg: Matrix) = {
@@ -734,8 +808,8 @@ object EigenDecomposition {
 
     var isSymmetric = true
 
-    val V = ARRAY.tabulate[ARRAY[Double]](n)(
-      (row: Int) => ARRAY.tabulate[Double](n)(
+    val V = NArray.tabulate[NArray[Double]](n)(
+      (row: Int) => NArray.tabulate[Double](n)(
         (col: Int) => {
           if (isSymmetric) isSymmetric = A(row)(col) == A(col)(row)
           A(row)(col)
@@ -772,7 +846,7 @@ object EigenDecomposition {
  * @param Arg Square matrix
  */
 
-class EigenDecomposition(V:ARRAY[ARRAY[Double]], d:ARRAY[Double], e:ARRAY[Double], n:Int) {
+class Eigen(V:NArray[NArray[Double]], d:NArray[Double], e:NArray[Double], n:Int) {
 
   /** Return the eigenvector matrix
    *
@@ -784,13 +858,13 @@ class EigenDecomposition(V:ARRAY[ARRAY[Double]], d:ARRAY[Double], e:ARRAY[Double
    *
    * @return real(diag(D))
    */
-  def getRealEigenvalues(): ARRAY[Double] = d
+  def getRealEigenvalues(): NArray[Double] = d
 
   /** Return the imaginary parts of the eigenvalues
    *
    * @return imag(diag(D))
    */
-  def getImagEigenvalues(): ARRAY[Double] = e
+  def getImagEigenvalues(): NArray[Double] = e
 
   /** Return the block diagonal eigenvalue matrix
    *
@@ -799,13 +873,15 @@ class EigenDecomposition(V:ARRAY[ARRAY[Double]], d:ARRAY[Double], e:ARRAY[Double
   def getD(): Matrix = {
     val X = new Matrix(n, n)
     val D = X.getArray()
-    for (i <- 0 until n) {
-      for (j <- 0 until n) {
+    var i:Int = 0; while (i < n) {
+      var j:Int = 0; while (j < n) {
         D(i)(j) = 0.0
+        j += 1
       }
       D(i)(i) = d(i)
       if (e(i) > 0) D(i)(i + 1) = e(i)
       else if (e(i) < 0) D(i)(i - 1) = e(i)
+      i += 1
     }
     X
   }

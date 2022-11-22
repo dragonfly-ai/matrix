@@ -1,9 +1,9 @@
 package ai.dragonfly.math.matrix.decomposition
 
 import ai.dragonfly.math.matrix.*
-import bridge.array.*
+import narr.*
 
-object CholeskyDecomposition {
+object Cholesky {
 
   /** Cholesky Decomposition.
    * <P>
@@ -20,39 +20,43 @@ object CholeskyDecomposition {
    * @param  mat Square, symmetric matrix.
    */
 
-  def apply(mat:Matrix):CholeskyDecomposition = {
+  def apply(mat:Matrix):Cholesky = {
     // Initialize.
     val A = mat.getArrayCopy()
     val n = A.length
     val L = new Matrix(n, n).getArray()
     var isspd:Boolean = mat.columns == n
     // Main loop.
-    for (j <- 0 until n) {
+    var j:Int = 0; while (j < n) {
       val Lrowj = L(j)
       var d = 0.0
-      for (k <- 0 until j) {
+      var k:Int = 0; while (k < j) {
         val Lrowk = L(k)
         var s = 0.0
-        for (i <- 0 until k) {
+        var i:Int = 0; while (i < k) {
           s += Lrowk(i) * Lrowj(i)
+          i += 1
         }
         s = (A(j)(k) - s) / L(k)(k)
         Lrowj(k) = s
         d = d + s * s
         isspd = isspd & (A(k)(j) == A(j)(k))
+        k += 1
       }
       d = A(j)(j) - d
       isspd = isspd & (d > 0.0)
       L(j)(j) = Math.sqrt(Math.max(d, 0.0))
-      for (k <- j + 1 until n) {
+      k = j + 1; while (k < n) { // recycling k
         L(j)(k) = 0.0
+        k += 1
       }
+      j += 1
     }
-    new CholeskyDecomposition(L, isspd)
+    new Cholesky(L, isspd)
   }
 }
 
-class CholeskyDecomposition private (val larry:ARRAY[ARRAY[Double]], val isspd:Boolean) { // Initialize.
+class Cholesky private(val larry:NArray[NArray[Double]], val isspd:Boolean) { // Initialize.
 
   inline def dimension:Int = larry.length
 
@@ -82,25 +86,31 @@ class CholeskyDecomposition private (val larry:ARRAY[ARRAY[Double]], val isspd:B
       throw new RuntimeException("Matrix is not symmetric positive definite.")
     }
     // Copy right hand side.
-    val X: ARRAY[ARRAY[Double]] = B.getArrayCopy()
+    val X: NArray[NArray[Double]] = B.getArrayCopy()
     val nx: Int = B.columns
     // Solve L*Y = B;
-    for (k <- 0 until dimension) {
-      for (j <- 0 until nx) {
-        for (i <- 0 until k) {
+    var k:Int = 0; while (k < dimension) {
+      var j:Int = 0; while (j < nx) {
+        var i:Int = 0; while (i < k) {
           X(k)(j) = X(k)(j) - X(i)(j) * larry(k)(i)
+          i += 1
         }
         X(k)(j) = X(k)(j) / larry(k)(k)
+        j += 1
       }
+      k += 1
     }
     // Solve L'*X = Y;
-    for (k <- dimension - 1 to 0 by -1) {
-      for (j <- 0 until nx) {
-        for (i <- k + 1 until dimension) {
+    k = dimension - 1; while  (k > -1) { // recycling k
+      var j:Int = 0; while (j < nx) {
+        var i:Int = k + 1; while (i < dimension) {
           X(k)(j) = X(k)(j) - X(i)(j) * larry(i)(k)
+          i += 1
         }
         X(k)(j) = X(k)(j) / larry(k)(k)
+        j += 1
       }
+      k -= 1
     }
     Matrix(X)
   }

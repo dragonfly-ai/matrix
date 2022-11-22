@@ -1,46 +1,54 @@
 package ai.dragonfly.math.matrix.decomposition
 
 import ai.dragonfly.math.matrix.*
-import bridge.array.*
+import narr.*
 
 import scala.math.hypot
+//import ai.dragonfly.math.matrix.decomposition.SV.hypot
 
-object QRDecomposition {
+object QR {
 
-  def apply(M: Matrix): QRDecomposition = {
+  def apply(M: Matrix): QR = {
     // Initialize.
-    val QR:ARRAY[ARRAY[Double]] = M.getArrayCopy()
+    val QR:NArray[NArray[Double]] = M.getArrayCopy()
     val rows:Int = M.getRowDimension()
     val columns:Int = M.getColumnDimension()
-    val Rdiag:ARRAY[Double] = ARRAY.fill[Double](columns)(0.0)
+    val Rdiag:NArray[Double] = NArray.fill[Double](columns)(0.0)
 
     // Main loop.
-    for (k <- 0 until columns) { // Compute 2-norm of k-th column without under/overflow.
+    var k:Int = 0; while (k < columns) { // Compute 2-norm of k-th column without under/overflow.
       var nrm:Double = 0.0
-      for (i <- k until rows) {
+      var i:Int = k; while (i < rows) {
         nrm = hypot(nrm, QR(i)(k))
+        i += 1
       }
       if (nrm != 0.0) { // Form k-th Householder vector.
         if (QR(k)(k) < 0) nrm = -nrm
-        for (i <- k until rows) {
+        i = k; while (i < rows) {  // recycling
           QR(i)(k) /= nrm
+          i += 1
         }
         QR(k)(k) += 1.0
         // Apply transformation to remaining columns.
-        for (j <- k + 1 until columns) {
+        var j:Int = k + 1; while (j < columns) {
           var s = 0.0
-          for (i <- k until rows) {
-            s += QR(i)(k) * QR(i)(j)
+          var i0:Int = k; while (i0 < rows) {
+            s += QR(i0)(k) * QR(i0)(j)
+            i0 += 1
           }
           s = -s / QR(k)(k)
-          for (i <- k until rows) {
-            QR(i)(j) += s * QR(i)(k)
+          var i1:Int = k; while (i1 < rows) {
+            QR(i1)(j) += s * QR(i1)(k)
+            i1 += 1
           }
+          j += 1
         }
       }
       Rdiag(k) = -nrm
+      k += 1
     }
-    new QRDecomposition(Matrix(QR), rows, columns, Rdiag)
+    println ("apply()")
+    new QR(Matrix(QR), rows, columns, Rdiag)
   }
 
 }
@@ -63,7 +71,7 @@ object QRDecomposition {
   * @param A Rectangular matrix
   */
 
-class QRDecomposition private (val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: ARRAY[Double]) {
+class QR private(val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: NArray[Double]) {
 
   /** Is the matrix full rank?
     *
@@ -80,8 +88,8 @@ class QRDecomposition private (val QR: Matrix, val rows:Int, val columns:Int, va
     * @return Lower trapezoidal matrix whose columns define the reflections
     */
   def getH(): Matrix = Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (r:Int) => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => if (r >= c) QR.get(r, c) else 0.0
       )
     )
@@ -92,8 +100,8 @@ class QRDecomposition private (val QR: Matrix, val rows:Int, val columns:Int, va
     * @return R
     */
   def getR(): Matrix = Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (r:Int) => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => {
           if (r < c) QR.get(r, c)
           else if (r == c) Rdiag(r)
@@ -110,23 +118,28 @@ class QRDecomposition private (val QR: Matrix, val rows:Int, val columns:Int, va
   def getQ(): Matrix = {
     val X = new Matrix(rows, columns)
     val Q = X.getArray()
-    for (k <- columns - 1 to 0 by -1) {
-      for (i <- 0 until rows) {
+    var k:Int = columns - 1; while (k > -1) {
+      var i:Int = 0; while (i < rows) {
         Q(i)(k) = 0.0
+        i += 1
       }
       Q(k)(k) = 1.0
-      for (j <- k until columns) {
+      var j:Int = k; while (j < columns) {
         if (QR.get(k, k) != 0) {
           var s = 0.0
-          for (i <- k until rows) {
+          i = k; while (i < rows) {  // recycling i
             s += QR.get(i, k) * Q(i)(j)
+            i += 1
           }
           s = -s / QR.get(k, k)
-          for (i <- k until rows) {
+          i = k; while (i < rows) {  // recycling i
             Q(i)(j) += s * QR.get(i, k)
+            i += 1
           }
         }
+        j += 1
       }
+      k -= 1
     }
     X
   }
@@ -147,28 +160,37 @@ class QRDecomposition private (val QR: Matrix, val rows:Int, val columns:Int, va
     val X = B.getArrayCopy()
 
     // Compute Y = transpose(Q)*B
-    for (k <- 0 until columns) {
-      for (j <- 0 until nx) {
+    var k:Int = 0; while (k < columns) {
+      var j:Int = 0; while (j < nx) {
         var s = 0.0
-        for (i <- k until rows) {
+        var i:Int = k; while (i < rows) {
           s += QR.get(i, k) * X(i)(j)
+          i += 1
         }
         s = -s / QR.get(k, k)
-        for (i <- k until rows) {
+        i = k; while (i < rows) { // recycling i
           X(i)(j) += s * QR.get(i, k)
+          i += 1
         }
+        j += 1
       }
+      k += 1
     }
+
     // Solve R*X = Y;
-    for (k <- columns - 1 to 0 by -1) {
-      for (j <- 0 until nx) {
+    k = columns - 1; while (k > -1) { // recycling k
+      var j:Int = 0; while (j < nx) {
         X(k)(j) /= Rdiag(k)
+        j += 1
       }
-      for (i <- 0 until k) {
-        for (j <- 0 until nx) {
+      var i:Int = 0; while (i < k) {
+        j = 0; while (j < nx) {
           X(i)(j) -= X(k)(j) * QR.get(i, k)
+          j += 1
         }
+        i += 1
       }
+      k -= 1
     }
     Matrix(X).getMatrix(0, columns - 1, 0, nx - 1)
   }

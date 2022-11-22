@@ -1,28 +1,14 @@
-import ai.dragonfly.math.example.Demonstrable
+import ai.dragonfly.democrossy.{Demonstration, DivConsole, XApp}
 
-object Demo {
+import Console.*
 
-  val allDemos: Array[Demonstrable] = Array[Demonstrable](
+object Demo extends XApp(DivConsole(style = "padding: 8px; overflow: scroll;")) with App {
+
+  val allDemos: Array[Demonstration] = Array[Demonstration](
     DemoPCA,
     DemoLinearRegression,
-    DemoEigenValueDecomposition
+    DemoEigenDecomposition
   )
 
-  import Console.*
-
-  lazy val consolidateDemoOutput: String = {
-    implicit val sb: StringBuilder = new StringBuilder()
-    for (d <- allDemos) {
-      sb.append(s"\n\n/* ${RESET}${GREEN}Begin ${d.name} Demonstration${RESET}*/\n")
-      sb.append(s"${d.demo()}")
-      sb.append(s"/* ${RESET}${RED}End ${d.name} Demonstration${RESET} */\n\n")
-    }
-    sb.toString()
-  }
-
-
-  def main(args: Array[String]): Unit = {
-    println(s"${RESET}${GREEN}$consolidateDemoOutput${RESET}")
-  }
-
+  for (d <- allDemos) d.demonstrate
 }

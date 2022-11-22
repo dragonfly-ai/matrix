@@ -1,8 +1,8 @@
 package ai.dragonfly.math.matrix
 
-import ai.dragonfly.math.matrix.decomposition.{CholeskyDecomposition, EigenDecomposition, LUDecomposition, QRDecomposition, SingularValueDecomposition}
+import ai.dragonfly.math.matrix.decomposition.{Cholesky, Eigen, LU, QR, SV}
 import ai.dragonfly.math.vector.*
-import bridge.array.ARRAY
+import narr.*
 
 import scala.math.hypot
 import scala.scalajs.js
@@ -63,9 +63,9 @@ object Matrix {
    * @param A Two-dimensional array of doubles.
    * @throws IllegalArgumentException All rows must have the same length
    */
-  def constructWithCopy(A: ARRAY[ARRAY[Double]]): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](A.length)(
-      (row:Int) => ARRAY.tabulate[Double](A(0).length)(
+  def constructWithCopy(A: NArray[NArray[Double]]): Matrix = new Matrix(
+    NArray.tabulate[NArray[Double]](A.length)(
+      (row:Int) => NArray.tabulate[Double](A(0).length)(
         (col:Int) => A(row)(col)
       )
     )
@@ -78,8 +78,8 @@ object Matrix {
    * @return An m-by-n matrix with uniformly distributed random elements.
    */
   def random(rows: Int, columns: Int, r:scala.util.Random = ai.dragonfly.math.Random.defaultRandom): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      _ => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      _ => NArray.tabulate[Double](columns)(
         _ => r.nextDouble()
       )
     )
@@ -102,7 +102,11 @@ object Matrix {
    */
   def diagonal(rows: Int, columns: Int, value:Double): Matrix = {
     val out:Matrix = new Matrix(rows, columns, 0.0)
-    for (i <- 0 until Math.min(rows, columns)) out.set(i, i, value)
+    var i:Int = 0
+    while (i < Math.min(rows, columns)) {
+      out.set(i, i, value)
+      i = i + 1
+    }
     out
   }
 
@@ -113,7 +117,11 @@ object Matrix {
    */
   def diagonal(v:Vector): Matrix = {
     val out:Matrix = new Matrix(v.dimension, v.dimension, 0.0)
-    for (i <- 0 until v.dimension) out.set(i, i, v.component(i))
+    var i:Int = 0
+    while (i < v.dimension) {
+      out.set(i, i, v.component(i))
+      i = i + 1
+    }
     out
   }
 
@@ -124,7 +132,7 @@ object Matrix {
    * @throws IllegalArgumentException All rows must have the same length
    */
 
-  def apply(values:ARRAY[ARRAY[Double]]):Matrix = new Matrix(values)
+  def apply(values:NArray[NArray[Double]]):Matrix = new Matrix(values)
 //    val l:Int = values(0).length
 //    for (r <- 1 until values.length) {
 //      if (values(r).length != l) throw new IllegalArgumentException("Cannot create a Matrix from a Jagged Array.")
@@ -134,7 +142,7 @@ object Matrix {
 
 }
 
-class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
+class Matrix  private(val values: NArray[NArray[Double]]) {
 
   inline def rows:Int = values.length
   inline def columns:Int = values(0).length
@@ -146,8 +154,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
    * @param value Fill the matrix with this scalar value.
    */
   def this(rows: Int, columns: Int, value: Double) = this(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (_:Int) => ARRAY.fill[Double](columns)(value)
+    NArray.tabulate[NArray[Double]](rows)(
+      (_:Int) => NArray.fill[Double](columns)(value)
     )
   )
 
@@ -167,7 +175,7 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
    * @param m Number of rows.
    * @param n Number of colums.
    */
-  def this(values: ARRAY[ARRAY[Double]], m: Int, n: Int)  = this(values)
+  def this(values: NArray[NArray[Double]], m: Int, n: Int)  = this(values)
 
   /** Construct a matrix from a one-dimensional packed array
     *
@@ -175,14 +183,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @param m    Number of rows.
     * @throws IllegalArgumentException Array length must be a multiple of m.
     */
-  def this(vals: ARRAY[Double], m: Int) = this({
+  def this(vals: NArray[Double], m: Int) = this({
     val n:Int = vals.length / m
     if (m < 1 || m*n != vals.length) {
-      throw new IllegalArgumentException(s"Matrix(vals:ARRAY[Double], m:Int) : m = $m does evenly divide vals.length = ${vals.length}.");
+      throw new IllegalArgumentException(s"Matrix(vals:NArray[Double], m:Int) : m = $m does evenly divide vals.length = ${vals.length}.");
     }
 
-    ARRAY.tabulate[ARRAY[Double]](m)(
-      (i:Int) => ARRAY.tabulate[Double](n)(
+    NArray.tabulate[NArray[Double]](m)(
+      (i:Int) => NArray.tabulate[Double](n)(
         (j:Int) => vals(i + j*m)
       )
     )
@@ -200,14 +208,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     *
     * @return Pointer to the two-dimensional array of matrix elements.
     */
-  def getArray(): ARRAY[ARRAY[Double]] = values
+  def getArray(): NArray[NArray[Double]] = values
 
   /** Copy the internal two-dimensional array.
     *
     * @return Two-dimensional array copy of matrix elements.
     */
-  def getArrayCopy(): ARRAY[ARRAY[Double]] = ARRAY.tabulate[ARRAY[Double]](rows)(
-    (row:Int) => ARRAY.tabulate[Double](columns)(
+  def getArrayCopy(): NArray[NArray[Double]] = NArray.tabulate[NArray[Double]](rows)(
+    (row:Int) => NArray.tabulate[Double](columns)(
       (col:Int) => values(row)(col)
     )
   )
@@ -216,12 +224,16 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     *
     * @return Matrix elements packed in a one-dimensional array by columns.
     */
-  def getColumnPackedCopy(): ARRAY[Double] = {
-    val vals: ARRAY[Double] = new ARRAY[Double](rows * columns)
-    for (i <- 0 until rows) {
-      for (j <- 0 until columns) {
+  def getColumnPackedCopy(): NArray[Double] = {
+    val vals: NArray[Double] = new NArray[Double](rows * columns)
+    var i:Int = 0
+    while (i < rows) {
+      var j:Int = 0
+      while (j < columns) {
         vals( i + j*rows) = values(i)(j)
+        j = j + 1
       }
+      i = i + 1
     }
     vals
   }
@@ -230,12 +242,16 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     *
     * @return Matrix elements packed in a one-dimensional array by rows.
     */
-  def getRowPackedCopy(): ARRAY[Double] = {
-    val vals: ARRAY[Double] = new ARRAY[Double](rows * columns)
-    for (i <- 0 until rows) {
-      for (j <- 0 until columns) {
+  def getRowPackedCopy(): NArray[Double] = {
+    val vals: NArray[Double] = new NArray[Double](rows * columns)
+    var i: Int = 0
+    while (i < rows) {
+      var j: Int = 0
+      while (j < columns) {
         vals( i*columns + j) = values(i)(j)
+        j = j + 1
       }
+      i = i + 1
     }
     vals
   }
@@ -271,8 +287,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
   def getMatrix(r0: Int, r1: Int, c0: Int, c1: Int): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](r1 - r0 + 1)(
-      (r:Int) => ARRAY.tabulate[Double](c1 - c0 + 1)(
+    NArray.tabulate[NArray[Double]](r1 - r0 + 1)(
+      (r:Int) => NArray.tabulate[Double](c1 - c0 + 1)(
         (c:Int) => values(r0 + r)(c0 + c)
       )
     )
@@ -285,9 +301,9 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A(r(:),c(:))
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(rowIndices: ARRAY[Int], columnIndices: ARRAY[Int]): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rowIndices.length)(
-      (r:Int) => ARRAY.tabulate[Double](columnIndices.length)(
+  def getMatrix(rowIndices: NArray[Int], columnIndices: NArray[Int]): Matrix = new Matrix(
+    NArray.tabulate[NArray[Double]](rowIndices.length)(
+      (r:Int) => NArray.tabulate[Double](columnIndices.length)(
         (c:Int) => values(rowIndices(r))(columnIndices(c))
       )
     )
@@ -301,9 +317,9 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A(i0:i1,c(:))
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(r0: Int, r1: Int, columnIndices: ARRAY[Int]): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](r1 - r0 + 1)(
-      (r:Int) => ARRAY.tabulate[Double](columnIndices.length)(
+  def getMatrix(r0: Int, r1: Int, columnIndices: NArray[Int]): Matrix = new Matrix(
+    NArray.tabulate[NArray[Double]](r1 - r0 + 1)(
+      (r:Int) => NArray.tabulate[Double](columnIndices.length)(
         (c:Int) => values(r + r0)(columnIndices(c))
       )
     )
@@ -317,9 +333,9 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A(r(:),j0:j1)
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def getMatrix(rowIndices: ARRAY[Int], c0: Int, c1: Int): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rowIndices.length)(
-      (r:Int) => ARRAY.tabulate[Double](c1 - c0 + 1)(
+  def getMatrix(rowIndices: NArray[Int], c0: Int, c1: Int): Matrix = new Matrix(
+    NArray.tabulate[NArray[Double]](rowIndices.length)(
+      (r:Int) => NArray.tabulate[Double](c1 - c0 + 1)(
         (c:Int) => values(rowIndices(r))(c + c0)
       )
     )
@@ -344,10 +360,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
   def setMatrix(r0: Int, r1: Int, c0: Int, c1: Int, X: Matrix): Unit = {
-    for (r <- r0 to r1) {
-      for (c <- c0 to c1) {
+    var r:Int = r0
+    while (r <= r1) {
+      var c = c0
+      while (c <= c1) {
         values(r)(c) = X.get(r-r0,c-c0)
+        c = c + 1
       }
+      r = r + 1
     }
   }
 
@@ -358,11 +378,15 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @param X A(r(:),c(:))
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(rowIndices: ARRAY[Int], columnIndices: ARRAY[Int], X: Matrix): Unit = {
-    for (i <- 0 until rowIndices.length) {
-      for (j <- 0 until columnIndices.length) {
+  def setMatrix(rowIndices: NArray[Int], columnIndices: NArray[Int], X: Matrix): Unit = {
+    var i:Int = 0
+    while (i < rowIndices.length) {
+      var j:Int = 0
+      while (j < columnIndices.length) {
         values(rowIndices(i))(columnIndices(j)) = X.get(i, j)
+        j = j + 1
       }
+      i = i + 1
     }
   }
 
@@ -375,11 +399,15 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @param X  A(r(:),j0:j1)
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(rowIndices: ARRAY[Int], c0: Int, c1: Int, X: Matrix): Unit = {
-    for (r <- 0 until rowIndices.length) {
-      for (c <- c0 to c1) {
+  def setMatrix(rowIndices: NArray[Int], c0: Int, c1: Int, X: Matrix): Unit = {
+    var r:Int = 0
+    while (r < rowIndices.length) {
+      var c:Int = c0
+      while (c <= c1) {
         values(rowIndices(r))(c) = X.get(r, c - c0)
+        c = c + 1
       }
+      r = r + 1
     }
   }
 
@@ -391,11 +419,15 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @param X  A(i0:i1,c(:))
     * @throws ArrayIndexOutOfBoundsException Submatrix indices
     */
-  def setMatrix(r0: Int, r1: Int, columnIndices: ARRAY[Int], X: Matrix): Unit = {
-    for (r <- r0 to r1) {
-      for (c <- 0 until columnIndices.length) {
+  def setMatrix(r0: Int, r1: Int, columnIndices: NArray[Int], X: Matrix): Unit = {
+    var r:Int = r0
+    while (r <= r1) {
+      var c:Int = 0
+      while (c < columnIndices.length) {
         values(r)(columnIndices(c)) = X.get(r - r0, c)
+        c = c + 1
       }
+      r = r + 1
     }
   }
 
@@ -404,8 +436,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return Mᵀ
     */
   def transpose(): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](columns)(
-      (col:Int) => ARRAY.tabulate[Double](rows)(
+    NArray.tabulate[NArray[Double]](columns)(
+      (col:Int) => NArray.tabulate[Double](rows)(
         (row:Int) => values(row)(col)
       )
     )
@@ -417,11 +449,16 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     */
   def norm1(): Double = {
     var maxColumnSum:Double = Double.MinValue
-
-    for (c <- 0 until columns) {
+    var c:Int = 0
+    while (c < columns) {
       var columnSum:Double = 0.0
-      for (r <- 0 until rows) columnSum += Math.abs(values(r)(c))
+      var r:Int = 0
+      while (r < rows) {
+        columnSum += Math.abs(values(r)(c))
+        r = r + 1
+      }
       maxColumnSum = Math.max(maxColumnSum, columnSum)
+      c = c + 1
     }
 
     maxColumnSum
@@ -431,7 +468,7 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     *
     * @return maximum singular value.
     */
-  def norm2(): Double = SingularValueDecomposition(this).norm2()
+  def norm2(): Double = SV(this).norm2()
 
   /** Infinity norm
     *
@@ -440,10 +477,16 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
   def normInf(): Double = {
     var maxRowSum:Double = Double.MinValue
 
-    for (r <- 0 until rows) {
+    var r:Int = 0
+    while (r < rows) {
       var rowSum:Double = 0.0
-      for (c <- 0 until columns) rowSum += Math.abs(values(r)(c))
+      var c:Int = 0
+      while (c < columns) {
+        rowSum += Math.abs(values(r)(c))
+        c = c + 1
+      }
       maxRowSum = Math.max(maxRowSum, rowSum)
+      r = r + 1
     }
 
     maxRowSum
@@ -456,10 +499,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
   def normF(): Double = {
     var f:Double = Double.MinValue
 
-    for (r <- 0 until rows) {
-      for (c <- 0 until columns) {
+    var r:Int = 0
+    while (r < rows) {
+      var c:Int = 0
+      while (c < columns) {
         f = hypot(f, values(r)(c))
+        c = c + 1
       }
+      r = r + 1
     }
 
     f
@@ -477,8 +524,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A + B
     */
   def plus(B: Matrix): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (r:Int) => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => values(r)(c) + B.get(r, c)
       )
     )
@@ -490,10 +537,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A + B
     */
   def plusEquals(B: Matrix): Matrix = {
-    for (r <- 0 until rows) {
-      for (c <- 0 until columns) {
+    var r:Int = 0
+    while (r < rows) {
+      var c:Int = 0
+      while (c < columns) {
         values(r)(c) = values(r)(c) + B.get(r, c)
+        c = c + 1
       }
+      r = r + 1
     }
     this
   }
@@ -504,8 +555,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A - B
     */
   def minus(B: Matrix): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (r:Int) => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => values(r)(c) - B.get(r, c)
       )
     )
@@ -517,10 +568,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A - B
     */
   def minusEquals(B: Matrix): Matrix = {
-    for (r <- 0 until rows) {
-      for (c <- 0 until columns) {
+    var r:Int = 0
+    while (r < rows) {
+      var c:Int = 0
+      while (c < columns) {
         values(r)(c) = values(r)(c) - B.get(r, c)
+        c = c + 1
       }
+      r = r + 1
     }
     this
   }
@@ -531,8 +586,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A.*B
     */
   def arrayTimes(B: Matrix): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (r:Int) => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => values(r)(c) * B.get(r, c)
       )
     )
@@ -544,10 +599,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A.*B
     */
   def arrayTimesEquals(B: Matrix): Matrix = {
-    for (r <- 0 until rows) {
-      for (c <- 0 until columns) {
+    var r:Int = 0
+    while (r < rows) {
+      var c:Int = 0
+      while (c < columns) {
         values(r)(c) = values(r)(c) * B.get(r, c)
+        c = c + 1
       }
+      r = r + 1
     }
     this
   }
@@ -558,8 +617,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A./B
     */
   def arrayRightDivide(B: Matrix): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (r:Int) => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => values(r)(c) / B.get(r, c)
       )
     )
@@ -571,10 +630,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A./B
     */
   def arrayRightDivideEquals(B: Matrix): Matrix = {
-    for (r <- 0 until rows) {
-      for (c <- 0 until columns) {
+    var r:Int = 0
+    while (r < rows) {
+      var c:Int = 0
+      while (c < columns) {
         values(r)(c) = values(r)(c) / B.get(r, c)
+        c = c + 1
       }
+      r = r + 1
     }
     this
   }
@@ -586,8 +649,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A.\B
     */
   def arrayLeftDivide(B: Matrix): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (r:Int) => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => B.get(r, c) / values(r)(c)
       )
     )
@@ -599,10 +662,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return A.\B
     */
   def arrayLeftDivideEquals(B: Matrix): Matrix = {
-    for (i <- 0 until rows) {
-      for (j <- 0 until columns) {
-        values(i)(j) = B.get(i, j) / values(i)(j)
+    var r:Int = 0
+    while (r < rows) {
+      var c:Int = 0
+      while (c < columns) {
+        values(r)(c) = B.get(r, c) / values(r)(c)
+        c = c + 1
       }
+      r = r + 1
     }
     this
   }
@@ -613,8 +680,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return s*A
     */
   def times(s: Double): Matrix = new Matrix(
-    ARRAY.tabulate[ARRAY[Double]](rows)(
-      (r:Int) => ARRAY.tabulate[Double](columns)(
+    NArray.tabulate[NArray[Double]](rows)(
+      (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => s * values(r)(c)
       )
     )
@@ -626,10 +693,14 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return replace A by s*A
     */
   def timesEquals(s: Double): Matrix = {
-    for (r <- 0 until rows) {
-      for (c <- 0 until columns) {
+    var r:Int = 0
+    while (r < rows) {
+      var c:Int = 0
+      while (c < columns) {
         values(r)(c) = s * values(r)(c)
+        c = c + 1
       }
+      r = r + 1
     }
     this
   }
@@ -647,18 +718,26 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
 
     val Bcolj = new Array[Double](columns)
 
-    for (j <- 0 until B.columns) {
-      for (k <- 0 until columns) {
+    var j:Int = 0
+    while (j < B.columns) {
+      var k:Int = 0
+      while (k < columns) {
         Bcolj(k) = B.get(k, j)
+        k = k + 1
       }
-      for (i <- 0 until rows) {
+      var i:Int = 0
+      while (i < rows) {
         val Arowi = values(i)
         var s:Double = 0.0
-        for (k <- 0 until columns) {
+        k = 0
+        while (k < columns) {
           s += Arowi(k) * Bcolj(k)
+          k = k + 1
         }
         X.set(i, j, s)
+        i = i + 1
       }
+      j = j + 1
     }
     X
   }
@@ -668,35 +747,35 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return LUDecomposition
     * @see LUDecomposition
     */
-  def lu(): LUDecomposition = LUDecomposition(this)
+  def lu(): LU = LU(this)
 
   /** QR Decomposition
     *
     * @return QRDecomposition
     * @see QRDecomposition
     */
-  def qr(): QRDecomposition = QRDecomposition(this)
+  def qr(): QR = QR(this)
 
   /** Cholesky Decomposition
     *
     * @return CholeskyDecomposition
     * @see CholeskyDecomposition
     */
-  def chol(): CholeskyDecomposition = CholeskyDecomposition(this)
+  def chol(): Cholesky = Cholesky(this)
 
   /** Singular Value Decomposition
     *
     * @return SingularValueDecomposition
     * @see SingularValueDecomposition
     */
-  def svd(): SingularValueDecomposition = SingularValueDecomposition(this)
+  def svd(): SV = SV(this)
 
   /** Eigenvalue Decomposition
     *
     * @return EigenvalueDecomposition
     * @see EigenvalueDecomposition
     */
-  def eig(): EigenDecomposition = EigenDecomposition(this)
+  def eig(): Eigen = Eigen(this)
 
   /** Solve A*X = B
     *
@@ -704,8 +783,8 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     * @return solution if A is square, least squares solution otherwise
     */
   def solve(B: Matrix): Matrix = {
-    if (rows == columns) LUDecomposition(this).solve(B)
-    else QRDecomposition(this).solve(B)
+    if (rows == columns) LU(this).solve(B)
+    else QR(this).solve(B)
   }
 
   /** Solve X*A = B, which is also A'*X' = B'
@@ -725,19 +804,19 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     *
     * @return determinant
     */
-  def det(): Double = LUDecomposition(this).det()
+  def det(): Double = LU(this).det()
 
   /** Matrix rank
     *
-    * @return effective numerical rank, obtained from SVD.
+    * @return effective numerical rank, obtained from SV.
     */
-  def rank(): Int = SingularValueDecomposition(this).rank()
+  def rank(): Int = SV(this).rank()
 
   /** Matrix condition (2 norm)
     *
     * @return ratio of largest to smallest singular value.
     */
-  def cond(): Double = SingularValueDecomposition(this).cond()
+  def cond(): Double = SV(this).cond()
 
   /** Matrix trace.
     *
@@ -745,8 +824,10 @@ class Matrix  private(val values: ARRAY[ARRAY[Double]]) {
     */
   def trace(): Double = {
     var t = 0.0
-    for (i <- 0 until Math.min(rows, columns)) {
+    var i:Int = 0
+    while (i < Math.min(rows, columns)) {
       t += values(i)(i)
+      i = i + 1
     }
     t
   }

@@ -1,6 +1,6 @@
 package ai.dragonfly.math.matrix
 
-import bridge.array.*
+import narr.*
 import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.matrix.*
 
@@ -17,11 +17,13 @@ package object util {
     extension (m: Matrix) def asString:String = {
       val values = m.getArray()
       val sb:StringBuilder = StringBuilder()
-      for ( r <- values.indices ) {
+      var r:Int = 0; while (r < values.length ) {
         sb.append("\n")
-        for ( c <- values(0).indices ){
+        var c:Int = 0; while ( c < values(0).length ){
           sb.append(s"${values(r)(c)}, ")
+          c = c + 1
         }
+        r = r + 1
       }
       sb.toString()
     }

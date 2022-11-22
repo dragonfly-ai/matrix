@@ -1,11 +1,11 @@
 import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.stats.{LabeledVector, SimpleLabeledVector}
-import bridge.array.ARRAY
+import narr.*
 
 object EmpericalData {
 
-  val trainingData_01: ARRAY[LabeledVector] = new ARRAY[LabeledVector](1416)
-  val testData_01: ARRAY[LabeledVector] = new ARRAY[LabeledVector](160)
+  val trainingData_01: NArray[LabeledVector] = new NArray[LabeledVector](1416)
+  val testData_01: NArray[LabeledVector] = new NArray[LabeledVector](160)
 
   def initializeData: Unit = {
     // initialize training data:

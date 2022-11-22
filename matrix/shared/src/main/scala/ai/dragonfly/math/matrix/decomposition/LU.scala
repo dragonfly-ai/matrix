@@ -1,51 +1,56 @@
 package ai.dragonfly.math.matrix.decomposition
 
 import ai.dragonfly.math.matrix.*
-import bridge.array.*
+import narr.*
 
-object LUDecomposition {
+object LU {
 
-  def apply(A:Matrix):LUDecomposition = {
+  def apply(A:Matrix):LU = {
 
-    val LU:ARRAY[ARRAY[Double]] = A.getArrayCopy()
+    val LU:NArray[NArray[Double]] = A.getArrayCopy()
     val m:Int = A.getRowDimension()
     val n:Int = A.getColumnDimension()
-    val piv:ARRAY[Int] = ARRAY.tabulate[Int](m)((i:Int) => i)
+    val piv:NArray[Int] = NArray.tabulate[Int](m)((i:Int) => i)
 
     var pivsign:Double = 1.0
 
-    var LUrowi:ARRAY[Double] = null
+    var LUrowi:NArray[Double] = null
 
-    val LUcolj:ARRAY[Double] = ARRAY.fill[Double](m)(0.0)
+    val LUcolj:NArray[Double] = NArray.fill[Double](m)(0.0)
 
     // Outer loop.
 
-    for (j <- 0 until n) { // Make a copy of the j-th column to localize references.
-      for (i <- 0 until m) {
+    var j:Int = 0; while (j < n) { // Make a copy of the j-th column to localize references.
+      var i:Int = 0; while (i < m) {
         LUcolj(i) = LU(i)(j)
+        i += 1
       }
       // Apply previous transformations.
-      for (i <- 0 until m) {
+      i = 0; while (i < m) {  // recycling i
         LUrowi = LU(i)
         // Most of the time is spent in the following dot product.
         val kmax = Math.min(i, j)
         var s = 0.0
-        for (k <- 0 until kmax) {
+        var k:Int = 0; while (k < kmax) {
           s += LUrowi(k) * LUcolj(k)
+          k += 1
         }
         LUcolj(i) = LUcolj(i) - s
         LUrowi(j) = LUcolj(i)
+        i += 1
       }
       // Find pivot and exchange if necessary.
       var p = j
-      for (i <- j + 1 until m) {
+      i = j + 1; while (i < m) {  // recycling i
         if (Math.abs(LUcolj(i)) > Math.abs(LUcolj(p))) p = i
+        i += 1
       }
       if (p != j) {
-        for (k <- 0 until n) {
-          val t = LU(p)(k)
-          LU(p)(k) = LU(j)(k)
-          LU(j)(k) = t
+        var k0:Int = 0; while (k0 < n) {
+          val t = LU(p)(k0)
+          LU(p)(k0) = LU(j)(k0)
+          LU(j)(k0) = t
+          k0 += 1
         }
         val k = piv(p)
         piv(p) = piv(j)
@@ -53,11 +58,15 @@ object LUDecomposition {
         pivsign = -pivsign
       }
       // Compute multipliers.
-      if (j < m & LU(j)(j) != 0.0) for (i <- j + 1 until m) {
-        LU(i)(j) = LU(i)(j) / LU(j)(j)
+      if (j < m & LU(j)(j) != 0.0) {
+        var i0:Int = j + 1; while (i0 < m) {
+          LU(i0)(j) = LU(i0)(j) / LU(j)(j)
+          i0 += 1
+        }
       }
+      j += 1
     }
-    new LUDecomposition(LU, piv, pivsign)
+    new LU(LU, piv, pivsign)
   }
 
 }
@@ -81,7 +90,7 @@ object LUDecomposition {
   * @param  A Rectangular matrix
   */
 
-class LUDecomposition private (val LU:ARRAY[ARRAY[Double]], piv:ARRAY[Int], pivsign:Double) {  // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
+class LU private(val LU:NArray[NArray[Double]], piv:NArray[Int], pivsign:Double) {  // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
   val m:Int = LU.length
   val n:Int = LU(0).length
@@ -91,8 +100,9 @@ class LUDecomposition private (val LU:ARRAY[ARRAY[Double]], piv:ARRAY[Int], pivs
     * @return true if U, and hence A, is nonsingular.
     */
   def isNonsingular(): Boolean = {
-    for (j <- 0 until n) {
+    var j:Int = 0; while (j < n) {
       if (LU(j)(j) == 0.0) return false
+      j += 1
     }
     true
   }
@@ -102,8 +112,8 @@ class LUDecomposition private (val LU:ARRAY[ARRAY[Double]], piv:ARRAY[Int], pivs
     * @return L
     */
   def getL(): Matrix = Matrix(
-    ARRAY.tabulate[ARRAY[Double]](m)(
-      (r:Int) => ARRAY.tabulate[Double](n)(
+    NArray.tabulate[NArray[Double]](m)(
+      (r:Int) => NArray.tabulate[Double](n)(
         (c:Int) => {
           if (r > c) LU(r)(c)
           else if (r == c) 1.0
@@ -119,8 +129,8 @@ class LUDecomposition private (val LU:ARRAY[ARRAY[Double]], piv:ARRAY[Int], pivs
     * @return U
     */
   def getU(): Matrix = Matrix(
-    ARRAY.tabulate[ARRAY[Double]](n)(
-      (r:Int) => ARRAY.tabulate[Double](n)(
+    NArray.tabulate[NArray[Double]](n)(
+      (r:Int) => NArray.tabulate[Double](n)(
         (c:Int) => {
           if (r > c) 0.0
           else LU(r)(c)
@@ -133,14 +143,14 @@ class LUDecomposition private (val LU:ARRAY[ARRAY[Double]], piv:ARRAY[Int], pivs
     *
     * @return piv
     */
-  def getPivot(): ARRAY[Int] = ARRAY.tabulate[Int](m)((i:Int) => piv(i))
+  def getPivot(): NArray[Int] = NArray.tabulate[Int](m)((i:Int) => piv(i))
 
 
   /** Return pivot permutation vector as a one-dimensional double array
     *
     * @return (double) piv
     */
-  def getDoublePivot(): ARRAY[Double] = ARRAY.tabulate[Double](m)((i:Int) => piv(i).toDouble)
+  def getDoublePivot(): NArray[Double] = NArray.tabulate[Double](m)((i:Int) => piv(i).toDouble)
 
   /** Determinant
     *
@@ -152,7 +162,10 @@ class LUDecomposition private (val LU:ARRAY[ARRAY[Double]], piv:ARRAY[Int], pivs
 
     var d:Double = pivsign
 
-    for (j <- 0 until n) d *= LU(j)(j)
+    var j:Int = 0; while (j < n) {
+      d *= LU(j)(j)
+      j += 1
+    }
 
     d
   }
@@ -174,23 +187,30 @@ class LUDecomposition private (val LU:ARRAY[ARRAY[Double]], piv:ARRAY[Int], pivs
     val X = Xmat.getArray()
 
     // Solve L*Y = B(piv,:)
-    for (k <- 0 until n) {
-      for (i <- k + 1 until n) {
-        for (j <- 0 until nx) {
+    var k:Int = 0; while (k < n) {
+      var i:Int = k + 1; while (i < n) {
+        var j:Int = 0; while (j < nx) {
           X(i)(j) = X(i)(j) - (X(k)(j) * LU(i)(k))
+          j += 1
         }
+        i += 1
       }
+      k += 1
     }
     // Solve U*X = Y;
-    for (k <- n - 1 to 0 by -1) {
-      for (j <- 0 until nx) {
+    k = n - 1; while (k > -1) { // recycling k
+      var j:Int = 0; while (j < nx) {
         X(k)(j) = X(k)(j) / LU(k)(k)
+        j += 1
       }
-      for (i <- 0 until k) {
-        for (j <- 0 until nx) {
-          X(i)(j) = X(i)(j) - (X(k)(j) * LU(i)(k))
+      var i:Int = 0; while (i < k) {
+        var j1:Int = 0; while (j1 < nx) {
+          X(i)(j1) = X(i)(j1) - (X(k)(j1) * LU(i)(k))
+          j1 += 1
         }
+        i += 1
       }
+      k -= 1
     }
     Xmat
   }
