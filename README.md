@@ -25,7 +25,7 @@ libraryDependencies += "ai.dragonfly.code" %%% "matrix" % "0.4.53"
 
 # JavaScript Optimization
 
-Because matrix relies on <a href="https://github.com/dragonfly-ai/narr">NArr</a>, JavaScript enviornments store matrix data as:
+Because matrix relies on <a href="https://github.com/dragonfly-ai/narr">NArr</a>, JavaScript environments store matrix data as:
 ```scala
 var matrixArray:NArray[NArray[Double]]
 ```
