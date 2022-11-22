@@ -2,6 +2,8 @@
 
 This pure scala Matrix library provides matrix math capabilities to Scala JVM, Scala Native, and Scala.js.  Although it began as a 1:1 port of <a href="https://math.nist.gov/javanumerics/jama/">JAMA</a> for Scala 3 and Scala.js projects, it has expanded to include features that make matrix operations more comfortable in idiomatic Scala.
 
+Check out a visual demo in the browser:  https://dragonfly.ai/matrix/index.html
+
 Features:
   - Matrix math:
     + multiplication for Matrix * Matrix, Matrix * Vector, and Scalar * Matrix
