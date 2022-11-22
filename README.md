@@ -20,8 +20,19 @@ To use this library with SBT:
 
 <pre>
 resolvers += "dragonfly.ai" at "https://code.dragonfly.ai/"
-libraryDependencies += "ai.dragonfly.code" %%% "matrix" % "0.331.527"
+libraryDependencies += "ai.dragonfly.code" %%% "matrix" % "0.4.53"
 </pre><br />
+
+# JavaScript Optimization
+
+Because matrix relies on <a href="https://github.com/dragonfly-ai/narr">NArr</a>, JavaScript enviornments store matrix data as:
+```scala
+var matrixArray:NArray[NArray[Double]]
+```
+which is equivalent to:
+```scala
+var matrixArray:js.Array[Float64Array]
+```
 
 # History
 Past versions of this library JAMA from the <a href="https://mvnrepository.com/artifact/gov.nist.math/jama/1.0.3">maven repository</a> on the JVM side, and provided facades for a JavaScript version of JAMA ported through <a href="http://www.jsweet.org">Jsweet</a> and included through the <a href="https://scalacenter.github.io/scalajs-bundler/">scalajs-bundler</a> sbt plugin.  As scalajs-bundler has slipped into an unmaintained status, this library evolved into a pure scala port of JAMA and has begun to take its own shape.
@@ -30,3 +41,6 @@ Past versions of this library JAMA from the <a href="https://mvnrepository.com/a
 
 This implementation of JAMA excludes test and I/O functionality as well as some constructors that comments in the original JAMA library describe as dangerous and unnecessary.
 
+# Verification
+
+See the verification subproject of this repository to evaluate the fidelity of this port from Java to Scala.  Given the original JaMa implementation of hypot, these two matrix libraries produce identical output, however, modern Java includes a more advanced implementation of the hypot function and using it produces tiny discrepancies between Jama and this scala implementation.  
