@@ -17,7 +17,7 @@ import scala.language.implicitConversions
 object PCA {
 
   // Create a PCA object from a set of data points
-  def apply(data: UnsupervisedData): PCA = {
+  def apply[V <:  Vector](data: UnsupervisedData[V]): PCA[V] = {
 
     // arrange the matrix of centered points
     val Xc = Matrix(
@@ -26,7 +26,7 @@ object PCA {
       )
     )
 
-    new PCA(
+    new PCA[V](
       Xc.transpose().times(Xc).times(1.0 / data.size).svd(), // Compute Singular Value Decomposition
       data.sampleMean,
       data.dimension
@@ -36,27 +36,28 @@ object PCA {
 
 }
 
-case class PCA (svd: SV, mean: Vector, dimension: Double) {
+case class PCA[V <: Vector] (svd: SV, mean: V, dimension: Double) {
 
   lazy val Uᵀ:Matrix = svd.getU().transpose()
 
   def getReducer(k: Int): DimensionalityReducerPCA = DimensionalityReducerPCA(Matrix(Uᵀ.getArray().take(k)), mean)
 
-  lazy val basisPairs: Seq[BasisPair] = {
+  lazy val basisPairs: Seq[BasisPair[V]] = {
     val singularValues = svd.getSingularValues()
     val arr: NArray[NArray[Double]] = Uᵀ.getArray()
-    var pairs:Seq[BasisPair] = Seq[BasisPair]()
-    for (i <- arr.indices) {
-      pairs = pairs :+ BasisPair(
+    var pairs:Seq[BasisPair[V]] = Seq[BasisPair[V]]()
+    var i:Int = 0; while (i < arr.length) {
+      pairs = pairs :+ BasisPair[V](
         singularValues(i),
-        Vector(arr(i))
+        Vector(arr(i)).asInstanceOf[V]
       )
+      i += 1
     }
     pairs
   }
 }
 
-case class BasisPair (variance: Double, basisVector: Vector)
+case class BasisPair[V <: Vector] (variance: Double, basisVector: V)
 
 case class DimensionalityReducerPCA(Ak:Matrix, mean: Vector) {
 

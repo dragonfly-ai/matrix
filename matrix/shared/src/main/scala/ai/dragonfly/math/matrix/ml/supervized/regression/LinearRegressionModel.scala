@@ -12,10 +12,10 @@ import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
  */
 
 
-case class LinearRegressionModel(A: Matrix, mean: Vector, bias: Double, standardError: Double, `R²`: Double) {
-  val a: Vector = A.asVector
+case class LinearRegressionModel[V <: Vector](A: Matrix, mean: V, bias: Double, standardError: Double, `R²`: Double) {
+  val a: V = A.asVector.asInstanceOf[V]
 
-  def apply(x: Vector): Double = (a dot (x - mean)) + bias
+  def apply(x: V): Double = (a dot (x - mean)) + bias
   //  def apply(X:Matrix):Matrix = {
   //    X.times(A)
   //  }

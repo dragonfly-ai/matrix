@@ -2,7 +2,7 @@ import ai.dragonfly.democrossy.Demonstration
 import ai.dragonfly.math.interval.Interval.*
 import ai.dragonfly.math.matrix.ml.data.StaticSupervisedData
 import ai.dragonfly.math.matrix.ml.supervized.regression.*
-import ai.dragonfly.math.vector.Vector2
+import ai.dragonfly.math.vector.*
 import ai.dragonfly.viz.cli.*
 
 object DemoLinearRegression extends Demonstration {
@@ -13,7 +13,7 @@ object DemoLinearRegression extends Demonstration {
 
     println("\n\nLinear Regression Tests: ")
     println("\nSynthetic Tests: ")
-    val slrt: SyntheticLinearRegressionTest = SyntheticLinearRegressionTest(Vector2(2.0, 1.0), 2.0, 100, 1.1)
+    val slrt: SyntheticLinearRegressionTest[Vector2] = SyntheticLinearRegressionTest[Vector2](Vector2(2.0, 1.0), 2.0, 100, 1.1)
     println(s"Generated Synthetic Test Data: $slrt")
 
     val interval: Interval[Double] = `[]`[Double](-1.0, 15.0)
@@ -33,7 +33,7 @@ object DemoLinearRegression extends Demonstration {
 
     println("\nTest LinearRegressionQR:\n")
 
-    val syntProbLR: LinearRegressionProblem = LinearRegressionProblem(slrt.trainingData)
+    val syntProbLR: LinearRegressionProblem[Vector2] = LinearRegressionProblem[Vector2](slrt.trainingData)
 
     val slrQR = LinearRegressionQR.train(syntProbLR)
     println(s"\tLinearRegressionQR.train(syntProbLR) => $slrQR\n")
@@ -65,10 +65,10 @@ object DemoLinearRegression extends Demonstration {
     println(yPlot)
 
     println("\nEmperical Tests:\n")
-    val empericalTrainingData: StaticSupervisedData = new StaticSupervisedData(EmpericalData.trainingData_01)
-    val empericalTestData: StaticSupervisedData = new StaticSupervisedData(EmpericalData.testData_01)
-    val elrt: EmpiricalRegressionTest = EmpiricalRegressionTest(empericalTrainingData, empericalTestData)
-    val emProbLR: LinearRegressionProblem = LinearRegressionProblem(empericalTrainingData)
+    val empericalTrainingData: StaticSupervisedData[VectorN] = new StaticSupervisedData[VectorN](EmpericalData.trainingData_01)
+    val empericalTestData: StaticSupervisedData[VectorN] = new StaticSupervisedData[VectorN](EmpericalData.testData_01)
+    val elrt: EmpiricalRegressionTest[VectorN] = EmpiricalRegressionTest[VectorN](empericalTrainingData, empericalTestData)
+    val emProbLR: LinearRegressionProblem[VectorN] = LinearRegressionProblem[VectorN](empericalTrainingData)
 
     val size: Double = empericalTrainingData.size
 

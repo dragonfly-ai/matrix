@@ -14,7 +14,7 @@ trait LinearRegression {
 
   def estimateBeta(X:Matrix, Y:Matrix): Matrix
 
-  def train(lrp:LinearRegressionProblem): LinearRegressionModel = {
+  def train[V <: Vector](lrp:LinearRegressionProblem[V]): LinearRegressionModel[V] = {
     import lrp.*
 
     val A:Matrix = estimateBeta(X, Y)
@@ -29,7 +29,7 @@ trait LinearRegression {
       `err²` = `err²` + et
     }
 
-    regression.LinearRegressionModel(
+    regression.LinearRegressionModel[V](
       A, lrp.mean, lrp.bias,
       err/size,
       1.0 - (`err²` / (`EstGaussian(Y)`.sampleVariance * `EstGaussian(Y)`.ℕ))
@@ -37,22 +37,22 @@ trait LinearRegression {
   }
 }
 
-trait LinearRegressionProblem {
+trait LinearRegressionProblem[V <: Vector] {
   val X: Matrix
   val Y: Matrix
   val bias:Double
-  val mean:Vector
+  val mean:V
   val `EstGaussian(Y)`: EstimatedGaussian
   def size:Double = `EstGaussian(Y)`.ℕ
 }
 
 object LinearRegressionProblem {
 
-  def apply(trainingData:SupervisedData):LinearRegressionProblem = {
-    new LinearRegressionProblem {
+  def apply[V <: Vector](trainingData:SupervisedData[V]):LinearRegressionProblem[V] = {
+    new LinearRegressionProblem[V] {
       override val X: Matrix = trainingData.X
       override val Y: Matrix = trainingData.Y
-      override val mean:Vector = trainingData.sampleMean
+      override val mean:V = trainingData.sampleMean
       override val bias:Double = trainingData.rangeBias
       override val `EstGaussian(Y)`: EstimatedGaussian = trainingData.labelStats
     }
