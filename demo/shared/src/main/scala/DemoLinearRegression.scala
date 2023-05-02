@@ -3,6 +3,8 @@ import ai.dragonfly.math.interval.Interval.*
 import ai.dragonfly.math.matrix.ml.data.StaticSupervisedData
 import ai.dragonfly.math.matrix.ml.supervized.regression.*
 import ai.dragonfly.math.vector.*
+import ai.dragonfly.math.vector.Vec.*
+import ai.dragonfly.math.vector.Vec2.*
 import ai.dragonfly.viz.cli.*
 
 object DemoLinearRegression extends Demonstration {
@@ -13,7 +15,7 @@ object DemoLinearRegression extends Demonstration {
 
     println("\n\nLinear Regression Tests: ")
     println("\nSynthetic Tests: ")
-    val slrt: SyntheticLinearRegressionTest[Vector2] = SyntheticLinearRegressionTest[Vector2](Vector2(2.0, 1.0), 2.0, 100, 1.1)
+    val slrt: SyntheticLinearRegressionTest[2] = SyntheticLinearRegressionTest[2](Vec[2](2.0, 1.0), 2.0, 100, 1.1)
     println(s"Generated Synthetic Test Data: $slrt")
 
     val interval: Interval[Double] = `[]`[Double](-1.0, 15.0)
@@ -21,11 +23,11 @@ object DemoLinearRegression extends Demonstration {
     val xPlot: Chart = Chart("X Component", "p.x", "f(p)", slrt.trainingData.domainComponent(0), interval, 100, 40)
     val yPlot: Chart = Chart("Y Component", "p.y", "f(p)", slrt.trainingData.domainComponent(1), interval, 100, 40)
 
-    val xY = (0 until slrt.trainingData.size).map((i: Int) => {
-      val lv = slrt.trainingData.labeledExample(i); Vector2(lv.vector.component(0), lv.y)
+    val xY = (0 until slrt.trainingData.sampleSize).map((i: Int) => {
+      val lv = slrt.trainingData.labeledExample(i); Vec[2](lv.vector(0), lv.y)
     })
-    val yY = (0 until slrt.trainingData.size).map((i: Int) => {
-      val lv = slrt.trainingData.labeledExample(i); Vector2(lv.vector.component(1), lv.y)
+    val yY = (0 until slrt.trainingData.sampleSize).map((i: Int) => {
+      val lv = slrt.trainingData.labeledExample(i); Vec[2](lv.vector(1), lv.y)
     })
 
     xPlot.scatter(" (p.x, f(p))", xY: _*)
@@ -33,7 +35,7 @@ object DemoLinearRegression extends Demonstration {
 
     println("\nTest LinearRegressionQR:\n")
 
-    val syntProbLR: LinearRegressionProblem[Vector2] = LinearRegressionProblem[Vector2](slrt.trainingData)
+    val syntProbLR: LinearRegressionProblem[2] = LinearRegressionProblem[2](slrt.trainingData)
 
     val slrQR = LinearRegressionQR.train(syntProbLR)
     println(s"\tLinearRegressionQR.train(syntProbLR) => $slrQR\n")
@@ -42,11 +44,11 @@ object DemoLinearRegression extends Demonstration {
     val p = slrt.trainingData.sampleMean
     var yMean: Double = slrQR(p)
 
-    val xSlopeQR = slrQR(p + Vector2(1.0, 0.0)) - yMean
-    val ySlopeQR = slrQR(p + Vector2(0.0, 1.0)) - yMean
+    val xSlopeQR = slrQR(p + Vec[2](1.0, 0.0)) - yMean
+    val ySlopeQR = slrQR(p + Vec[2](0.0, 1.0)) - yMean
 
-    xPlot.line(Vector2(p.component(0), yMean), xSlopeQR, "QR (p.x, f'(p))")
-    yPlot.line(Vector2(p.component(1), yMean), ySlopeQR, "QR (p.y, f'(p))")
+    xPlot.line(Vec[2](p(0), yMean), xSlopeQR, "QR (p.x, f'(p))")
+    yPlot.line(Vec[2](p(1), yMean), ySlopeQR, "QR (p.y, f'(p))")
 
     println("\n\nTest LinearRegressionSVD:\n")
     val slrSVD = LinearRegressionSVD.train(syntProbLR)
@@ -54,23 +56,23 @@ object DemoLinearRegression extends Demonstration {
     println(s"\tslrt.evaluate(slrSVD) => ${slrt.evaluate(slrSVD)}\n")
 
     yMean = slrSVD(p)
-    val xSlopeSVD: Double = slrSVD(p + Vector2(1.0, 0.0)) - yMean
-    val ySlopeSVD: Double = slrSVD(p + Vector2(0.0, 1.0)) - yMean
+    val xSlopeSVD: Double = slrSVD(p + Vec[2](1.0, 0.0)) - yMean
+    val ySlopeSVD: Double = slrSVD(p + Vec[2](0.0, 1.0)) - yMean
 
     val c = yMean / slrSVD.a.magnitude
-    xPlot.line(Vector2(p.component(0), yMean), xSlopeSVD, "SVD (p.x, f'(p))")
-    yPlot.line(Vector2(p.component(1), yMean), ySlopeSVD, "SVD (p.y, f'(p))")
+    xPlot.line(Vec[2](p(0), yMean), xSlopeSVD, "SVD (p.x, f'(p))")
+    yPlot.line(Vec[2](p(1), yMean), ySlopeSVD, "SVD (p.y, f'(p))")
 
     println(xPlot)
     println(yPlot)
 
     println("\nEmperical Tests:\n")
-    val empericalTrainingData: StaticSupervisedData[VectorN] = new StaticSupervisedData[VectorN](EmpericalData.trainingData_01)
-    val empericalTestData: StaticSupervisedData[VectorN] = new StaticSupervisedData[VectorN](EmpericalData.testData_01)
-    val elrt: EmpiricalRegressionTest[VectorN] = EmpiricalRegressionTest[VectorN](empericalTrainingData, empericalTestData)
-    val emProbLR: LinearRegressionProblem[VectorN] = LinearRegressionProblem[VectorN](empericalTrainingData)
+    val empericalTrainingData: StaticSupervisedData[8] = new StaticSupervisedData[8](EmpericalData.trainingData_01)
+    val empericalTestData: StaticSupervisedData[8] = new StaticSupervisedData[8](EmpericalData.testData_01)
+    val elrt: EmpiricalRegressionTest[8] = EmpiricalRegressionTest[8](empericalTrainingData, empericalTestData)
+    val emProbLR: LinearRegressionProblem[8] = LinearRegressionProblem[8](empericalTrainingData)
 
-    val size: Double = empericalTrainingData.size
+    val size: Double = empericalTrainingData.sampleSize
 
     println("\nTest LinearRegressionQR:\n")
     val elrQR = LinearRegressionQR.train(emProbLR)

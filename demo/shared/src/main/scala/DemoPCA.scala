@@ -1,12 +1,15 @@
 
 import ai.dragonfly.democrossy.Demonstration
-import narr.*
+import narr.{NArray, *}
 import ai.dragonfly.math.geometry.Line
 import ai.dragonfly.math.matrix.ml.data.*
 import ai.dragonfly.math.matrix.ml.unsupervised.dimreduction.PCA
 import ai.dragonfly.math.vector.*
+import ai.dragonfly.math.vector.Vec.*
+import ai.dragonfly.math.vector.Vec2.*
 import ai.dragonfly.math.interval
 import ai.dragonfly.viz.cli.CLImg
+
 import Console.*
 
 object DemoPCA extends Demonstration {
@@ -16,7 +19,7 @@ object DemoPCA extends Demonstration {
   def demo(): Unit = {
 
     // 2D shapes represented by centered 2D meshes of exactly 9 points each.
-    val square = Vector(
+    val square:Vec[18] = Vec[18](
       -1.000000, 1.000000, // point 1 1
       0.000000, 1.000000, // point 6 2
       1.000000, 1.000000, // point 2 3
@@ -29,7 +32,7 @@ object DemoPCA extends Demonstration {
       0.000000, 0.000000 // point 9
     )
 
-    val circle = Vector(
+    val circle:Vec[18] = Vec[18](
       -0.700000, 0.700000, // point 1 1
       0.000000, 1.000000, // point 6 2
       0.700000, 0.700000, // point 2 3
@@ -40,7 +43,7 @@ object DemoPCA extends Demonstration {
       -1.000000, 0.000000, // point 5 8
       0.000000, 0.000000 // point 9
     )
-    val almond = Vector(
+    val almond:Vec[18] = Vec[18](
       -0.488187, 0.800000, // point 1 1
       0.000000, 1.000000, // point 6 2
       0.503938, 0.800000, // point 2 3
@@ -51,7 +54,7 @@ object DemoPCA extends Demonstration {
       -0.600000, 0.500000, // point 5 8
       0.000000, 0.500000 // point 9
     )
-    val triangle = Vector(
+    val triangle:Vec[18] = Vec[18](
       -1.000000, 1.000000, // point 1 1
       0.000000, 1.000000, // point 6 2
       1.000000, 1.000000, // point 2 3
@@ -62,7 +65,7 @@ object DemoPCA extends Demonstration {
       -0.500000, 0.000000, // point 5 8
       0.000000, 0.000000 // point 9
     )
-    val cross = Vector(
+    val cross:Vec[18] = Vec[18](
       -0.100000, 0.100000, // point 1 1
       0.000000, 1.000000, // point 6 2
       0.100000, 0.100000, // point 2 3
@@ -73,7 +76,7 @@ object DemoPCA extends Demonstration {
       -1.000000, 0.000000, // point 5 8
       0.000000, 0.000000 // point 9
     )
-    val x = Vector(
+    val x:Vec[18] = Vec[18](
       -1.000000, 1.000000, // point 1 1
       0.000000, 0.100000, // point 6 2
       1.000000, 1.000000, // point 2 3
@@ -85,24 +88,26 @@ object DemoPCA extends Demonstration {
       0.000000, 0.000000 // point 9
     )
 
-    val vArr = NArray[Vector](square, circle, almond, triangle, cross, x)
+    val vArr:NArray[Vec[18]] = NArray[Vec[18]](square, circle, almond, triangle, cross, x)
 
     val cimg: CLImg = CLImg(50 * vArr.length, 50)
 
     println("Sample Shapes:\n")
-    for (i <- vArr.indices) {
-      plotVectorOfShape2D(vArr(i), Vector2((i * 50) + 25, 25))(cimg)
+    var i:Int = 0; while (i < vArr.length) {
+      plotVectorOfShape2D(vArr(i), Vec[2]((i * 50) + 25, 25))(cimg)
+      i += 1
     }
 
     println(cimg)
 
     println(s"$RESET")
 
-    val pca = PCA(StaticUnsupervisedData(vArr))
-    val reducer = pca.getReducer(3)
+    val sud: StaticUnsupervisedData[18] = StaticUnsupervisedData[18](vArr)
+    val pca = PCA[18](sud)
+    val reducer = pca.getReducer[2]
 
-    println(s"Mean Shape with μ = ${pca.mean}\n")
-    println(plotVectorOfShape2D(pca.mean, Vector2(25, 25))())
+    println(s"Mean Shape with μ = ${pca.mean.render()}\n")
+    println(plotVectorOfShape2D(pca.mean, Vec[2](25, 25))())
 
     for (bp <- pca.basisPairs) {
       if (bp.variance > 0.001) {
@@ -110,12 +115,12 @@ object DemoPCA extends Demonstration {
         val cImg2: CLImg = new CLImg(350, 50)
         var s: Double = -3.0 * bp.variance
         while (s <= 3.0 * bp.variance) {
-          plotVectorOfShape2D((bp.basisVector * s) + pca.mean, Vector2((i * 50) + 25, 25))(cImg2)
+          plotVectorOfShape2D((bp.basisVector * s) + pca.mean, Vec[2]((i * 50) + 25, 25))(cImg2)
           s = s + bp.variance
           i = i + 1
         }
         println(s"$RESET")
-        println(s"Singular Shape with σ = ${bp.variance} and Singular Vector: ${bp.basisVector}")
+        println(s"Singular Shape with σ = ${bp.variance} and Singular Vector: ${bp.basisVector.render()}")
         println(s"Shape Variation from -3σ to 3σ (${-3.0 * bp.variance} to ${3.0 * bp.variance}):")
         println(cImg2)
         println(s"$RESET")
@@ -123,15 +128,17 @@ object DemoPCA extends Demonstration {
     }
 
     println(s"Dimensinoality reduction from ${reducer.domainDimension} to ${reducer.rangeDimension}:")
-    for (v <- vArr) {
+    i = 0; while (i < vArr.length) {
+      val v:Vec[18] = vArr(i)
       val cImg2: CLImg = new CLImg(100, 50)
-      plotVectorOfShape2D(v, Vector2(25, 25))(cImg2)
+      plotVectorOfShape2D(v, Vec[2](25, 25))(cImg2)
       val reducedV = reducer(v)
       //plotVectorOfShape2D(reducedV, Vector2(75, 25))(cImg2)
-      plotVectorOfShape2D(reducer.unapply(reducedV), Vector2(75, 25))(cImg2)
-      println(s"$v -> $reducedV")
+      plotVectorOfShape2D(reducer.unapply(reducedV), Vec[2](75, 25))(cImg2)
+      println(s"${v.render()} -> ${reducedV.show}")
       println(cImg2)
       println(s"$RESET")
+      i += 1
     }
 
   }
@@ -139,13 +146,13 @@ object DemoPCA extends Demonstration {
 
   def name: String = "Principle Components Analysis"
 
-  def plotVectorOfShape2D(sv: Vector, position: Vector2)(cimg: CLImg = CLImg(50, 50)): CLImg = {
-    def transform(x: Double, y: Double): Vector2 = Vector2((15 * x) + position.x, (15 * y) + position.y)
+  def plotVectorOfShape2D(sv: Vec[18], position: Vec[2])(cimg: CLImg = CLImg(50, 50)): CLImg = {
+    def transform(x: Double, y: Double): Vec[2] = Vec[2]((15 * x) + position.x, (15 * y) + position.y)
 
     def segment(i: Int, j: Int): Any = {
       Line.trace2D(
-        transform(sv.values(i), sv.values(i + 1)),
-        transform(sv.values(j), sv.values(j + 1)),
+        transform(sv(i), sv(i + 1)),
+        transform(sv(j), sv(j + 1)),
         (dX: Int, dY: Int) => {
           cimg.setPixel(dX, (cimg.height - 1) - dY, 2)
         }
@@ -153,12 +160,12 @@ object DemoPCA extends Demonstration {
     }
 
     var i = 0
-    while (i + 3 < sv.values.length) {
+    while (i + 3 < sv.dimension) {
       segment(i, i + 2)
-      segment(i, sv.values.length - 2)
+      segment(i, sv.dimension - 2)
       i = i + 2
     }
-    segment(0, sv.values.length - 4)
+    segment(0, sv.dimension - 4)
     cimg
   }
 

@@ -1,7 +1,23 @@
+/*
+ * Copyright 2023 dragonfly.ai
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ai.dragonfly.math.matrix
 
 import narr.*
-import ai.dragonfly.math.vector.*
+import ai.dragonfly.math.vector.{Vec, *}
 import ai.dragonfly.math.matrix.*
 
 package object util {
@@ -31,14 +47,19 @@ package object util {
 
 //  extension (a: Matrix) def *(b: Matrix): Matrix = a.times(b)
 
-  extension (a: Matrix) def asVector: Vector = {
-      if (a.getColumnDimension() == 1 || a.getRowDimension() == 1) {
-        Vector(a.getRowPackedCopy())
-      } else throw CannotExpressMatrixAsVector(a)
+  extension (thisMatrix: Matrix) {
+    def asVector[N <: Int]: Vec[N] = {
+      if (thisMatrix.getColumnDimension() == 1 || thisMatrix.getRowDimension() == 1) {
+        thisMatrix.getRowPackedCopy().asInstanceOf[Vec[N]]
+      } else throw CannotExpressMatrixAsVector(thisMatrix)
     }
+  }
 
-  extension (a: Vector) def asRowMatrix: Matrix = new Matrix(a.values, 1)
+  extension[N <: Int] (thisVector: Vec[N]) {
+    inline def asRowMatrix: Matrix = new Matrix(thisVector.asInstanceOf[NArray[Double]], 1)
+    inline def asColumnMatrix: Matrix = new Matrix(thisVector.asInstanceOf[NArray[Double]], thisVector.dimension)
 
-  extension (a: Vector) def asColumnMatrix: Matrix = new Matrix(a.values, a.dimension)
+  }
+
 
 }

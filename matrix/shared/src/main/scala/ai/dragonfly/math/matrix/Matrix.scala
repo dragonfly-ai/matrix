@@ -1,7 +1,24 @@
+/*
+ * Copyright 2023 dragonfly.ai
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ai.dragonfly.math.matrix
 
 import ai.dragonfly.math.matrix.decomposition.{Cholesky, Eigen, LU, QR, SV}
 import ai.dragonfly.math.vector.*
+import ai.dragonfly.math.vector.Vec.*
 import narr.*
 
 import scala.math.hypot
@@ -114,11 +131,11 @@ object Matrix {
    * @param v a vector
    * @return
    */
-  def diagonal(v:Vector): Matrix = {
+  def diagonal[N <: Int](v:Vec[N]): Matrix = {
     val out:Matrix = new Matrix(v.dimension, v.dimension, 0.0)
     var i:Int = 0
     while (i < v.dimension) {
-      out.set(i, i, v.component(i))
+      out.set(i, i, v(i))
       i = i + 1
     }
     out
@@ -141,7 +158,7 @@ object Matrix {
 
 }
 
-class Matrix  private(val values: NArray[NArray[Double]]) {
+class Matrix private(val values: NArray[NArray[Double]]) {
 
   inline def rows:Int = values.length
   inline def columns:Int = values(0).length

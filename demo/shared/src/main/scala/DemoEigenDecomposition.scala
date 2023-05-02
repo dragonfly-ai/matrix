@@ -1,6 +1,8 @@
 import ai.dragonfly.democrossy.Demonstration
 import ai.dragonfly.math.matrix.Matrix
-import ai.dragonfly.math.vector.Vector4
+import ai.dragonfly.math.vector.*
+import ai.dragonfly.math.vector.Vec.*
+import ai.dragonfly.math.vector.Vec4.*
 import narr.*
 import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
 
@@ -16,7 +18,7 @@ object DemoEigenDecomposition extends Demonstration {
     )
     println(M0.asString)
     println("\n\n")
-    println(Vector4(M0.eig().getRealEigenvalues()))
+    println(Vec[4](M0.eig().getRealEigenvalues()).render())
     println("\n\n")
 
   }
