@@ -15,9 +15,9 @@ object Cholesky extends Verification {
   override def run: Unit = {
 
     val jCh: CholeskyDecomposition = new CholeskyDecomposition(jm)
-    val mCh: matrix.decomposition.Cholesky = matrix.decomposition.Cholesky(mm)
+    val mCh: matrix.decomposition.Cholesky[11] = matrix.decomposition.Cholesky[11, 11](mm)
 
-    println(s"\tComparing L : ${Verification.arrayCompare2D(jCh.getL.getArray, mCh.getL().values)}")
+    println(s"\tComparing L : ${Verification.arrayCompare2D(jCh.getL.getArray, mCh.getL().getArray())}")
 
   }
 }

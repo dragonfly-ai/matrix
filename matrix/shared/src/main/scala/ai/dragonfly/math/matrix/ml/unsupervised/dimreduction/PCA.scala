@@ -20,7 +20,6 @@ import ai.dragonfly.math.*
 import ai.dragonfly.math.geometry.Line
 import ai.dragonfly.math.matrix.util.*
 import ai.dragonfly.math.matrix.*
-import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
 import ai.dragonfly.math.matrix.decomposition.SV
 import ai.dragonfly.math.matrix.ml.data.*
 import ai.dragonfly.math.stats.probability.distributions.stream.StreamingVectorStats
@@ -34,17 +33,19 @@ import scala.language.implicitConversions
 object PCA {
 
   // Create a PCA object from a set of data points
-  def apply[N <:  Int](data: UnsupervisedData[N])(using ValueOf[N]): PCA[N] = {
+  def apply[M <: Int, N <:  Int](data: UnsupervisedData[M, N])(using ValueOf[M], ValueOf[N]): PCA[N, N] = {
 
     // arrange the matrix of centered points
-    val Xc = Matrix(
+    val Xc = Matrix[M, N](
       NArray.tabulate[NArray[Double]](data.sampleSize)(
         (row:Int) => (data.example(row) - data.sampleMean).asInstanceOf[NArray[Double]]
       )
     )
 
-    new PCA[N](
-      Xc.transpose().times(Xc).times(1.0 / data.sampleSize).svd(), // Compute Singular Value Decomposition
+    val m:Matrix[N, N] = (Xc.transpose * Xc) * (1.0 / data.sampleSize)
+
+    new PCA[N, N](
+      SV[N, N, m.MIN](m), // Compute Singular Value Decomposition
       data.sampleMean
     )
   }
@@ -52,13 +53,15 @@ object PCA {
 
 }
 
-case class PCA[N <: Int](svd: SV, mean: Vec[N])(using ValueOf[N]) {
+case class PCA[M <: Int, N <: Int](svd: SV[M, N, ? <: Int], mean: Vec[N])(using ValueOf[M], ValueOf[N]) {
 
   val dimension: Double = valueOf[N]
 
-  lazy val Uᵀ:Matrix = svd.getU().transpose()
+  lazy val Uᵀ:Matrix[N, M] = svd.getU().transpose.asInstanceOf[Matrix[N, M]]
 
-  inline def getReducer[K <: Int](using ValueOf[K]): DimensionalityReducerPCA[N, K] = DimensionalityReducerPCA[N, K](Matrix(Uᵀ.getArray().take(valueOf[K])), mean)
+  inline def getReducer[K <: Int](using ValueOf[K]): DimensionalityReducerPCA[N, K] = {
+    DimensionalityReducerPCA[N, K](Matrix(Uᵀ.getArray().take(valueOf[K])), mean)
+  }
 
   lazy val basisPairs: Seq[BasisPair[N]] = {
     val singularValues = svd.getSingularValues()
@@ -74,14 +77,16 @@ case class PCA[N <: Int](svd: SV, mean: Vec[N])(using ValueOf[N]) {
 
 case class BasisPair[N <: Int](variance: Double, basisVector: Vec[N])(using ValueOf[N])
 
-case class DimensionalityReducerPCA[N <: Int, K <: Int](Ak:Matrix, mean: Vec[N])(using ValueOf[N]) {
+case class DimensionalityReducerPCA[N <: Int, K <: Int](Ak:Matrix[K, N], mean: Vec[N])(using ValueOf[N], ValueOf[K]) {
 
   /**
    * Reduce dimensionality of vector from domainDimension to rangeDimension
    * @param v domainDimensioned vector
    * @return rangeDimensioned vector
    */
-  def apply(v:Vec[N]):Vec[K] = (Ak * (v - mean).asColumnMatrix).asVector[K]
+  def apply(v:Vec[N]):Vec[K] = {
+    (Ak * (v - mean).asColumnMatrix).asVector.asInstanceOf[Vec[K]]
+  }
 
   def domainDimension:Int = mean.dimension
 
@@ -93,6 +98,6 @@ case class DimensionalityReducerPCA[N <: Int, K <: Int](Ak:Matrix, mean: Vec[N])
    * @param v rangeDimensioned vector
    * @return rangeDimensioned vector
    */
-  inline def unapply(v:Vec[K]):Vec[N] = ((v.asRowMatrix * Ak).asVector) + mean
+  inline def unapply(v:Vec[K])(using ValueOf[K]):Vec[N] = (v.asRowMatrix * Ak).asVector.asInstanceOf[Vec[N]] + mean
 
 }

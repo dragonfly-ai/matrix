@@ -1,14 +1,14 @@
 import ai.dragonfly.democrossy.Demonstration
 import ai.dragonfly.math.matrix.Matrix
+import ai.dragonfly.math.matrix.decomposition.*
 import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.vector.Vec.*
 import ai.dragonfly.math.vector.Vec4.*
 import narr.*
-import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
 
 object DemoEigenDecomposition extends Demonstration {
   def demo(): Unit = {
-    val M0: Matrix = Matrix(
+    val M0: Matrix[4, 4] = Matrix[4, 4](
       NArray[NArray[Double]](
         NArray[Double](1.0, 2.0, 3.0, 4.0),
         NArray[Double](0.0, -1.0, 0.0, -3.0),
@@ -16,9 +16,11 @@ object DemoEigenDecomposition extends Demonstration {
         NArray[Double](0.27, ai.dragonfly.math.Constant.π, 1.1, 0.5),
       )
     )
-    println(M0.asString)
+
+    println(M0)
     println("\n\n")
-    println(Vec[4](M0.eig().getRealEigenvalues()).render())
+    val eig:Eigen[4] = Eigen[4, 4](M0)
+    println(Vec[4](eig.getRealEigenvalues()).render())
     println("\n\n")
 
   }

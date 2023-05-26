@@ -36,11 +36,11 @@ object Cholesky {
    * @param  mat Square, symmetric matrix.
    */
 
-  def apply(mat:Matrix):Cholesky = {
+  def apply[M <: Int, N <: Int](mat:Matrix[M, N])(using ValueOf[N]):Cholesky[N] = {
     // Initialize.
     val A = mat.getArrayCopy()
     val n = A.length
-    val L = new Matrix(n, n).getArray()
+    val L = Matrix.zeros[N, N].getArray()
     var isspd:Boolean = mat.columns == n
     // Main loop.
     var j:Int = 0; while (j < n) {
@@ -72,7 +72,7 @@ object Cholesky {
   }
 }
 
-class Cholesky private(val larry:NArray[NArray[Double]], val isspd:Boolean) { // Initialize.
+class Cholesky[N <: Int] private(val larry:NArray[NArray[Double]], val isspd:Boolean)(using ValueOf[N]) { // Initialize.
 
   inline def dimension:Int = larry.length
 
@@ -86,7 +86,7 @@ class Cholesky private(val larry:NArray[NArray[Double]], val isspd:Boolean) { //
     *
     * @return L
     */
-  def getL(): Matrix = Matrix(larry)
+  def getL(): Matrix[N, N] = Matrix[N, N](larry)
 
   /** Solve A*X = B
     *
@@ -95,7 +95,7 @@ class Cholesky private(val larry:NArray[NArray[Double]], val isspd:Boolean) { //
     * @throws IllegalArgumentException  Matrix row dimensions must agree.
     * @throws RuntimeException  Matrix is not symmetric positive definite.
     */
-  def solve(B: Matrix): Matrix = {
+  def solve[V <: Int](B: Matrix[N, V])(using ValueOf[V]): Matrix[N, V] = {
     if (B.rows != dimension) throw new IllegalArgumentException("Matrix row dimensions must agree.")
 
     if (!isspd) {
@@ -128,7 +128,7 @@ class Cholesky private(val larry:NArray[NArray[Double]], val isspd:Boolean) { //
       }
       k -= 1
     }
-    Matrix(X)
+    Matrix[N, V](X)
   }
 
 }

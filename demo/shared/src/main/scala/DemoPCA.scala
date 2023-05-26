@@ -102,8 +102,8 @@ object DemoPCA extends Demonstration {
 
     println(s"$RESET")
 
-    val sud: StaticUnsupervisedData[18] = StaticUnsupervisedData[18](vArr)
-    val pca = PCA[18](sud)
+    val sud: StaticUnsupervisedData[6, 18] = StaticUnsupervisedData[6, 18](vArr)
+    val pca = PCA[6, 18](sud)
     val reducer = pca.getReducer[2]
 
     println(s"Mean Shape with μ = ${pca.mean.render()}\n")

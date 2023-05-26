@@ -17,7 +17,6 @@
 package ai.dragonfly.math.matrix.ml.supervized.regression
 
 import ai.dragonfly.math.interval.Interval.*
-import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
 import ai.dragonfly.math.matrix.*
 import ai.dragonfly.math.matrix.ml.data.{StaticSupervisedData, SupervisedData}
 import ai.dragonfly.math.matrix.ml.supervized
@@ -26,16 +25,16 @@ import ai.dragonfly.math.stats.LabeledVec
 import ai.dragonfly.math.stats.probability.distributions.{EstimatedGaussian, stream}
 import ai.dragonfly.math.vector.*
 
-trait LinearRegression {
+trait LinearRegression[M <: Int, N <: Int](using ValueOf[M], ValueOf[N]) {
 
-  def estimateBeta(X:Matrix, Y:Matrix): Matrix
+  def estimateBeta(X:Matrix[M, N], Y:Matrix[M, 1]): Matrix[N, 1]
 
-  def train[N <: Int](lrp:LinearRegressionProblem[N]): LinearRegressionModel[N] = {
+  def train(lrp:LinearRegressionProblem[M, N]): LinearRegressionModel[N] = {
     import lrp.*
 
-    val A:Matrix = estimateBeta(X, Y)
+    val A:Matrix[N, 1] = estimateBeta(X, Y)
 
-    val errors:Matrix = X.times(A).minus(Y)
+    val errors:Matrix[M, 1] = (X * A) - Y
 
     var err:Double = 0.0
     var `err²`: Double = 0.0
@@ -53,10 +52,11 @@ trait LinearRegression {
   }
 }
 
-trait LinearRegressionProblem[N <: Int] {
-  val dimension:Int
-  val X: Matrix
-  val Y: Matrix
+trait LinearRegressionProblem[M <: Int, N <: Int](using ValueOf[M], ValueOf[N]) {
+  val sampleSize:Int = valueOf[M]
+  val dimension:Int = valueOf[N]
+  val X: Matrix[M, N]
+  val Y: Matrix[M, 1]
   val bias:Double
   val mean:Vec[N]
   val `EstGaussian(Y)`: EstimatedGaussian
@@ -65,11 +65,10 @@ trait LinearRegressionProblem[N <: Int] {
 
 object LinearRegressionProblem {
 
-  def apply[N <: Int](trainingData:SupervisedData[N])(using ValueOf[N]):LinearRegressionProblem[N] = {
-    new LinearRegressionProblem[N] {
-      override val dimension: Int = valueOf[N]
-      override val X: Matrix = trainingData.X
-      override val Y: Matrix = trainingData.Y
+  def apply[M <: Int, N <: Int](trainingData:SupervisedData[M, N])(using ValueOf[M], ValueOf[N]):LinearRegressionProblem[M, N] = {
+    new LinearRegressionProblem[M, N] {
+      override val X: Matrix[M, N] = trainingData.X
+      override val Y: Matrix[M, 1] = trainingData.Y
       override val mean:Vec[N] = trainingData.sampleMean
       override val bias:Double = trainingData.rangeBias
       override val `EstGaussian(Y)`: EstimatedGaussian = trainingData.labelStats

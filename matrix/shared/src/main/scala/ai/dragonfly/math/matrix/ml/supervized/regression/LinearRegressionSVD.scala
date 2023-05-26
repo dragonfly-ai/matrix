@@ -19,14 +19,13 @@ package ai.dragonfly.math.matrix.ml.supervized.regression
 import ai.dragonfly.math.matrix.*
 import ai.dragonfly.math.matrix.decomposition.SV
 
-object LinearRegressionSVD extends LinearRegression {
+class LinearRegressionSVD[M <: Int, N <: Int](using ValueOf[M], ValueOf[N]) extends LinearRegression[M, N] {
 
-  override def estimateBeta(X: Matrix, Y: Matrix): Matrix = {
-    val svd: SV = X.svd()
-
+  override def estimateBeta(X: Matrix[M, N], Y: Matrix[M, 1]): Matrix[N, 1] = {
     // Â = VS⁻ⁱUᵀ * Y
-    svd.getV().times(svd.getS().inverse().times(svd.getU().transpose())).times(Y)
-
+    val svd: SV[M, N, N] = SV[M, N, N](X)
+    //svd.getV() * (svd.getS_Inverse() * svd.getU().transpose) * Y
+    svd.getV().times(svd.getS_Inverse().times(svd.getU().transpose)).times(Y)
   }
 
 

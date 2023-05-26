@@ -7,18 +7,19 @@ import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.vector.Vec.*
 import narr.*
 
-trait LinearRegressionTest[N <: Int] {
-  def trainingData:SupervisedData[N]
-  def testData:SupervisedData[N]
+trait LinearRegressionTest[M <: Int, N <: Int] {
+  def trainingData:SupervisedData[M, N]
+  def testData:SupervisedData[M, N]
   def evaluate(model: LinearRegressionModel[N]):LinearRegressionTestScore
 }
 
-case class SyntheticLinearRegressionTest[N <: Int](trueCoefficients: Vec[N], bias: Double, sampleSize:Int, noise:Double = 1.0)(using ValueOf[N]) extends LinearRegressionTest[N] {
+case class SyntheticLinearRegressionTest[M <: Int, N <: Int](trueCoefficients: Vec[N], bias: Double, noise:Double = 1.0)(using ValueOf[M], ValueOf[N]) extends LinearRegressionTest[M, N] {
+  val sampleSize:Int = valueOf[M]
   val maxNorm:Double = trueCoefficients.dimension * trueCoefficients.magnitude //Math.min(2.0 * dimension, sampleSize)
 
   var syntheticError: Double = 0.0
 
-  override val trainingData:SupervisedData[N] = {
+  override val trainingData:SupervisedData[M, N] = {
     val td: NArray[LabeledVec[N]] = new NArray[LabeledVec[N]](sampleSize)
 
     var i:Int = 0; while (i < td.length) {
@@ -33,7 +34,7 @@ case class SyntheticLinearRegressionTest[N <: Int](trueCoefficients: Vec[N], bia
       syntheticError = syntheticError + err * err
       i += 1
     }
-    new StaticSupervisedData[N](td)
+    new StaticSupervisedData[M, N](td)
   }
 
   syntheticError = Math.sqrt(syntheticError / trainingData.sampleSize)
@@ -53,11 +54,11 @@ case class SyntheticLinearRegressionTest[N <: Int](trueCoefficients: Vec[N], bia
     LinearRegressionTestScore(model.standardError, observedError)
   }
 
-  override def testData: SupervisedData[N] = trainingData
+  override def testData: SupervisedData[M, N] = trainingData
 }
 
 
-case class EmpiricalRegressionTest[N <: Int](override val trainingData:SupervisedData[N], override val testData:SupervisedData[N]) extends LinearRegressionTest[N] {
+case class EmpiricalRegressionTest[M <: Int, N <: Int](override val trainingData:SupervisedData[M, N], override val testData:SupervisedData[M, N]) extends LinearRegressionTest[M, N] {
   override def evaluate(model: LinearRegressionModel[N]):LinearRegressionTestScore = {
     var observedError:Double = 0.0
     var i:Int = 0; while (i < testData.sampleSize) {

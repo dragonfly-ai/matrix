@@ -20,7 +20,6 @@ import ai.dragonfly.math.matrix.*
 import ai.dragonfly.math.matrix.util.*
 import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.vector.Vec.*
-import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
 
 /**
  * @param A
@@ -29,15 +28,13 @@ import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
  */
 
 
-case class LinearRegressionModel[N <: Int](A: Matrix, mean: Vec[N], bias: Double, standardError: Double, `R²`: Double) {
+case class LinearRegressionModel[N <: Int](A: Matrix[N, 1], mean: Vec[N], bias: Double, standardError: Double, `R²`: Double) {
   val a: Vec[N] = A.asVector.asInstanceOf[Vec[N]]
 
   def apply(x: Vec[N]): Double = (a dot (x - mean)) + bias
   //  def apply(X:Matrix):Matrix = {
   //    X.times(A)
   //  }
-
-  import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
 
   override def toString(): String = s"LinearRegressionModel(\n\t\tA = ${A.dim},\n\t\tmean = ${mean.render()},\n\t\tbias = $bias,\n\t\tstandardError = $standardError,\n\t\tR² = ${`R²`}\n\t)"
 }

@@ -17,17 +17,16 @@
 package ai.dragonfly.math.matrix.util
 
 import ai.dragonfly.math.matrix.*
-import ai.dragonfly.math.matrix.util.given_Dimensioned_Matrix
 
 enum MatrixOperation {
   case `+`, `-`, x, AxB, Ax, zip
 }
 
-case class MismatchedMatrixDimensions(m1:Matrix, m2:Matrix, op:MatrixOperation) extends Exception(
+case class MismatchedMatrixDimensions[M1 <: Int, N1 <: Int, M2 <: Int, N2 <: Int](m1:Matrix[M1, N1], m2:Matrix[M2, N2], op:MatrixOperation) extends Exception(
   s"Incompatible Matrix Dimensions under $op:\n ${m1.dim} and ${m2.dim}"
 )
 
-case class CannotExpressMatrixAsVector(m1:Matrix) extends Exception(
+case class CannotExpressMatrixAsVector[M <: Int, N <: Int](m1:Matrix[M, N]) extends Exception(
   s"To convert a Matrix to a Vector, one of its dimensions must be 1, but this matrix has dimensions: ${m1.dim}"
 )
 

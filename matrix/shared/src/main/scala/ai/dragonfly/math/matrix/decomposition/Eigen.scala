@@ -25,11 +25,13 @@ object Eigen {
 
   // Symmetric Householder reduction to tridiagonal form.
 
-  private def tred2(V: NArray[NArray[Double]], n: Int): Eigen = {
+  private def tred2[N <: Int](V: NArray[NArray[Double]])(using ValueOf[N]): Eigen[N] = {
     //  This is derived from the Algol procedures tred2 by
     //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
     //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
     //  Fortran subroutine in EISPACK.
+
+    val n:Int = valueOf[N]
 
     val d: NArray[Double] = NArray.fill[Double](n)(0.0)
     val e: NArray[Double] = NArray.fill[Double](n)(0.0)
@@ -152,16 +154,19 @@ object Eigen {
     V(n - 1)(n - 1) = 1.0
     e(0) = 0.0
 
-    tql2(V, d, e, n)
+    tql2[N](V, d, e)
   }
 
   // Symmetric tridiagonal QL algorithm.
 
-  private def tql2(V: NArray[NArray[Double]], d: NArray[Double], e: NArray[Double], n: Int): Eigen = {
+  private def tql2[N <: Int](V: NArray[NArray[Double]], d: NArray[Double], e: NArray[Double])(using ValueOf[N]): Eigen[N] = {
     //  This is derived from the Algol procedures tql2, by
     //  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
     //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
     //  Fortran subroutine in EISPACK.
+
+    val n:Int = valueOf[N]
+
     var i0:Int = 1; while (i0 < n) {
       e(i0 - 1) = e(i0)
       i0 += 1
@@ -266,16 +271,18 @@ object Eigen {
       i += 1
     }
 
-    new Eigen(V, d, e, n)
+    new Eigen[N](V, d, e)
   }
 
-  private def orthes(V: NArray[NArray[Double]], n: Int): Eigen = {
+  private def orthes[N <: Int](V: NArray[NArray[Double]])(using ValueOf[N]): Eigen[N] = {
     //  This is derived from the Algol procedures orthes and ortran,
     //  by Martin and Wilkinson, Handbook for Auto. Comp.,
     //  Vol.ii-Linear Algebra, and the corresponding
     //  Fortran subroutines in EISPACK.
 
-    val H: NArray[NArray[Double]] = Matrix(V).getArrayCopy()
+    val n:Int = valueOf[N]
+
+    val H: NArray[NArray[Double]] = Matrix[N, N](V).getArrayCopy()
 
     val ort: NArray[Double] = NArray.fill[Double](n)(0.0)
 
@@ -368,23 +375,24 @@ object Eigen {
     }
 
     // Reduce Hessenberg to real Schur form.
-    hqr2(V, H, n)
+    hqr2[N](V, H)
   }
 
 
   // Nonsymmetric reduction from Hessenberg to real Schur form.
 
-  private def hqr2(V: NArray[NArray[Double]], H: NArray[NArray[Double]], dim: Int): Eigen = {
+  private def hqr2[N <: Int](V: NArray[NArray[Double]], H: NArray[NArray[Double]])(using ValueOf[N]): Eigen[N] = {
+    val nn: Int = valueOf[N]
+
     //  This is derived from the Algol procedure hqr2,
     //  by Martin and Wilkinson, Handbook for Auto. Comp.,
     //  Vol.ii-Linear Algebra, and the corresponding
     //  Fortran subroutine in EISPACK.
     // Initialize
 
-    val d: NArray[Double] = NArray.fill[Double](dim)(0.0)
-    val e: NArray[Double] = NArray.fill[Double](dim)(0.0)
+    val d: NArray[Double] = NArray.fill[Double](nn)(0.0)
+    val e: NArray[Double] = NArray.fill[Double](nn)(0.0)
 
-    val nn: Int = dim
     var ni: Int = nn - 1
     val low: Int = 0
     val high: Int = nn - 1
@@ -669,7 +677,7 @@ object Eigen {
 
     // Backsubstitute to find vectors of upper triangular form
 
-    if (norm == 0.0) return new Eigen(V, d, e, ni)
+    if (norm == 0.0) return new Eigen[N](V, d, e)
 
     ni = nn - 1
     while (ni >= 0) {
@@ -814,13 +822,13 @@ object Eigen {
     }
 
 
-    new Eigen(V, d, e, dim)
+    new Eigen[N](V, d, e)
   }
 
-  def apply(Arg: Matrix) = {
+  def apply[M <: Int, N <: Int](Arg: Matrix[M, N])(using ValueOf[N]) = {
 
     val A = Arg.getArray()
-    val n = Arg.getColumnDimension()
+    val n = valueOf[N] //Arg.getColumnDimension()
 
     var isSymmetric = true
 
@@ -833,8 +841,8 @@ object Eigen {
       )
     )
 
-    if (isSymmetric) tred2(V, n)  // Tridiagonalize
-    else orthes(V, n)  // Reduce to Hessenberg form
+    if (isSymmetric) tred2[N](V)  // Tridiagonalize
+    else orthes[N](V)  // Reduce to Hessenberg form
 
   }
 
@@ -862,13 +870,15 @@ object Eigen {
  * @param Arg Square matrix
  */
 
-class Eigen(V:NArray[NArray[Double]], d:NArray[Double], e:NArray[Double], n:Int) {
+class Eigen[N <: Int] private(V:NArray[NArray[Double]], d:NArray[Double], e:NArray[Double])(using ValueOf[N]) {
+
+  val n:Int = valueOf[N]
 
   /** Return the eigenvector matrix
    *
    * @return V
    */
-  def getV(): Matrix = Matrix(V)
+  def getV(): Matrix[N, N] = Matrix[N, N](V)
 
   /** Return the real parts of the eigenvalues
    *
@@ -886,8 +896,8 @@ class Eigen(V:NArray[NArray[Double]], d:NArray[Double], e:NArray[Double], n:Int)
    *
    * @return D
    */
-  def getD(): Matrix = {
-    val X = new Matrix(n, n)
+  def getD(): Matrix[N, N] = {
+    val X = Matrix.zeros[N, N]
     val D = X.getArray()
     var i:Int = 0; while (i < n) {
       var j:Int = 0; while (j < n) {

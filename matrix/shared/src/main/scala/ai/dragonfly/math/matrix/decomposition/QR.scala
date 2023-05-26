@@ -24,7 +24,7 @@ import scala.math.hypot
 
 object QR {
 
-  def apply(M: Matrix): QR = {
+  def apply[M <: Int, N <: Int](M: Matrix[M, N])(using ValueOf[M], ValueOf[N]): QR[M, N] = {
     // Initialize.
     val QR:NArray[NArray[Double]] = M.getArrayCopy()
     val rows:Int = M.getRowDimension()
@@ -64,7 +64,7 @@ object QR {
       k += 1
     }
     println ("apply()")
-    new QR(Matrix(QR), rows, columns, Rdiag)
+    new QR(Matrix[M, N](QR), Rdiag)
   }
 
 }
@@ -87,7 +87,12 @@ object QR {
   * @param A Rectangular matrix
   */
 
-class QR private(val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: NArray[Double]) {
+class QR[M <: Int, N <: Int] private (
+  val QR: Matrix[M, N], val Rdiag: NArray[Double]
+)(using ValueOf[M], ValueOf[N]) {
+
+  val rows:Int = valueOf[M]
+  val columns:Int = valueOf[N]
 
   /** Is the matrix full rank?
     *
@@ -103,10 +108,10 @@ class QR private(val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: NArra
     *
     * @return Lower trapezoidal matrix whose columns define the reflections
     */
-  def getH(): Matrix = Matrix(
+  def getH(): Matrix[M, N] = Matrix[M, N](
     NArray.tabulate[NArray[Double]](rows)(
       (r:Int) => NArray.tabulate[Double](columns)(
-        (c:Int) => if (r >= c) QR.get(r, c) else 0.0
+        (c:Int) => if (r >= c) QR(r, c) else 0.0
       )
     )
   )
@@ -115,11 +120,11 @@ class QR private(val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: NArra
     *
     * @return R
     */
-  def getR(): Matrix = Matrix(
+  def getR(): Matrix[M, N] = Matrix[M, N](
     NArray.tabulate[NArray[Double]](rows)(
       (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => {
-          if (r < c) QR.get(r, c)
+          if (r < c) QR(r, c)
           else if (r == c) Rdiag(r)
           else 0.0
         }
@@ -131,8 +136,8 @@ class QR private(val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: NArra
     *
     * @return Q
     */
-  def getQ(): Matrix = {
-    val X = new Matrix(rows, columns)
+  def getQ(): Matrix[M, N] = {
+    val X = Matrix.zeros[M, N]
     val Q = X.getArray()
     var k:Int = columns - 1; while (k > -1) {
       var i:Int = 0; while (i < rows) {
@@ -141,15 +146,15 @@ class QR private(val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: NArra
       }
       Q(k)(k) = 1.0
       var j:Int = k; while (j < columns) {
-        if (QR.get(k, k) != 0) {
+        if (QR(k, k) != 0) {
           var s = 0.0
           i = k; while (i < rows) {  // recycling i
-            s += QR.get(i, k) * Q(i)(j)
+            s += QR(i, k) * Q(i)(j)
             i += 1
           }
-          s = -s / QR.get(k, k)
+          s = -s / QR(k, k)
           i = k; while (i < rows) {  // recycling i
-            Q(i)(j) += s * QR.get(i, k)
+            Q(i)(j) += s * QR(i, k)
             i += 1
           }
         }
@@ -162,30 +167,30 @@ class QR private(val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: NArra
 
   /** Least squares solution of A*X = B
     *
-    * @param B A Matrix with as many rows as A and any number of columns.
+    * @param b A Matrix with as many rows as A and any number of columns.
     * @return X that minimizes the two norm of Q*R*X-B.
     * @throws IllegalArgumentException  Matrix row dimensions must agree.
     * @throws RuntimeException  Matrix is rank deficient.
     */
-  def solve(B: Matrix): Matrix = {
-    if (B.getRowDimension() != rows) throw new IllegalArgumentException("Matrix row dimensions must agree.")
+  def solve[V <: Int](b: Matrix[M, V])(using ValueOf[V]): Matrix[N, V] = {
+    // if (B.getRowDimension() != rows) throw new IllegalArgumentException("Matrix row dimensions must agree.")
     if (!this.isFullRank()) throw new RuntimeException("Matrix is rank deficient.")
 
     // Copy right hand side
-    val nx = B.getColumnDimension()
-    val X = B.getArrayCopy()
+    val nx = b.columns
+    val X = b.getArrayCopy()
 
     // Compute Y = transpose(Q)*B
     var k:Int = 0; while (k < columns) {
       var j:Int = 0; while (j < nx) {
         var s = 0.0
         var i:Int = k; while (i < rows) {
-          s += QR.get(i, k) * X(i)(j)
+          s += QR(i, k) * X(i)(j)
           i += 1
         }
-        s = -s / QR.get(k, k)
+        s = -s / QR(k, k)
         i = k; while (i < rows) { // recycling i
-          X(i)(j) += s * QR.get(i, k)
+          X(i)(j) += s * QR(i, k)
           i += 1
         }
         j += 1
@@ -201,14 +206,15 @@ class QR private(val QR: Matrix, val rows:Int, val columns:Int, val Rdiag: NArra
       }
       var i:Int = 0; while (i < k) {
         j = 0; while (j < nx) {
-          X(i)(j) -= X(k)(j) * QR.get(i, k)
+          X(i)(j) -= X(k)(j) * QR(i, k)
           j += 1
         }
         i += 1
       }
       k -= 1
     }
-    Matrix(X).getMatrix(0, columns - 1, 0, nx - 1)
+
+    Matrix[M, V](X).subMatrix[N, V](0, 0)
   }
 
 }

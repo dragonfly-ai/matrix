@@ -14,12 +14,12 @@ object LU extends Verification {
   override def run: Unit = {
 
     val jlu: LUDecomposition = new LUDecomposition(jm)
-    val mlu: matrix.decomposition.LU = matrix.decomposition.LU(mm)
+    val mlu: matrix.decomposition.LU[11, 11] = matrix.decomposition.LU[11, 11](mm)
 
     println(s"\tComparing Determinants: ${jlu.det()} vs ${mlu.det()} error = ${Math.abs(jlu.det() - mlu.det())}")
 
-    println(s"\tComparing L : ${Verification.arrayCompare2D(jlu.getL.getArray, mlu.getL().values)}")
-    println(s"\tComparing U : ${Verification.arrayCompare2D(jlu.getU.getArray, mlu.getU().values)}")
+    println(s"\tComparing L : ${Verification.arrayCompare2D(jlu.getL.getArray, mlu.getL().getArray())}")
+    println(s"\tComparing U : ${Verification.arrayCompare2D(jlu.getU.getArray, mlu.getU().getArray())}")
 
   }
 }

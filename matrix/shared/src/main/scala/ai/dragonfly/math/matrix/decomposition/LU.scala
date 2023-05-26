@@ -19,13 +19,16 @@ package ai.dragonfly.math.matrix.decomposition
 import ai.dragonfly.math.matrix.*
 import narr.*
 
+import scala.compiletime.ops.int.-
+
 object LU {
 
-  def apply(A:Matrix):LU = {
+  def apply[M <: Int, N <: Int](A:Matrix[M, N])(using ValueOf[M], ValueOf[N]):LU[M, N] = {
 
-    val LU:NArray[NArray[Double]] = A.getArrayCopy()
-    val m:Int = A.getRowDimension()
-    val n:Int = A.getColumnDimension()
+    val m:Int = valueOf[M]
+    val n:Int = valueOf[N]
+
+    val lu:NArray[NArray[Double]] = A.getArrayCopy()
     val piv:NArray[Int] = NArray.tabulate[Int](m)((i:Int) => i)
 
     var pivsign:Double = 1.0
@@ -38,12 +41,12 @@ object LU {
 
     var j:Int = 0; while (j < n) { // Make a copy of the j-th column to localize references.
       var i:Int = 0; while (i < m) {
-        LUcolj(i) = LU(i)(j)
+        LUcolj(i) = lu(i)(j)
         i += 1
       }
       // Apply previous transformations.
       i = 0; while (i < m) {  // recycling i
-        LUrowi = LU(i)
+        LUrowi = lu(i)
         // Most of the time is spent in the following dot product.
         val kmax = Math.min(i, j)
         var s = 0.0
@@ -63,9 +66,9 @@ object LU {
       }
       if (p != j) {
         var k0:Int = 0; while (k0 < n) {
-          val t = LU(p)(k0)
-          LU(p)(k0) = LU(j)(k0)
-          LU(j)(k0) = t
+          val t = lu(p)(k0)
+          lu(p)(k0) = lu(j)(k0)
+          lu(j)(k0) = t
           k0 += 1
         }
         val k = piv(p)
@@ -74,15 +77,15 @@ object LU {
         pivsign = -pivsign
       }
       // Compute multipliers.
-      if (j < m & LU(j)(j) != 0.0) {
+      if (j < m & lu(j)(j) != 0.0) {
         var i0:Int = j + 1; while (i0 < m) {
-          LU(i0)(j) = LU(i0)(j) / LU(j)(j)
+          lu(i0)(j) = lu(i0)(j) / lu(j)(j)
           i0 += 1
         }
       }
       j += 1
     }
-    new LU(LU, piv, pivsign)
+    new LU[M, N](lu, piv, pivsign)
   }
 
 }
@@ -106,7 +109,9 @@ object LU {
   * @param  A Rectangular matrix
   */
 
-class LU private(val LU:NArray[NArray[Double]], piv:NArray[Int], pivsign:Double) {  // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
+class LU[M <: Int, N <: Int] private (
+  val LU:NArray[NArray[Double]], piv:NArray[Int], pivsign:Double
+)(using ValueOf[M], ValueOf[N]) {  // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
   val m:Int = LU.length
   val n:Int = LU(0).length
@@ -127,7 +132,7 @@ class LU private(val LU:NArray[NArray[Double]], piv:NArray[Int], pivsign:Double)
     *
     * @return L
     */
-  def getL(): Matrix = Matrix(
+  def getL(): Matrix[M, N] = Matrix[M, N](
     NArray.tabulate[NArray[Double]](m)(
       (r:Int) => NArray.tabulate[Double](n)(
         (c:Int) => {
@@ -144,7 +149,7 @@ class LU private(val LU:NArray[NArray[Double]], piv:NArray[Int], pivsign:Double)
     *
     * @return U
     */
-  def getU(): Matrix = Matrix(
+  def getU(): Matrix[N, N] = Matrix[N, N](
     NArray.tabulate[NArray[Double]](n)(
       (r:Int) => NArray.tabulate[Double](n)(
         (c:Int) => {
@@ -188,18 +193,18 @@ class LU private(val LU:NArray[NArray[Double]], piv:NArray[Int], pivsign:Double)
 
   /** Solve A*X = B
     *
-    * @param  B A Matrix with as many rows as A and any number of columns.
+    * @param  B A Matrix with as many rows as A and as many columns as B.
     * @return X so that L*U*X = B(piv,:)
     * @throws IllegalArgumentException Matrix row dimensions must agree.
     * @throws RuntimeException  Matrix is singular.
     */
-  def solve(B: Matrix): Matrix = {
-    if (B.getRowDimension() != m) throw new IllegalArgumentException("Matrix row dimensions must agree.")
-    if (!this.isNonsingular()) throw new RuntimeException("Matrix is singular.")
+  def solve[V <: Int](B: Matrix[M, V])(using ValueOf[V]): Matrix[N, V] = {
+    // if (B.getRowDimension() != m) throw new IllegalArgumentException("Matrix row dimensions must agree.")
+    if ( !this.isNonsingular() ) throw new RuntimeException( "Matrix is singular." )
 
     // Copy right hand side with pivoting
-    val nx:Int = B.getColumnDimension()
-    val Xmat:Matrix = B.getMatrix(piv, 0, nx - 1)
+    val nx:Int = B.columns
+    val Xmat:Matrix[N, V] = B.getMatrix[N, V](piv, 0)
     val X = Xmat.getArray()
 
     // Solve L*Y = B(piv,:)

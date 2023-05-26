@@ -21,6 +21,7 @@ import ai.dragonfly.math.vector.Vec.*
 import ai.dragonfly.math.matrix.*
 import narr.*
 import scala.math.hypot
+import scala.compiletime.ops.int.*
 //import SV.hypot
 object SV {
 
@@ -48,23 +49,20 @@ object SV {
 //    r
 //  }
 
-  def apply(M:Matrix):SV = {
+  def apply[M <: Int, N <: Int, S <: Int](mtrx:Matrix[M, N])(using ValueOf[M], ValueOf[N], ValueOf[S]):SV[M, N, S] = {
+
     // Derived from LINPACK code.
     // Initialize.
-    val A = M.getArrayCopy()
-    val rows = M.getRowDimension()
-    val columns = M.getColumnDimension()
+    val A: Matrix[M, N] = mtrx.copy
 
-    /* Apparently the failing cases are only a proper subset of (rows<columns),
- so let's not throw error.  Correct fix to come later?
-    if (rows<columns) {
-  throw new IllegalArgumentException("Jama SVD only works for rows >= columns"); }
-    */
-    val nu = Math.min(rows, columns)
-    val s = NArray.fill[Double](Math.min(rows + 1, columns))(0.0)
-    val U = NArray.tabulate[NArray[Double]](rows)(_ => NArray.fill[Double](nu)(0.0))
-    val V = NArray.tabulate[NArray[Double]](columns)(_ => NArray.fill[Double](columns)(0.0))
-    val e = NArray.fill[Double](columns)(0.0)
+    val rows:Int = valueOf[M]
+    val columns:Int = valueOf[N]
+    val sDim:Int = valueOf[S]
+
+    val s: Vec[S] = Vec.fill[S](0.0) // zeros
+    val U: Matrix[M, S] = Matrix.zeros[M, S]
+    val V: Matrix[N, N] = Matrix.zeros[N, N]
+    val e: Vec[M] = Vec.fill[M](0.0)
     val work = NArray.fill[Double](rows)(0.0)
 
     // Reduce A to bidiagonal form, storing the diagonal elements
@@ -82,18 +80,18 @@ object SV {
 
         s(k0) = 0.0
         var i:Int = k0; while (i < rows) {
-          s(k0) = hypot(s(k0), A(i)(k0))
+          s(k0) = hypot(s(k0), A(i, k0))
           i += 1
         }
         if (s(k0) != 0.0) {
-          if (A(k0)(k0) < 0.0) {
+          if (A(k0, k0) < 0.0) {
             s(k0) = -s(k0)
           }
           var i0 = k0; while (i0 < rows) {
-            A(i0)(k0) /= s(k0)
+            A(i0, k0) /= s(k0)
             i0 += 1
           }
-          A(k0)(k0) += 1.0
+          A(k0, k0) += 1.0
         }
         s(k0) = -s(k0)
       }
@@ -103,12 +101,12 @@ object SV {
           // Apply the transformation.
           var t = 0.0
           var i:Int = k0; while (i < rows) {
-            t += A(i)(k0) * A(i)(j0)
+            t += A(i, k0) * A(i, j0)
             i += 1
           }
-          t = -t / A(k0)(k0)
+          t = -t / A(k0, k0)
           i = k0; while (i < rows) {
-            A(i)(j0) += t * A(i)(k0)
+            A(i, j0) += t * A(i, k0)
             i += 1
           }
         }
@@ -116,13 +114,13 @@ object SV {
         // Place the k-th row of A into e for the
         // subsequent calculation of the row transformation.
 
-        e(j0) = A(k0)(j0)
+        e(j0) = A(k0, j0)
 
         j0 += 1
       }
       if (k0 < nct) { // Place the transformation in U for subsequent back multiplication.
         var i:Int = k0; while (i < rows) {
-          U(i)(k0) = A(i)(k0)
+          U(i, k0) = A(i, k0)
           i += 1
         }
       }
@@ -141,10 +139,10 @@ object SV {
             e(k0) = -e(k0)
           }
           var i0:Int = k0 + 1; while (i0 < columns) {
-            e(i0) /= e(k0)
+            e(i0) = e(i0) / e(k0)
             i0 += 1
           }
-          e(k0 + 1) += 1.0
+          e(k0 + 1) = e(k0 + 1) + 1.0
         }
         e(k0) = -e(k0)
         if ((k0 + 1 < rows) && (e(k0) != 0.0)) {
@@ -157,7 +155,7 @@ object SV {
           }
           var j0:Int = k0 + 1; while (j0 < columns) {
             var i2:Int = k0 + 1; while (i2 < rows) {
-              work(i2) += e(j0) * A(i2)(j0)
+              work(i2) += e(j0) * A(i2, j0)
               i2 += 1
             }
             j0 += 1
@@ -165,7 +163,7 @@ object SV {
           j0 = k0 + 1; while (j0 < columns) {
             val t = -e(j0) / e(k0 + 1)
             var i2:Int = k0 + 1; while (i2 < rows) {
-              A(i2)(j0) += t * work(i2)
+              A(i2, j0) += t * work(i2)
               i2 += 1
             }
             j0 += 1
@@ -175,7 +173,7 @@ object SV {
         // Place the transformation in V for subsequent back multiplication.
 
         i = k0 + 1; while (i < columns) { // recycling i
-          V(i)(k0) = e(i)
+          V(i, k0) = e(i)
           i += 1
         }
 
@@ -187,58 +185,58 @@ object SV {
 
     var p = Math.min(columns, rows + 1)
     if (nct < columns) {
-      s(nct) = A(nct)(nct)
+      s(nct) = A(nct, nct)
     }
     if (rows < p) {
       s(p - 1) = 0.0
     }
     if (nrt + 1 < p) {
-      e(nrt) = A(nrt)(p - 1)
+      e(nrt) = A(nrt, p - 1)
     }
 
     e(p - 1) = 0.0
 
     // generate U.
 
-    var j:Int = nct; while (j < nu) {
+    var j:Int = nct; while (j < sDim) {
       var i:Int = 0; while (i < rows) {
-        U(i)(j) = 0.0
+        U(i, j) = 0.0
         i += 1
       }
-      U(j)(j) = 1.0
+      U(j, j) = 1.0
       j += 1
     }
 
     var k:Int = nct - 1; while (k > -1) {
       if (s(k) != 0.0) {
-        var j0:Int = k + 1; while  (j0 < nu) {
+        var j0:Int = k + 1; while  (j0 < sDim) {
           var t = 0.0
           var i:Int = k; while (i < rows) {
-            t += U(i)(k) * U(i)(j0)
+            t += U(i, k) * U(i, j0)
             i += 1
           }
-          t = -t / U(k)(k)
+          t = -t / U(k, k)
           i = k; while (i < rows) { // recycling i
-            U(i)(j0) += t * U(i)(k)
+            U(i, j0) += t * U(i, k)
             i += 1
           }
           j0 += 1
         }
         var i:Int = k; while (i < rows) {
-          U(i)(k) = -U(i)(k)
+          U(i, k) = -U(i, k)
           i += 1
         }
-        U(k)(k) = 1.0 + U(k)(k)
+        U(k, k) = 1.0 + U(k, k)
         i = 0; while (i < k - 1) { // recycling i
-          U(i)(k) = 0.0
+          U(i, k) = 0.0
           i += 1
         }
       } else {
         var i:Int = 0; while (i < rows) {
-          U(i)(k) = 0.0
+          U(i, k) = 0.0
           i += 1
         }
-        U(k)(k) = 1.0
+        U(k, k) = 1.0
       }
       k -= 1
     }
@@ -246,25 +244,25 @@ object SV {
     // generate V.
     k = columns - 1; while (k > -1) { // recycling k
       if ((k < nrt) && (e(k) != 0.0)) {
-        var j:Int = k + 1; while (j < nu) {
+        var j:Int = k + 1; while (j < sDim) {
           var t = 0.0
           var i:Int = k + 1; while (i < columns) {
-            t += V(i)(k) * V(i)(j)
+            t += V(i, k) * V(i, j)
             i += 1
           }
-          t = -t / V(k + 1)(k)
+          t = -t / V(k + 1, k)
           i = k + 1; while (i < columns) { // recycling i
-            V(i)(j) += t * V(i)(k)
+            V(i, j) += t * V(i, k)
             i += 1
           }
           j += 1
         }
       }
       var i:Int = 0; while (i < columns) {
-        V(i)(k) = 0.0
+        V(i, k) = 0.0
         i += 1
       }
-      V(k)(k) = 1.0
+      V(k, k) = 1.0
       k -= 1
     }
 
@@ -350,9 +348,9 @@ object SV {
               e(j - 1) = cs * e(j - 1)
             }
             var i:Int = 0; while (i < columns) {
-              t = cs * V(i)(j) + sn * V(i)(p - 1)
-              V(i)(p - 1) = -sn * V(i)(j) + cs * V(i)(p - 1)
-              V(i)(j) = t
+              t = cs * V(i, j) + sn * V(i, p - 1)
+              V(i, p - 1) = -sn * V(i, j) + cs * V(i, p - 1)
+              V(i, j) = t
               i += 1
             }
             j -= 1
@@ -371,9 +369,9 @@ object SV {
             f = -sn * e(j)
             e(j) = cs * e(j)
             var i:Int = 0; while (i < rows) {
-              t = cs * U(i)(j) + sn * U(i)(k - 1)
-              U(i)(k - 1) = -sn * U(i)(j) + cs * U(i)(k - 1)
-              U(i)(j) = t
+              t = cs * U(i, j) + sn * U(i, k - 1)
+              U(i, k - 1) = -sn * U(i, j) + cs * U(i, k - 1)
+              U(i, j) = t
               i += 1
             }
             j += 1
@@ -418,9 +416,9 @@ object SV {
             g = sn * s(j + 1)
             s(j + 1) = cs * s(j + 1)
             var i:Int = 0; while (i < columns) {
-              t = cs * V(i)(j) + sn * V(i)(j + 1)
-              V(i)(j + 1) = -sn * V(i)(j) + cs * V(i)(j + 1)
-              V(i)(j) = t
+              t = cs * V(i, j) + sn * V(i, j + 1)
+              V(i, j + 1) = -sn * V(i, j) + cs * V(i, j + 1)
+              V(i, j) = t
               i += 1
             }
             t = hypot(f, g)
@@ -433,9 +431,9 @@ object SV {
             e(j + 1) = cs * e(j + 1)
             if (j < rows - 1) {
               var i:Int = 0; while (i < rows) {
-                t = cs * U(i)(j) + sn * U(i)(j + 1)
-                U(i)(j + 1) = -sn * U(i)(j) + cs * U(i)(j + 1)
-                U(i)(j) = t
+                t = cs * U(i, j) + sn * U(i, j + 1)
+                U(i, j + 1) = -sn * U(i, j) + cs * U(i, j + 1)
+                U(i, j) = t
                 i += 1
               }
             }
@@ -451,7 +449,7 @@ object SV {
           if (s(k) <= 0.0) {
             s(k) = (if (s(k) < 0.0) -s(k) else 0.0)
             var i:Int = 0; while (i < pp) {
-              V(i)(k) = -V(i)(k)
+              V(i, k) = -V(i, k)
               i += 1
             }
           }
@@ -467,17 +465,17 @@ object SV {
               s(k + 1) = t
               if (k < columns - 1) {
                 var i:Int = 0; while (i < columns) {
-                  t = V(i)(k + 1)
-                  V(i)(k + 1) = V(i)(k)
-                  V(i)(k) = t
+                  t = V(i, k + 1)
+                  V(i, k + 1) = V(i, k)
+                  V(i, k) = t
                   i += 1
                 }
               }
               if (k < rows - 1) {
                 var i:Int = 0; while (i < rows) {
-                  t = U(i)(k + 1)
-                  U(i)(k + 1) = U(i)(k)
-                  U(i)(k) = t
+                  t = U(i, k + 1)
+                  U(i, k + 1) = U(i, k)
+                  U(i, k) = t
                   i += 1
                 }
               }
@@ -489,7 +487,7 @@ object SV {
           p -= 1
       }
     }
-    new SV(Matrix(U), Matrix(V), s, rows, columns)
+    new SV[M, N, S](U, V, s)
   }
 }
 
@@ -515,34 +513,45 @@ object SV {
  * @param M Rectangular matrix
  */
 
-class SV private(val U:Matrix, val V:Matrix, singularValues:NArray[Double], m:Int, n:Int){
+class SV[M <: Int, N <: Int, S <: Int] private(
+  val U:Matrix[M, S], val V:Matrix[N, N], singularValues:Vec[S]
+)(using ValueOf[M], ValueOf[N], ValueOf[S]) {
+  val m:Int = valueOf[M]
+  val n:Int = valueOf[N]
+
+  val sDim:Int = valueOf[S]
 
   /** Return the left singular vectors
     *
     * @return U
     */
-  def getU(): Matrix = U
+  def getU(): Matrix[M, S] = U
 
   /** Return the right singular vectors
     *
     * @return V
     */
-  def getV(): Matrix = V
+  def getV(): Matrix[N, N] = V
 
   /** Return the one-dimensional array of singular values
     *
     * @return diagonal of S.
     */
-  def getSingularValues():NArray[Double] = singularValues
+  def getSingularValues():Vec[S] = singularValues
 
   /** Return the diagonal matrix of singular values
     *
     * @return S
     */
-  inline def getS(): Matrix = {
-    val d:Int = singularValues.length
-    Matrix.diagonal[d.type](singularValues.asInstanceOf[Vec[d.type]])
-  }
+  inline def getS(): Matrix[S, S] = Matrix.diagonal[S](singularValues)
+
+  /** Return the diagonal matrix of singular values
+   *
+   * @return S
+   */
+  inline def getS_Inverse(): Matrix[S, S] = Matrix.diagonal[S](
+    Vec.tabulate[S]( (i:Int) => 1.0 / singularValues(i) )
+  )
 
   /** Two norm
     *
@@ -564,7 +573,7 @@ class SV private(val U:Matrix, val V:Matrix, singularValues:NArray[Double], m:In
     val eps = Math.pow(2.0, -52.0)
     val tol = Math.max(m, n) * singularValues(0) * eps
     var r = 0
-    var i:Int = 0; while (i < singularValues.length) {
+    var i:Int = 0; while (i < singularValues.dimension) {
       if (singularValues(i) > tol) {
         r += 1
       }

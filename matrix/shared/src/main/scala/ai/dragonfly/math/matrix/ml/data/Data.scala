@@ -29,11 +29,10 @@ import matrix.util.*
 
 import scala.language.{existentials, implicitConversions}
 
-trait Data[N <: Int] {
-  def dimension:Int
-
-  val sampleSize:Int
-  def X:Matrix
+trait Data[M <: Int, N <: Int](using ValueOf[M], ValueOf[N]) {
+  val sampleSize:Int = valueOf[M]
+  val dimension:Int = valueOf[N]
+  def X:Matrix[M, N]
   //def asVectors:Set[Vector]
   def example(i:Int):Vec[N]
   def sampleMean:Vec[N]
@@ -43,21 +42,17 @@ trait Data[N <: Int] {
   def domainBias:Vec[N] = sampleMean
 }
 
-trait UnsupervisedData[N <: Int] extends Data[N] {
+trait UnsupervisedData[M <: Int, N <: Int](using ValueOf[M], ValueOf[N]) extends Data[M, N] {
 
 }
 
 object StaticUnsupervisedData {
-  inline def apply[N <: Int](examples:NArray[Vec[N]])(using ValueOf[N]):StaticUnsupervisedData[N] = {
-    new StaticUnsupervisedData[N](examples)
+  inline def apply[M <: Int, N <: Int](examples:NArray[Vec[N]])(using ValueOf[M], ValueOf[N]):StaticUnsupervisedData[M, N] = {
+    new StaticUnsupervisedData[M, N](examples)
   }
 }
 
-class StaticUnsupervisedData[N <: Int](examples:NArray[Vec[N]])(using ValueOf[N]) extends UnsupervisedData[N] {
-
-  override val dimension: Int = examples(0).dimension
-
-  override val sampleSize: Int = examples.length
+class StaticUnsupervisedData[M <: Int, N <: Int](examples:NArray[Vec[N]])(using ValueOf[M], ValueOf[N]) extends UnsupervisedData[M, N] {
 
   private val Xar:NArray[NArray[Double]] = NArray.ofSize[NArray[Double]](sampleSize)
 
@@ -92,25 +87,21 @@ class StaticUnsupervisedData[N <: Int](examples:NArray[Vec[N]])(using ValueOf[N]
 
   override def domainComponent(i: Int):Interval[Double] = intervals(i)
 
-  override val X: Matrix = Matrix(Xar)
+  override val X: Matrix[M, N] = Matrix[M, N](Xar)
 
   override def example(i: Int): Vec[N] =  Vec[N]( Xar(i) ) + sampleMean
 
 }
 
-trait SupervisedData[N <: Int] extends Data[N] {
-  def y:Vec[sampleSize.type]
-  def Y: Matrix
+trait SupervisedData[M <: Int, N <: Int] extends Data[M, N] {
+  def y:Vec[M]
+  def Y: Matrix[M, 1]
   def labeledExample(i:Int):LabeledVec[N]
   def labelStats:EstimatedGaussian
   def rangeBias:Double = labelStats.sampleMean
 }
 
-class StaticSupervisedData[N <: Int](labeledExamples:NArray[LabeledVec[N]])(using ValueOf[N]) extends SupervisedData[N] {
-
-  override val dimension:Int = valueOf[N]
-
-  override val sampleSize: Int = labeledExamples.length
+class StaticSupervisedData[M <: Int, N <: Int](labeledExamples:NArray[LabeledVec[N]])(using ValueOf[M], ValueOf[N]) extends SupervisedData[M, N] {
 
   private val Xar:NArray[NArray[Double]] = NArray.ofSize[NArray[Double]](sampleSize)
   private val Yar:NArray[Double] = NArray.ofSize[Double](sampleSize)
@@ -150,10 +141,10 @@ class StaticSupervisedData[N <: Int](labeledExamples:NArray[LabeledVec[N]])(usin
 
   val intervals: NArray[Interval[Double]] = temp._5
 
-  override val y: Vec[sampleSize.type] = Vec[sampleSize.type](Yar)
+  override val y: Vec[M] = Vec[M](Yar)
 
-  override val X: Matrix = Matrix(Xar)
-  override val Y: Matrix = y.asColumnMatrix
+  override val X: Matrix[M, N] = Matrix(Xar)
+  override val Y: Matrix[M, 1] = y.asColumnMatrix
 
   def example(i: Int): Vec[N] = Vec[N]( Xar(i) ) + sampleMean
 

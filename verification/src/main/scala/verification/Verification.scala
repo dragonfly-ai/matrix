@@ -68,7 +68,7 @@ trait Verification {
   )
 
   val jm: Jama.Matrix = new Jama.Matrix(mvs0)
-  val mm: ai.dragonfly.math.matrix.Matrix = ai.dragonfly.math.matrix.Matrix(mvs0)
+  val mm: ai.dragonfly.math.matrix.Matrix[11, 11] = ai.dragonfly.math.matrix.Matrix[11, 11](mvs0)
 
   def name:String
   def run: Unit
