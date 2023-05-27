@@ -13,14 +13,14 @@ object Eigen extends Verification {
 
   override def run: Unit = {
 
-    val jed: Jama.EigenvalueDecomposition = new EigenvalueDecomposition(jm)
-    val med: matrix.decomposition.Eigen[11] = matrix.decomposition.Eigen[11, 11](mm)
+    val jed: Jama.EigenvalueDecomposition = new EigenvalueDecomposition(squareJaMa)
+    val med: matrix.decomposition.Eigen[11] = matrix.decomposition.Eigen[11](squareMa)
 
-    println(s"\tComparing Real Eigen Values: ${Verification.arrayCompare(jed.getRealEigenvalues(), med.getRealEigenvalues())}")
-    println(s"\tComparing Imaginary Eigen Values: ${Verification.arrayCompare(jed.getImagEigenvalues(), med.getImagEigenvalues())}")
+    println(s"\tComparing Real Eigen Values: ${Verification.arrayCompare(jed.getRealEigenvalues(), med.realEigenvalues.asInstanceOf[Array[Double]])}")
+    println(s"\tComparing Imaginary Eigen Values: ${Verification.arrayCompare(jed.getImagEigenvalues(), med.imaginaryEigenvalues.asInstanceOf[Array[Double]])}")
 
-    println(s"\tComparing V : ${Verification.arrayCompare2D(jed.getV.getArray, med.getV().getArray())}")
-    println(s"\tComparing D : ${Verification.arrayCompare2D(jed.getD.getArray, med.getD().getArray())}")
+    println(s"\tComparing V : ${Verification.arrayCompare2D(jed.getV.getArray, med.Q.values)}")
+    println(s"\tComparing D : ${Verification.arrayCompare2D(jed.getD.getArray, med.Λ.values)}")
 
   }
 }

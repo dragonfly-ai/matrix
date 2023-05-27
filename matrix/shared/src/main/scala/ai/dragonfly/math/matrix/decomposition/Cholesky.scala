@@ -17,6 +17,7 @@
 package ai.dragonfly.math.matrix.decomposition
 
 import ai.dragonfly.math.matrix.*
+import ai.dragonfly.math.matrix.util.MatrixNotSymmetricPositiveDefinite
 import narr.*
 
 object Cholesky {
@@ -25,23 +26,20 @@ object Cholesky {
    * <P>
    * For a symmetric, positive definite matrix A, the Cholesky decomposition
    * is an lower triangular matrix L so that A = L*L'.
-   * <P>
-   * If the matrix is not symmetric or positive definite, the constructor
-   * returns a partial decomposition and sets an internal flag that may
-   * be queried by the isSPD() method.
    */
   /** Cholesky algorithm for symmetric and positive definite matrix.
    * Structure to access L and isspd flag.
    *
-   * @param  mat Square, symmetric matrix.
+   * @param m a square, symmetric, positive definite matrix.
+   * @throws MatrixNotSymmetricPositiveDefinite exception if m is not a square, symmetric, positive definite matrix.
    */
 
-  def apply[M <: Int, N <: Int](mat:Matrix[M, N])(using ValueOf[N]):Cholesky[N] = {
+  def apply[N <: Int](m:Matrix[N, N])(using ValueOf[N]):Cholesky[N] = {
     // Initialize.
-    val A = mat.getArrayCopy()
+    val A = m.copyValues
     val n = A.length
-    val L = Matrix.zeros[N, N].getArray()
-    var isspd:Boolean = mat.columns == n
+    val L = Matrix.zeros[N, N].values
+    var isspd:Boolean = true
     // Main loop.
     var j:Int = 0; while (j < n) {
       val Lrowj = L(j)
@@ -68,25 +66,14 @@ object Cholesky {
       }
       j += 1
     }
-    new Cholesky(L, isspd)
+    if (isspd) new Cholesky(Matrix[N, N](L))
+    else throw MatrixNotSymmetricPositiveDefinite[N, N](m)
   }
 }
 
-class Cholesky[N <: Int] private(val larry:NArray[NArray[Double]], val isspd:Boolean)(using ValueOf[N]) { // Initialize.
+class Cholesky[N <: Int] private(val L: Matrix[N, N])(using ValueOf[N]) {
 
-  inline def dimension:Int = larry.length
-
-  /** Is the matrix symmetric and positive definite?
-    *
-    * @return true if A is symmetric and positive definite.
-    */
-  def isSPD(): Boolean = isspd
-
-  /** Return triangular factor.
-    *
-    * @return L
-    */
-  def getL(): Matrix[N, N] = Matrix[N, N](larry)
+  val mn:Int = valueOf[N]
 
   /** Solve A*X = B
     *
@@ -96,34 +83,34 @@ class Cholesky[N <: Int] private(val larry:NArray[NArray[Double]], val isspd:Boo
     * @throws RuntimeException  Matrix is not symmetric positive definite.
     */
   def solve[V <: Int](B: Matrix[N, V])(using ValueOf[V]): Matrix[N, V] = {
-    if (B.rows != dimension) throw new IllegalArgumentException("Matrix row dimensions must agree.")
-
-    if (!isspd) {
-      throw new RuntimeException("Matrix is not symmetric positive definite.")
-    }
+//    if (B.rows != dimension) throw new IllegalArgumentException("Matrix row dimensions must agree.")
+//
+//    if (!isspd) {
+//      throw new RuntimeException("Matrix is not symmetric positive definite.")
+//    }
     // Copy right hand side.
-    val X: NArray[NArray[Double]] = B.getArrayCopy()
+    val X: NArray[NArray[Double]] = B.copyValues
     val nx: Int = B.columns
     // Solve L*Y = B;
-    var k:Int = 0; while (k < dimension) {
+    var k:Int = 0; while (k < mn) {
       var j:Int = 0; while (j < nx) {
         var i:Int = 0; while (i < k) {
-          X(k)(j) = X(k)(j) - X(i)(j) * larry(k)(i)
+          X(k)(j) = X(k)(j) - X(i)(j) * L(k, i)
           i += 1
         }
-        X(k)(j) = X(k)(j) / larry(k)(k)
+        X(k)(j) = X(k)(j) / L(k, k)
         j += 1
       }
       k += 1
     }
     // Solve L'*X = Y;
-    k = dimension - 1; while  (k > -1) { // recycling k
+    k = mn - 1; while  (k > -1) { // recycling k
       var j:Int = 0; while (j < nx) {
-        var i:Int = k + 1; while (i < dimension) {
-          X(k)(j) = X(k)(j) - X(i)(j) * larry(i)(k)
+        var i:Int = k + 1; while (i < mn) {
+          X(k)(j) = X(k)(j) - X(i)(j) * L(i, k)
           i += 1
         }
-        X(k)(j) = X(k)(j) / larry(k)(k)
+        X(k)(j) = X(k)(j) / L(k, k)
         j += 1
       }
       k -= 1

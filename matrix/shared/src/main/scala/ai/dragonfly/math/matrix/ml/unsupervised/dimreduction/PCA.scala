@@ -60,12 +60,12 @@ case class PCA[M <: Int, N <: Int](svd: SV[M, N, ? <: Int], mean: Vec[N])(using 
   lazy val Uᵀ:Matrix[N, M] = svd.getU().transpose.asInstanceOf[Matrix[N, M]]
 
   inline def getReducer[K <: Int](using ValueOf[K]): DimensionalityReducerPCA[N, K] = {
-    DimensionalityReducerPCA[N, K](Matrix(Uᵀ.getArray().take(valueOf[K])), mean)
+    DimensionalityReducerPCA[N, K](Matrix(Uᵀ.values.take(valueOf[K])), mean)
   }
 
   lazy val basisPairs: Seq[BasisPair[N]] = {
     val singularValues = svd.getSingularValues()
-    val arr: NArray[NArray[Double]] = Uᵀ.getArray()
+    val arr: NArray[NArray[Double]] = Uᵀ.values
     var pairs:Seq[BasisPair[N]] = Seq[BasisPair[N]]()
     var i:Int = 0; while (i < arr.length) {
       pairs = pairs :+ BasisPair[N]( singularValues(i), Vec[N](arr(i)) )

@@ -18,18 +18,14 @@ package ai.dragonfly.math.matrix.util
 
 import ai.dragonfly.math.matrix.*
 
-enum MatrixOperation {
-  case `+`, `-`, x, AxB, Ax, zip
-}
+import scala.util.control
 
-case class MismatchedMatrixDimensions[M1 <: Int, N1 <: Int, M2 <: Int, N2 <: Int](m1:Matrix[M1, N1], m2:Matrix[M2, N2], op:MatrixOperation) extends Exception(
-  s"Incompatible Matrix Dimensions under $op:\n ${m1.dim} and ${m2.dim}"
+case class CannotExpressMatrixAsVector[M <: Int, N <: Int](m:Matrix[M, N]) extends Exception(
+  s"To convert a Matrix to a Vector, one of its dimensions must be 1, but this matrix has dimensions: [${m.rows}x${m.columns}]"
 )
-
-case class CannotExpressMatrixAsVector[M <: Int, N <: Int](m1:Matrix[M, N]) extends Exception(
-  s"To convert a Matrix to a Vector, one of its dimensions must be 1, but this matrix has dimensions: ${m1.dim}"
-)
-
 
 case class UnsupportedMatrixDimension(rows:Int, columns:Int) extends Exception(s"Can't create matrix with rows = $rows and columns = $columns.")
 
+case class MatrixNotSymmetricPositiveDefinite[M <: Int, N <: Int](m: Matrix[M, N]) extends Exception(
+  s"Matrix is not symmetric positive definite: Matrix[${m.rows}x${m.columns}]."
+)

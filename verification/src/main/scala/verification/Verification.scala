@@ -55,7 +55,7 @@ object Verification {
 
       ArrayComparison(a1.length, a1(0).length, discrepancies, combinedError)
 
-    } else throw new Exception(s"${Console.RED}Dimensions do not match!${Console.RESET}")
+    } else throw new Exception(s"${Console.RED}Dimensions do not match!${Console.RESET} a1[${a1.length}x${a1(0).length}] vs a2[${a2.length}x${a2(0).length}]")
 
   }
 
@@ -63,12 +63,26 @@ object Verification {
 
 trait Verification {
 
-  val mvs0: NArray[NArray[Double]] = NArray.tabulate[NArray[Double]](11)(
+  val squarValues: NArray[NArray[Double]] = NArray.tabulate[NArray[Double]](11)(
     (_: Int) => NArray.tabulate[Double](11)((_: Int) => Math.random())
   )
 
-  val jm: Jama.Matrix = new Jama.Matrix(mvs0)
-  val mm: ai.dragonfly.math.matrix.Matrix[11, 11] = ai.dragonfly.math.matrix.Matrix[11, 11](mvs0)
+  val wideValues: NArray[NArray[Double]] = NArray.tabulate[NArray[Double]](11)(
+    (_: Int) => NArray.tabulate[Double](19)((_: Int) => Math.random())
+  )
+
+  val tallValues: NArray[NArray[Double]] = NArray.tabulate[NArray[Double]](21)(
+    (_: Int) => NArray.tabulate[Double](12)((_: Int) => Math.random())
+  )
+
+  val squareJaMa: Jama.Matrix = new Jama.Matrix(squarValues)
+  val squareMa: ai.dragonfly.math.matrix.Matrix[11, 11] = ai.dragonfly.math.matrix.Matrix[11, 11](squarValues)
+
+  val wideJaMa: Jama.Matrix = new Jama.Matrix(wideValues)
+  val wideMa: ai.dragonfly.math.matrix.Matrix[11, 19] = ai.dragonfly.math.matrix.Matrix[11, 19](wideValues)
+
+  val tallJaMa: Jama.Matrix = new Jama.Matrix(tallValues)
+  val tallMa: ai.dragonfly.math.matrix.Matrix[21, 12] = ai.dragonfly.math.matrix.Matrix[21, 12](tallValues)
 
   def name:String
   def run: Unit

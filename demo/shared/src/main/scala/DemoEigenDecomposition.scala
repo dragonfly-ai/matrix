@@ -19,8 +19,8 @@ object DemoEigenDecomposition extends Demonstration {
 
     println(M0)
     println("\n\n")
-    val eig:Eigen[4] = Eigen[4, 4](M0)
-    println(Vec[4](eig.getRealEigenvalues()).render())
+    val eig:Eigen[4] = Eigen[4](M0)
+    println(eig.realEigenvalues.render())
     println("\n\n")
 
   }

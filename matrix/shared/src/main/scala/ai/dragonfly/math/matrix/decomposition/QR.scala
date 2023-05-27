@@ -26,7 +26,7 @@ object QR {
 
   def apply[M <: Int, N <: Int](M: Matrix[M, N])(using ValueOf[M], ValueOf[N]): QR[M, N] = {
     // Initialize.
-    val QR:NArray[NArray[Double]] = M.getArrayCopy()
+    val QR:NArray[NArray[Double]] = M.copyValues
     val rows:Int = M.getRowDimension()
     val columns:Int = M.getColumnDimension()
     val Rdiag:NArray[Double] = NArray.fill[Double](columns)(0.0)
@@ -138,7 +138,7 @@ class QR[M <: Int, N <: Int] private (
     */
   def getQ(): Matrix[M, N] = {
     val X = Matrix.zeros[M, N]
-    val Q = X.getArray()
+    val Q = X.values
     var k:Int = columns - 1; while (k > -1) {
       var i:Int = 0; while (i < rows) {
         Q(i)(k) = 0.0
@@ -178,7 +178,7 @@ class QR[M <: Int, N <: Int] private (
 
     // Copy right hand side
     val nx = b.columns
-    val X = b.getArrayCopy()
+    val X = b.copyValues
 
     // Compute Y = transpose(Q)*B
     var k:Int = 0; while (k < columns) {

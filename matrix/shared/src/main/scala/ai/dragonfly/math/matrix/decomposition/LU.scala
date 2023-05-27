@@ -28,7 +28,7 @@ object LU {
     val m:Int = valueOf[M]
     val n:Int = valueOf[N]
 
-    val lu:NArray[NArray[Double]] = A.getArrayCopy()
+    val lu:NArray[NArray[Double]] = A.copyValues
     val piv:NArray[Int] = NArray.tabulate[Int](m)((i:Int) => i)
 
     var pivsign:Double = 1.0
@@ -205,7 +205,7 @@ class LU[M <: Int, N <: Int] private (
     // Copy right hand side with pivoting
     val nx:Int = B.columns
     val Xmat:Matrix[N, V] = B.getMatrix[N, V](piv, 0)
-    val X = Xmat.getArray()
+    val X = Xmat.values
 
     // Solve L*Y = B(piv,:)
     var k:Int = 0; while (k < n) {

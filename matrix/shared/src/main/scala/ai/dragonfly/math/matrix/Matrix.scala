@@ -216,7 +216,7 @@ object Matrix {
 
 }
 
-class Matrix[M <: Int, N <: Int] private(private val values: NArray[NArray[Double]])(using ValueOf[M], ValueOf[N]) {
+class Matrix[M <: Int, N <: Int] private(val values: NArray[NArray[Double]])(using ValueOf[M], ValueOf[N]) {
 
   val rows: Int = valueOf[M]
   val columns: Int = valueOf[N]
@@ -226,23 +226,23 @@ class Matrix[M <: Int, N <: Int] private(private val values: NArray[NArray[Doubl
 
   /** Make a deep copy of a matrix
     */
-  def copy: Matrix[M, N] = new Matrix[M, N](getArrayCopy())
+  def copy: Matrix[M, N] = new Matrix[M, N](copyValues)
 
   //  /** Clone the Matrix object.
   //    */
   //  override def clone: Any = js.native
-
-  /** Access the internal two-dimensional array.
-    *
-    * @return Pointer to the two-dimensional array of matrix elements.
-    */
-  def getArray(): NArray[NArray[Double]] = values
+//
+//  /** Access the internal two-dimensional array.
+//    *
+//    * @return Pointer to the two-dimensional array of matrix elements.
+//    */
+//  def getArray(): NArray[NArray[Double]] = values
 
   /** Copy the internal two-dimensional array.
     *
     * @return Two-dimensional array copy of matrix elements.
     */
-  def getArrayCopy(): NArray[NArray[Double]] = NArray.tabulate[NArray[Double]](rows)(
+  def copyValues: NArray[NArray[Double]] = NArray.tabulate[NArray[Double]](rows)(
     (row:Int) => NArray.tabulate[Double](columns)(
       (col:Int) => values(row)(col)
     )
