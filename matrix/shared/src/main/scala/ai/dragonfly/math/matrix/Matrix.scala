@@ -153,6 +153,20 @@ object Matrix {
     out
   }
 
+//  def diagonal[M <: Int, N <: Int, D <: Int](v: Vec[D])(using ValueOf[M], ValueOf[N], ValueOf[D]): Matrix[M, N] = {
+//
+//    val rows:Int = valueOf[M]
+//    val columns:Int = valueOf[N]
+//
+//    val out: Matrix[M, N] = zeros[M, N]
+//
+//    var i: Int = 0
+//    while (i < Math.min(valueOf[D], Math.min(rows, columns))) {
+//      out(i, i) = v(i)
+//      i = i + 1
+//    }
+//    out
+//  }
 
   /** Construct a matrix from a 2-D array.
    *
@@ -220,9 +234,6 @@ class Matrix[M <: Int, N <: Int] private(val values: NArray[NArray[Double]])(usi
 
   val rows: Int = valueOf[M]
   val columns: Int = valueOf[N]
-
-  val minDim:Int = Math.min(rows, columns)
-  type MIN = minDim.type
 
   /** Make a deep copy of a matrix
     */
@@ -727,7 +738,6 @@ class Matrix[M <: Int, N <: Int] private(val values: NArray[NArray[Double]])(usi
 
   def * [V <: Int](thatMatrix: Matrix[N, V])(using ValueOf[V]): Matrix[M, V] = {
     given v:Int = Math.min(valueOf[M], valueOf[V])
-
     times(thatMatrix)
   }
 
@@ -773,19 +783,19 @@ class Matrix[M <: Int, N <: Int] private(val values: NArray[NArray[Double]])(usi
    *
    * @return maximum singular value.
    */
-  def norm2(): Double = SV[M, N, MIN](this).norm2()
+  def norm2: Double = SV[M, N](this).norm2()
 
   /** Matrix rank
    *
    * @return effective numerical rank, obtained from SV.
    */
-  def rank(): Int = SV[M, N, MIN](this).rank()
+  def rank: Int = SV[M, N](this).rank()
 
   /** Matrix condition (2 norm)
    *
    * @return ratio of largest to smallest singular value.
    */
-  def cond(): Double = SV[M, N, MIN](this).cond()
+  def cond: Double = SV[M, N](this).cond()
 
   /** Matrix trace.
     *

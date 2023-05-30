@@ -19,7 +19,7 @@ package ai.dragonfly.math.matrix.decomposition
 import ai.dragonfly.math.matrix.*
 import narr.*
 
-import scala.compiletime.ops.int.-
+import scala.compiletime.ops.int.{-, >}
 
 object LU {
 
@@ -27,8 +27,9 @@ object LU {
 
     val m:Int = valueOf[M]
     val n:Int = valueOf[N]
+    val minDim:Int = Math.min(m, n)
 
-    val lu:NArray[NArray[Double]] = A.copyValues
+    val lu:Matrix[M, N] = A.copy
     val piv:NArray[Int] = NArray.tabulate[Int](m)((i:Int) => i)
 
     var pivsign:Double = 1.0
@@ -41,12 +42,12 @@ object LU {
 
     var j:Int = 0; while (j < n) { // Make a copy of the j-th column to localize references.
       var i:Int = 0; while (i < m) {
-        LUcolj(i) = lu(i)(j)
+        LUcolj(i) = lu(i, j)
         i += 1
       }
       // Apply previous transformations.
       i = 0; while (i < m) {  // recycling i
-        LUrowi = lu(i)
+        LUrowi = lu.values(i)
         // Most of the time is spent in the following dot product.
         val kmax = Math.min(i, j)
         var s = 0.0
@@ -66,9 +67,9 @@ object LU {
       }
       if (p != j) {
         var k0:Int = 0; while (k0 < n) {
-          val t = lu(p)(k0)
-          lu(p)(k0) = lu(j)(k0)
-          lu(j)(k0) = t
+          val t = lu(p, k0)
+          lu(p, k0) = lu(j, k0)
+          lu(j, k0) = t
           k0 += 1
         }
         val k = piv(p)
@@ -76,10 +77,11 @@ object LU {
         piv(j) = k
         pivsign = -pivsign
       }
+      //println(s"j = $j and minDim = $minDim")
       // Compute multipliers.
-      if (j < m & lu(j)(j) != 0.0) {
+      if (j < minDim && lu(j, j) != 0.0) {
         var i0:Int = j + 1; while (i0 < m) {
-          lu(i0)(j) = lu(i0)(j) / lu(j)(j)
+          lu(i0, j) = lu(i0, j) / lu(j, j)
           i0 += 1
         }
       }
@@ -110,11 +112,11 @@ object LU {
   */
 
 class LU[M <: Int, N <: Int] private (
-  val LU:NArray[NArray[Double]], piv:NArray[Int], pivsign:Double
+  val LU:Matrix[M, N], piv:NArray[Int], pivsign:Double
 )(using ValueOf[M], ValueOf[N]) {  // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
-  val m:Int = LU.length
-  val n:Int = LU(0).length
+  val m:Int = valueOf[M]
+  val n:Int = valueOf[N]
 
   /** Is the matrix nonsingular?
     *
@@ -122,7 +124,7 @@ class LU[M <: Int, N <: Int] private (
     */
   def isNonsingular(): Boolean = {
     var j:Int = 0; while (j < n) {
-      if (LU(j)(j) == 0.0) return false
+      if (LU(j, j) == 0.0) return false
       j += 1
     }
     true
@@ -136,7 +138,7 @@ class LU[M <: Int, N <: Int] private (
     NArray.tabulate[NArray[Double]](m)(
       (r:Int) => NArray.tabulate[Double](n)(
         (c:Int) => {
-          if (r > c) LU(r)(c)
+          if (r > c) LU(r, c)
           else if (r == c) 1.0
           else 0.0
         }
@@ -154,7 +156,7 @@ class LU[M <: Int, N <: Int] private (
       (r:Int) => NArray.tabulate[Double](n)(
         (c:Int) => {
           if (r > c) 0.0
-          else LU(r)(c)
+          else LU(r, c)
         }
       )
     )
@@ -178,13 +180,13 @@ class LU[M <: Int, N <: Int] private (
     * @return det(A)
     * @throws IllegalArgumentException  Matrix must be square
     */
-  def det(): Double = {
+  def determinant: Double = {
     if (m != n) throw new IllegalArgumentException("Matrix must be square.")
 
     var d:Double = pivsign
 
     var j:Int = 0; while (j < n) {
-      d *= LU(j)(j)
+      d *= LU(j, j)
       j += 1
     }
 
@@ -211,7 +213,7 @@ class LU[M <: Int, N <: Int] private (
     var k:Int = 0; while (k < n) {
       var i:Int = k + 1; while (i < n) {
         var j:Int = 0; while (j < nx) {
-          X(i)(j) = X(i)(j) - (X(k)(j) * LU(i)(k))
+          X(i)(j) = X(i)(j) - (X(k)(j) * LU(i, k))
           j += 1
         }
         i += 1
@@ -221,12 +223,12 @@ class LU[M <: Int, N <: Int] private (
     // Solve U*X = Y;
     k = n - 1; while (k > -1) { // recycling k
       var j:Int = 0; while (j < nx) {
-        X(k)(j) = X(k)(j) / LU(k)(k)
+        X(k)(j) = X(k)(j) / LU(k, k)
         j += 1
       }
       var i:Int = 0; while (i < k) {
         var j1:Int = 0; while (j1 < nx) {
-          X(i)(j1) = X(i)(j1) - (X(k)(j1) * LU(i)(k))
+          X(i)(j1) = X(i)(j1) - (X(k)(j1) * LU(i, k))
           j1 += 1
         }
         i += 1

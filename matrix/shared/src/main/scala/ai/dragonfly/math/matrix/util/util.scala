@@ -54,7 +54,7 @@ package object util {
      * the determinant is nonzero if and only if the matrix is invertible and the linear map represented by the matrix is an isomorphism
      * @return the determinant of this matrix.
      */
-    def det(): Double = LU[MN, MN](m).det()
+    def determinant: Double = LU[MN, MN](m).determinant
 
   }
 
@@ -79,9 +79,9 @@ package object util {
      * m = Matrix[M, N] with M > N and Rank = N, has a left inverse b = Matrix[N, M] such that b * m = I[N, N]
      * @return b = Matrix[N, M] the Left Inverse of Matrix m.
      */
-    def leftInverse(using ValueOf[Min[N, M]]): Matrix[N, M] = {
-      val svd = SV[M, N, N](m)
-      svd.V * svd.getS_Inverse() * svd.U.transpose
+    def leftInverse: Matrix[N, M] = {
+      val svd = SV[M, N](m)
+      svd.V * svd.S_inverse * svd.U.transpose
     }
 
   }

@@ -17,6 +17,7 @@
 package ai.dragonfly.math.matrix.decomposition
 
 import ai.dragonfly.math.matrix.*
+import ai.dragonfly.math.vector.Vec
 import narr.*
 
 import scala.math.hypot
@@ -29,7 +30,7 @@ object QR {
     val QR:NArray[NArray[Double]] = M.copyValues
     val rows:Int = M.getRowDimension()
     val columns:Int = M.getColumnDimension()
-    val Rdiag:NArray[Double] = NArray.fill[Double](columns)(0.0)
+    val Rdiag:Vec[N] = Vec.fill[N](0.0)
 
     // Main loop.
     var k:Int = 0; while (k < columns) { // Compute 2-norm of k-th column without under/overflow.
@@ -63,7 +64,6 @@ object QR {
       Rdiag(k) = -nrm
       k += 1
     }
-    println ("apply()")
     new QR(Matrix[M, N](QR), Rdiag)
   }
 
@@ -88,7 +88,7 @@ object QR {
   */
 
 class QR[M <: Int, N <: Int] private (
-  val QR: Matrix[M, N], val Rdiag: NArray[Double]
+  val QR: Matrix[M, N], val Rdiag: Vec[N]
 )(using ValueOf[M], ValueOf[N]) {
 
   val rows:Int = valueOf[M]
@@ -108,7 +108,7 @@ class QR[M <: Int, N <: Int] private (
     *
     * @return Lower trapezoidal matrix whose columns define the reflections
     */
-  def getH(): Matrix[M, N] = Matrix[M, N](
+  def H: Matrix[M, N] = Matrix[M, N](
     NArray.tabulate[NArray[Double]](rows)(
       (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => if (r >= c) QR(r, c) else 0.0
@@ -120,8 +120,8 @@ class QR[M <: Int, N <: Int] private (
     *
     * @return R
     */
-  def getR(): Matrix[M, N] = Matrix[M, N](
-    NArray.tabulate[NArray[Double]](rows)(
+  def R: Matrix[N, N] = Matrix[N, N](
+    NArray.tabulate[NArray[Double]](columns)(
       (r:Int) => NArray.tabulate[Double](columns)(
         (c:Int) => {
           if (r < c) QR(r, c)
@@ -136,7 +136,7 @@ class QR[M <: Int, N <: Int] private (
     *
     * @return Q
     */
-  def getQ(): Matrix[M, N] = {
+  def Q: Matrix[M, N] = {
     val X = Matrix.zeros[M, N]
     val Q = X.values
     var k:Int = columns - 1; while (k > -1) {

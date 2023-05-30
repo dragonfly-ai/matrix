@@ -45,7 +45,7 @@ object PCA {
     val m:Matrix[N, N] = (Xc.transpose * Xc) * (1.0 / data.sampleSize)
 
     new PCA[N, N](
-      SV[N, N, m.MIN](m), // Compute Singular Value Decomposition
+      SV[N, N](m), // Compute Singular Value Decomposition
       data.sampleMean
     )
   }
@@ -53,18 +53,18 @@ object PCA {
 
 }
 
-case class PCA[M <: Int, N <: Int](svd: SV[M, N, ? <: Int], mean: Vec[N])(using ValueOf[M], ValueOf[N]) {
+case class PCA[M <: Int, N <: Int](svd: SV[M, N], mean: Vec[N])(using ValueOf[M], ValueOf[N]) {
 
   val dimension: Double = valueOf[N]
 
-  lazy val Uᵀ:Matrix[N, M] = svd.getU().transpose.asInstanceOf[Matrix[N, M]]
+  lazy val Uᵀ:Matrix[N, M] = svd.U.transpose.asInstanceOf[Matrix[N, M]]
 
   inline def getReducer[K <: Int](using ValueOf[K]): DimensionalityReducerPCA[N, K] = {
     DimensionalityReducerPCA[N, K](Matrix(Uᵀ.values.take(valueOf[K])), mean)
   }
 
   lazy val basisPairs: Seq[BasisPair[N]] = {
-    val singularValues = svd.getSingularValues()
+    val singularValues = svd.singularValues
     val arr: NArray[NArray[Double]] = Uᵀ.values
     var pairs:Seq[BasisPair[N]] = Seq[BasisPair[N]]()
     var i:Int = 0; while (i < arr.length) {

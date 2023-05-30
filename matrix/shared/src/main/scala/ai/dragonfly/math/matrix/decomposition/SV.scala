@@ -49,7 +49,7 @@ object SV {
 //    r
 //  }
 
-  def apply[M <: Int, N <: Int, S <: Int](mtrx:Matrix[M, N])(using ValueOf[M], ValueOf[N], ValueOf[S]):SV[M, N, S] = {
+  def apply[M <: Int, N <: Int](mtrx:Matrix[M, N])(using ValueOf[M], ValueOf[N]):SV[M, N] = {
 
     // Derived from LINPACK code.
     // Initialize.
@@ -57,10 +57,11 @@ object SV {
 
     val rows:Int = valueOf[M]
     val columns:Int = valueOf[N]
-    val sDim:Int = valueOf[S]
 
-    val s: Vec[S] = Vec.fill[S](0.0) // zeros
-    val U: Matrix[M, S] = Matrix.zeros[M, S]
+    val minDim:Int = Math.min(rows, columns);
+
+    val s: Vec[N] = Vec.fill[N](0.0) // zeros
+    val U: Matrix[M, N] = Matrix.zeros[M, N]
     val V: Matrix[N, N] = Matrix.zeros[N, N]
     val e: Vec[M] = Vec.fill[M](0.0)
     val work = NArray.fill[Double](rows)(0.0)
@@ -198,7 +199,7 @@ object SV {
 
     // generate U.
 
-    var j:Int = nct; while (j < sDim) {
+    var j:Int = nct; while (j < minDim) {
       var i:Int = 0; while (i < rows) {
         U(i, j) = 0.0
         i += 1
@@ -209,7 +210,7 @@ object SV {
 
     var k:Int = nct - 1; while (k > -1) {
       if (s(k) != 0.0) {
-        var j0:Int = k + 1; while  (j0 < sDim) {
+        var j0:Int = k + 1; while  (j0 < minDim) {
           var t = 0.0
           var i:Int = k; while (i < rows) {
             t += U(i, k) * U(i, j0)
@@ -244,7 +245,7 @@ object SV {
     // generate V.
     k = columns - 1; while (k > -1) { // recycling k
       if ((k < nrt) && (e(k) != 0.0)) {
-        var j:Int = k + 1; while (j < sDim) {
+        var j:Int = k + 1; while (j < minDim) {
           var t = 0.0
           var i:Int = k + 1; while (i < columns) {
             t += V(i, k) * V(i, j)
@@ -448,7 +449,7 @@ object SV {
           // Make the singular values positive.
           if (s(k) <= 0.0) {
             s(k) = (if (s(k) < 0.0) -s(k) else 0.0)
-            var i:Int = 0; while (i < pp) {
+            var i:Int = 0; while (i <= pp) {
               V(i, k) = -V(i, k)
               i += 1
             }
@@ -487,7 +488,7 @@ object SV {
           p -= 1
       }
     }
-    new SV[M, N, S](U, V, s)
+    new SV[M, N](U, V, s)
   }
 }
 
@@ -513,44 +514,27 @@ object SV {
  * @param M Rectangular matrix
  */
 
-class SV[M <: Int, N <: Int, S <: Int] private(
-  val U:Matrix[M, S], val V:Matrix[N, N], singularValues:Vec[S]
-)(using ValueOf[M], ValueOf[N], ValueOf[S]) {
+class SV[M <: Int, N <: Int] private(
+  val U:Matrix[M, N], val V:Matrix[N, N], val singularValues:Vec[N]
+)(using ValueOf[M], ValueOf[N]) {
   val m:Int = valueOf[M]
   val n:Int = valueOf[N]
-
-  val sDim:Int = valueOf[S]
-
-  /** Return the left singular vectors
-    *
-    * @return U
-    */
-  def getU(): Matrix[M, S] = U
-
-  /** Return the right singular vectors
-    *
-    * @return V
-    */
-  def getV(): Matrix[N, N] = V
-
-  /** Return the one-dimensional array of singular values
-    *
-    * @return diagonal of S.
-    */
-  def getSingularValues():Vec[S] = singularValues
 
   /** Return the diagonal matrix of singular values
     *
     * @return S
     */
-  inline def getS(): Matrix[S, S] = Matrix.diagonal[S](singularValues)
+  inline def S: Matrix[N, N] = Matrix.diagonal(singularValues)
 
   /** Return the diagonal matrix of singular values
    *
+   * https://en.wikipedia.org/wiki/Singular_value_decomposition#Pseudoinverse
+   * "where Σ† is the pseudoinverse of Σ, which is formed by replacing every non-zero diagonal entry by its reciprocal and transposing the resulting matrix."
+   *
    * @return S
    */
-  inline def getS_Inverse(): Matrix[S, S] = Matrix.diagonal[S](
-    Vec.tabulate[S]( (i:Int) => 1.0 / singularValues(i) )
+  inline def S_inverse: Matrix[N, N] = Matrix.diagonal(
+    Vec.tabulate[N]( (i:Int) => 1.0 / singularValues(i) )
   )
 
   /** Two norm

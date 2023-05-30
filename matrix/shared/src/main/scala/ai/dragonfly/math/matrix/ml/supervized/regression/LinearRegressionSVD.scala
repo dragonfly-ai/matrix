@@ -23,9 +23,9 @@ class LinearRegressionSVD[M <: Int, N <: Int](using ValueOf[M], ValueOf[N]) exte
 
   override def estimateBeta(X: Matrix[M, N], Y: Matrix[M, 1]): Matrix[N, 1] = {
     // Â = VS⁻ⁱUᵀ * Y
-    val svd: SV[M, N, N] = SV[M, N, N](X)
+    val svd: SV[M, N] = SV[M, N](X)
     //svd.getV() * (svd.getS_Inverse() * svd.getU().transpose) * Y
-    svd.getV().times(svd.getS_Inverse().times(svd.getU().transpose)).times(Y)
+    svd.V.times(svd.S_inverse.times(svd.U.transpose)).times(Y)
   }
 
 
