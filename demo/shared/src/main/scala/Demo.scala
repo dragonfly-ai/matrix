@@ -7,7 +7,8 @@ object Demo extends XApp(NativeConsole(style = "padding: 8px; overflow: scroll;"
   val allDemos: Array[Demonstration] = Array[Demonstration](
     DemoPCA,
     DemoLinearRegression,
-    DemoEigenDecomposition
+    DemoEigenDecomposition,
+    DemoVectorInterop
   )
 
   for (d <- allDemos) d.demonstrate

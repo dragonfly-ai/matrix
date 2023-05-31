@@ -27,6 +27,9 @@ package object util {
   extension[N <: Int] (thisVector: Vec[N])(using ValueOf[N]) {
     inline def asRowMatrix: Matrix[1, N] = Matrix[1, N](thisVector.asInstanceOf[NArray[Double]])
     inline def asColumnMatrix: Matrix[N, 1] = Matrix[N, 1](thisVector.asInstanceOf[NArray[Double]])
+
+    def times [M <: Int] (thatMatrix: Matrix[N, M])(using ValueOf[M]): Matrix[1, M] = asRowMatrix * thatMatrix
+    inline def * [M <: Int] (thatMatrix: Matrix[N, M])(using ValueOf[M]): Matrix[1, M] = times(thatMatrix)
   }
 
   /**

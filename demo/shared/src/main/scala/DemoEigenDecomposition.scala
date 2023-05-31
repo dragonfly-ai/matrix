@@ -3,7 +3,6 @@ import ai.dragonfly.math.matrix.Matrix
 import ai.dragonfly.math.matrix.decomposition.*
 import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.vector.Vec.*
-import ai.dragonfly.math.vector.Vec4.*
 import narr.*
 
 object DemoEigenDecomposition extends Demonstration {

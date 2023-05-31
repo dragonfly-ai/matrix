@@ -60,7 +60,7 @@ object SV {
 
     val minDim:Int = Math.min(rows, columns);
 
-    val s: Vec[N] = Vec.fill[N](0.0) // zeros
+    val s: Vec[N] = Vec.zeros[N]
     val U: Matrix[M, N] = Matrix.zeros[M, N]
     val V: Matrix[N, N] = Matrix.zeros[N, N]
     val e: Vec[M] = Vec.fill[M](0.0)
