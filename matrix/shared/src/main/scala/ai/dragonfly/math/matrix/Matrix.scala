@@ -778,25 +778,6 @@ class Matrix[M <: Int, N <: Int] private(val values: NArray[NArray[Double]])(usi
     X
   }
 
-
-  /** Two norm
-   *
-   * @return maximum singular value.
-   */
-  def norm2: Double = SV[M, N](this).norm2()
-
-  /** Matrix rank
-   *
-   * @return effective numerical rank, obtained from SV.
-   */
-  def rank: Int = SV[M, N](this).rank()
-
-  /** Matrix condition (2 norm)
-   *
-   * @return ratio of largest to smallest singular value.
-   */
-  def cond: Double = SV[M, N](this).cond()
-
   /** Matrix trace.
     *
     * @return sum of the diagonal elements.

@@ -74,7 +74,7 @@ package object util {
    * Extension methods for rectangular matrices where M > N.
    */
 
-  extension[M <: Int, N <: Int] (m: Matrix[M, N])(using ValueOf[M], ValueOf[N], ValueOf[Min[M, N]], M > N =:= true) {
+  extension[M <: Int, N <: Int] (m: Matrix[M, N])(using ValueOf[M], ValueOf[N], ValueOf[Min[M, N]], M >= N =:= true) {
     /** Solve b * m = I[N, N]
      * m = Matrix[M, N] with M > N and Rank = N, has a left inverse b = Matrix[N, M] such that b * m = I[N, N]
      * @return b = Matrix[N, M] the Left Inverse of Matrix m.
@@ -83,6 +83,25 @@ package object util {
       val svd = SV[M, N](m)
       svd.V * svd.S_inverse * svd.U.transpose
     }
+
+
+    /** Two norm
+     *
+     * @return maximum singular value.
+     */
+    def norm2: Double = SV[M, N](m).norm2()
+
+    /** Matrix rank
+     *
+     * @return effective numerical rank, obtained from SV.
+     */
+    def rank: Int = SV[M, N](m).rank()
+
+    /** Matrix condition (2 norm)
+     *
+     * @return ratio of largest to smallest singular value.
+     */
+    def cond: Double = SV[M, N](m).cond()
 
   }
 

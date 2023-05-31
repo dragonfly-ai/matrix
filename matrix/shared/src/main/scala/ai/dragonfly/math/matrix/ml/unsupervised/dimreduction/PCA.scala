@@ -30,13 +30,15 @@ import narr.*
 import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
 
+import scala.compiletime.ops.int.*
+
 object PCA {
 
   // Create a PCA object from a set of data points
-  def apply[M <: Int, N <:  Int](data: UnsupervisedData[M, N])(using ValueOf[M], ValueOf[N]): PCA[N, N] = {
+  def apply[M <: Int, N <:  Int](data: UnsupervisedData[M, N])(using ValueOf[M], ValueOf[N], N >= N =:= true): PCA[N] = {
 
     // arrange the matrix of centered points
-    val Xc = Matrix[M, N](
+    val Xc: Matrix[M, N] = Matrix[M, N](
       NArray.tabulate[NArray[Double]](data.sampleSize)(
         (row:Int) => (data.example(row) - data.sampleMean).asInstanceOf[NArray[Double]]
       )
@@ -44,20 +46,18 @@ object PCA {
 
     val m:Matrix[N, N] = (Xc.transpose * Xc) * (1.0 / data.sampleSize)
 
-    new PCA[N, N](
+    new PCA[N](
       SV[N, N](m), // Compute Singular Value Decomposition
       data.sampleMean
     )
   }
-
-
 }
 
-case class PCA[M <: Int, N <: Int](svd: SV[M, N], mean: Vec[N])(using ValueOf[M], ValueOf[N]) {
+case class PCA[N <: Int](svd: SV[N, N], mean: Vec[N])(using ValueOf[N]) {
 
   val dimension: Double = valueOf[N]
 
-  lazy val Uᵀ:Matrix[N, M] = svd.U.transpose.asInstanceOf[Matrix[N, M]]
+  lazy val Uᵀ:Matrix[N, N] = svd.U.transpose
 
   inline def getReducer[K <: Int](using ValueOf[K]): DimensionalityReducerPCA[N, K] = {
     DimensionalityReducerPCA[N, K](Matrix(Uᵀ.values.take(valueOf[K])), mean)

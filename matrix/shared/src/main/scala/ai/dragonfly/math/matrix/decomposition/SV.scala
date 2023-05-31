@@ -49,7 +49,7 @@ object SV {
 //    r
 //  }
 
-  def apply[M <: Int, N <: Int](mtrx:Matrix[M, N])(using ValueOf[M], ValueOf[N]):SV[M, N] = {
+  def apply[M <: Int, N <: Int](mtrx:Matrix[M, N])(using ValueOf[M], ValueOf[N], M >= N =:= true):SV[M, N] = {
 
     // Derived from LINPACK code.
     // Initialize.
@@ -516,7 +516,7 @@ object SV {
 
 class SV[M <: Int, N <: Int] private(
   val U:Matrix[M, N], val V:Matrix[N, N], val singularValues:Vec[N]
-)(using ValueOf[M], ValueOf[N]) {
+)(using ValueOf[M], ValueOf[N], M >= N =:= true) {
   val m:Int = valueOf[M]
   val n:Int = valueOf[N]
 

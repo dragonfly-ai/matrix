@@ -6,10 +6,10 @@ import ai.dragonfly.math.vector.*
 import ai.dragonfly.math.vector.Vec.*
 import ai.dragonfly.math.vector.Vec2.*
 import ai.dragonfly.viz.cli.*
+import ai.dragonfly.math.interval.*
+import scala.compiletime.ops.int.*
 
 object DemoLinearRegression extends Demonstration {
-
-  import ai.dragonfly.math.interval.*
 
   override def demo(): Unit = {
 
