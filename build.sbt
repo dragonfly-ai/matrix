@@ -50,7 +50,7 @@ lazy val demo = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       "ai.dragonfly" %%% "democrossy" % "0.102"
     )
   ).jsSettings(
-    Compile / fullOptJS / artifactPath := file("./demo/public_html/js/main.js"),
+    Compile / fullOptJS / artifactPath := file("./docs/js/main.js"),
     scalaJSUseMainModuleInitializer := true
   ).jvmSettings(
     libraryDependencies ++= Seq( "gov.nist.math" % "jama" % "1.0.2" )
