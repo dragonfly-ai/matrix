@@ -889,9 +889,10 @@ class Eigen[N <: Int] private(val Q:Matrix[N, N], val λ:Vec[N], val λi:Vec[N])
    */
   def imaginaryEigenvalues: Vec[N] = λi
 
+  inline def D: Matrix[N, N] = Λ
   /** Return the block diagonal eigenvalue matrix
    *
-   * @return D
+   * @return Λ
    */
   def Λ: Matrix[N, N] = {
     val X = Matrix.diagonal[N](λ)

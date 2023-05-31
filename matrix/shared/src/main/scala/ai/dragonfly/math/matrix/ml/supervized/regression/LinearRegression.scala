@@ -38,7 +38,7 @@ trait LinearRegression[M <: Int, N <: Int](using ValueOf[M], ValueOf[N]) {
 
     var err:Double = 0.0
     var `err²`: Double = 0.0
-    for (e <- errors.getRowPackedCopy()) {
+    for (e <- errors.rowPackedArray) {
       val et:Double = e*e
       err = err + Math.sqrt(et)
       `err²` = `err²` + et

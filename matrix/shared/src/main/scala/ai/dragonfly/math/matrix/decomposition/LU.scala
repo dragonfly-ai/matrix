@@ -122,19 +122,19 @@ class LU[M <: Int, N <: Int] private (
     *
     * @return true if U, and hence A, is nonsingular.
     */
-  def isNonsingular(): Boolean = {
+  def isSingular: Boolean = {
     var j:Int = 0; while (j < n) {
-      if (LU(j, j) == 0.0) return false
+      if (LU(j, j) == 0.0) return true
       j += 1
     }
-    true
+    false
   }
 
   /** Return lower triangular factor
     *
     * @return L
     */
-  def getL(): Matrix[M, N] = Matrix[M, N](
+  def L: Matrix[M, N] = Matrix[M, N](
     NArray.tabulate[NArray[Double]](m)(
       (r:Int) => NArray.tabulate[Double](n)(
         (c:Int) => {
@@ -151,7 +151,7 @@ class LU[M <: Int, N <: Int] private (
     *
     * @return U
     */
-  def getU(): Matrix[N, N] = Matrix[N, N](
+  def U: Matrix[N, N] = Matrix[N, N](
     NArray.tabulate[NArray[Double]](n)(
       (r:Int) => NArray.tabulate[Double](n)(
         (c:Int) => {
@@ -166,14 +166,14 @@ class LU[M <: Int, N <: Int] private (
     *
     * @return piv
     */
-  def getPivot(): NArray[Int] = NArray.tabulate[Int](m)((i:Int) => piv(i))
+  def pivot: NArray[Int] = NArray.tabulate[Int](m)((i:Int) => piv(i))
 
 
   /** Return pivot permutation vector as a one-dimensional double array
     *
     * @return (double) piv
     */
-  def getDoublePivot(): NArray[Double] = NArray.tabulate[Double](m)((i:Int) => piv(i).toDouble)
+  def doubleValuedPivot(): NArray[Double] = NArray.tabulate[Double](m)((i:Int) => piv(i).toDouble)
 
   /** Determinant
     *
@@ -201,8 +201,7 @@ class LU[M <: Int, N <: Int] private (
     * @throws RuntimeException  Matrix is singular.
     */
   def solve[V <: Int](B: Matrix[M, V])(using ValueOf[V]): Matrix[N, V] = {
-    // if (B.getRowDimension() != m) throw new IllegalArgumentException("Matrix row dimensions must agree.")
-    if ( !this.isNonsingular() ) throw new RuntimeException( "Matrix is singular." )
+    if ( this.isSingular ) throw new RuntimeException( "Matrix is singular." )
 
     // Copy right hand side with pivoting
     val nx:Int = B.columns

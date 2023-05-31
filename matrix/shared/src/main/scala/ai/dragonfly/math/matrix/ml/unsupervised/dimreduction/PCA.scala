@@ -90,7 +90,7 @@ case class DimensionalityReducerPCA[N <: Int, K <: Int](Ak:Matrix[K, N], mean: V
 
   def domainDimension:Int = mean.dimension
 
-  def rangeDimension:Int = Ak.getRowDimension()
+  def rangeDimension:Int = Ak.rows
 
   /**
    * Approximate inverse of dimensionality reduction

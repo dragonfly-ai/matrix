@@ -28,8 +28,8 @@ object QR {
   def apply[M <: Int, N <: Int](M: Matrix[M, N])(using ValueOf[M], ValueOf[N]): QR[M, N] = {
     // Initialize.
     val QR:NArray[NArray[Double]] = M.copyValues
-    val rows:Int = M.getRowDimension()
-    val columns:Int = M.getColumnDimension()
+    val rows:Int = M.rows
+    val columns:Int = M.columns
     val Rdiag:Vec[N] = Vec.fill[N](0.0)
 
     // Main loop.
@@ -98,7 +98,7 @@ class QR[M <: Int, N <: Int] private (
     *
     * @return true if R, and hence A, has full rank.
     */
-  def isFullRank(): Boolean = {
+  def isFullRank: Boolean = {
     var i:Int = 0
     while (i < columns && Rdiag(i) != 0.0) i += 1
     i == columns
@@ -174,7 +174,7 @@ class QR[M <: Int, N <: Int] private (
     */
   def solve[V <: Int](b: Matrix[M, V])(using ValueOf[V]): Matrix[N, V] = {
     // if (B.getRowDimension() != rows) throw new IllegalArgumentException("Matrix row dimensions must agree.")
-    if (!this.isFullRank()) throw new RuntimeException("Matrix is rank deficient.")
+    if (!this.isFullRank) throw new RuntimeException("Matrix is rank deficient.")
 
     // Copy right hand side
     val nx = b.columns

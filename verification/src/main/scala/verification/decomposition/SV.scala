@@ -7,19 +7,21 @@ import verification.Verification
 
 import scala.Console.*
 
+import scala.compiletime.ops.int.*
+
 object SV extends Verification {
 
   override val name:String = "Singular Value Decomposition"
 
   override def run: Unit = {
 
-    def compareJaMaToDragonflySVD[M <: Int, N <: Int](m: matrix.Matrix[M, N])(using ValueOf[M], ValueOf[N]): Unit = {
+    def compareJaMaToDragonflySVD[M <: Int, N <: Int](m: matrix.Matrix[M, N])(using ValueOf[M], ValueOf[N], M >= N =:= true): Unit = {
       val jsvd: SingularValueDecomposition = new SingularValueDecomposition(new Jama.Matrix(m.values))
       val msvd: matrix.decomposition.SV[M, N] = matrix.decomposition.SV[M, N](m)
 
-      println(s"\tComparing Two norm condition number: ${jsvd.cond()} vs ${msvd.cond()} error = ${Math.abs(jsvd.cond() - msvd.cond())}")
-      println(s"\tComparing Norm2: ${jsvd.norm2()} vs ${msvd.norm2()} error = ${Math.abs(jsvd.norm2() - msvd.norm2())}")
-      println(s"\tComparing Rank: ${jsvd.rank()} vs ${msvd.rank()} error = ${Math.abs(jsvd.rank() - msvd.rank())}")
+      println(s"\tComparing Two norm condition number: ${jsvd.cond} vs ${msvd.cond} error = ${Math.abs(jsvd.cond() - msvd.cond)}")
+      println(s"\tComparing Norm2: ${jsvd.norm2()} vs ${msvd.norm2} error = ${Math.abs(jsvd.norm2() - msvd.norm2)}")
+      println(s"\tComparing Rank: ${jsvd.rank()} vs ${msvd.rank} error = ${Math.abs(jsvd.rank() - msvd.rank)}")
 
 
       println(s"\tComparing Singular Values: ${Verification.arrayCompare(jsvd.getSingularValues, msvd.singularValues.asInstanceOf[Array[Double]])}")

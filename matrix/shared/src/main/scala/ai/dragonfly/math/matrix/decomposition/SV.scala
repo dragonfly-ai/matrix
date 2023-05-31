@@ -524,7 +524,7 @@ class SV[M <: Int, N <: Int] private(
     *
     * @return S
     */
-  inline def S: Matrix[N, N] = Matrix.diagonal(singularValues)
+  inline def S: Matrix[N, N] = Matrix.diagonal[N](singularValues)
 
   /** Return the diagonal matrix of singular values
    *
@@ -533,7 +533,7 @@ class SV[M <: Int, N <: Int] private(
    *
    * @return S
    */
-  inline def S_inverse: Matrix[N, N] = Matrix.diagonal(
+  inline def S_inverse: Matrix[N, N] = Matrix.diagonal[N](
     Vec.tabulate[N]( (i:Int) => 1.0 / singularValues(i) )
   )
 
@@ -541,19 +541,19 @@ class SV[M <: Int, N <: Int] private(
     *
     * @return max(S)
     */
-  def norm2(): Double = singularValues(0)
+  def norm2: Double = singularValues(0)
 
   /** Two norm condition number
     *
     * @return max(S)/min(S)
     */
-  def cond(): Double = singularValues(0) / singularValues(Math.min(m, n) - 1)
+  def cond: Double = singularValues(0) / singularValues(Math.min(m, n) - 1)
 
   /** Effective numerical matrix rank
     *
     * @return Number of nonnegligible singular values.
     */
-  def rank(): Int = {
+  def rank: Int = {
     val eps = Math.pow(2.0, -52.0)
     val tol = Math.max(m, n) * singularValues(0) * eps
     var r = 0

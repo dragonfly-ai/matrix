@@ -83,11 +83,7 @@ class Cholesky[N <: Int] private(val L: Matrix[N, N])(using ValueOf[N]) {
     * @throws RuntimeException  Matrix is not symmetric positive definite.
     */
   def solve[V <: Int](B: Matrix[N, V])(using ValueOf[V]): Matrix[N, V] = {
-//    if (B.rows != dimension) throw new IllegalArgumentException("Matrix row dimensions must agree.")
-//
-//    if (!isspd) {
-//      throw new RuntimeException("Matrix is not symmetric positive definite.")
-//    }
+
     // Copy right hand side.
     val X: NArray[NArray[Double]] = B.copyValues
     val nx: Int = B.columns

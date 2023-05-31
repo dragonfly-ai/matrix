@@ -89,19 +89,19 @@ package object util {
      *
      * @return maximum singular value.
      */
-    def norm2: Double = SV[M, N](m).norm2()
+    def norm2: Double = SV[M, N](m).norm2
 
     /** Matrix rank
      *
      * @return effective numerical rank, obtained from SV.
      */
-    def rank: Int = SV[M, N](m).rank()
+    def rank: Int = SV[M, N](m).rank
 
     /** Matrix condition (2 norm)
      *
      * @return ratio of largest to smallest singular value.
      */
-    def cond: Double = SV[M, N](m).cond()
+    def cond: Double = SV[M, N](m).cond
 
   }
 
