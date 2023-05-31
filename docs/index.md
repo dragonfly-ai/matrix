@@ -27,6 +27,3 @@ extension [MN <: Int] (m: Matrix[MN, MN])(using ValueOf[MN]) {
 ```
 
 &nbsp;&nbsp;&nbsp;Instead of including a `determinant` method directly in the `Matrix` class, this extension method makes a `determinant` method available only for square matrices.  Trying to invoke the `determinant` method on a rectangular metrix, for which M != N, will yield a compiler error.
-
-<a href="https://github.com/dragonfly-ai/matrix">Back to the matrix project on GitHub</a><br />
-<a href="https://github.com/dragonfly-ai/">Other projects by dragonfly.ai</a><br />
