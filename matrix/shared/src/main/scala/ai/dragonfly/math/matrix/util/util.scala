@@ -32,7 +32,7 @@ package object util {
   /**
    * Extension Methods for Square Matrices.
    */
-  extension [MN <: Int] (m: Matrix[MN, MN])(using ValueOf[MN], ValueOf[Min[MN, MN]]) {
+  extension [MN <: Int] (m: Matrix[MN, MN])(using ValueOf[MN]) {
     /**
      * https://en.wikipedia.org/wiki/Invertible_matrix
      *
