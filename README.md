@@ -46,9 +46,9 @@ extension [MN <: Int] (m: Matrix[MN, MN])(using ValueOf[MN]) {
 
 # SBT
 
-<pre>
-libraryDependencies += "ai.dragonfly" %%% "matrix" % "0.1"
-</pre>
+```scala
+libraryDependencies += "ai.dragonfly" %%% "matrix" % "<LATEST_VERSION>"
+```
 
 # JavaScript Optimization
 
