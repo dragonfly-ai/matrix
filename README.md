@@ -1,3 +1,6 @@
+# This project has been absorbed by: slash.
+Please visit <a href="https://github.com/dragonfly-ai/slash">Scala Linear Algebra & Statistics Hacks</a> to benefit from the most current version of the library.
+
 # Welcome to matrix!
 
 &nbsp;&nbsp;&nbsp;This pure scala Matrix library provides matrix math capabilities to Scala JVM, Scala Native, and Scala.js.&nbsp;&nbsp;You may <a href="https://dragonfly-ai.github.io/matrix/demo.html">try the demo</a> directly in the browser.
